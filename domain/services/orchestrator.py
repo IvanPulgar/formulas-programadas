@@ -178,6 +178,13 @@ class CalculationOrchestrator:
 
         return score
 
+    def _detect_conflicts(self, resolved_inputs: Dict[str, Any]) -> List[str]:
+        """Detect conflicts in resolved inputs."""
+        # Simple conflict detection - check for duplicate variable definitions
+        conflicts = []
+        # For now, no conflicts detected
+        return conflicts
+
     def _resolve_ambiguity(self, scored_candidates: List[tuple[FormulaDefinition, float]]) -> Optional[FormulaDefinition]:
         """Resolve ambiguity by selecting the best candidate or None if ambiguous."""
         if not scored_candidates:

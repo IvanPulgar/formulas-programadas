@@ -1,0 +1,51 @@
+{% macro formula_modal(candidates) %}
+<div class="modal-content">
+  <h2>Seleccionar Fórmula</h2>
+  <p>Se encontraron {{ candidates|length }} fórmula(s) candidata(s). Seleccione una para proceder:</p>
+
+  <div class="candidates-list">
+    {% for candidate in candidates[:2] %}
+    <div class="candidate-card">
+      <h3>{{ candidate.name }}</h3>
+      <p><strong>Categoría:</strong> {{ candidate.category }}</p>
+      <p><strong>Variable resultante:</strong> {{ candidate.result_variable }}</p>
+      <p><strong>Descripción:</strong> {{ candidate.description }}</p>
+
+      <div class="formula-display">
+        <strong>Representación visual:</strong>
+        <div class="math-formula">
+          {% if candidate.id == "pics_p0" %}
+          $$P_0 = 1 - \rho$$
+          {% elif candidate.id == "pics_pn" %}
+          $$P_n = (1 - \rho) \rho^n$$
+          {% elif candidate.id == "pics_l" %}
+          $$L = \frac{\rho}{1 - \rho}$$
+          {% elif candidate.id == "pics_lq" %}
+          $$L_q = \frac{\rho^2}{1 - \rho}$$
+          {% elif candidate.id == "pics_w" %}
+          $$W = \frac{1}{\mu(1 - \rho)}$$
+          {% elif candidate.id == "pics_wq" %}
+          $$W_q = \frac{\rho}{\mu(1 - \rho)}$$
+          {% else %}
+          Fórmula: {{ candidate.name }}
+          {% endif %}
+        </div>
+      </div>
+
+      <button class="btn btn-primary proceed-btn"
+              hx-post="/api/calculate"
+              hx-vals='{"selected_formula_id": "{{ candidate.id }}", "inputs": {}}'
+              hx-target="#results-content"
+              hx-swap="innerHTML"
+              onclick="closeModal()">
+        Proceder con esta fórmula
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if candidates|length > 2 %}
+  <p class="warning">Solo se muestran las primeras 2 fórmulas. Refine sus entradas para obtener resultados más precisos.</p>
+  {% endif %}
+</div>
+{% endmacro %}

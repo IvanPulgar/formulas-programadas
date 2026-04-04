@@ -1,0 +1,100 @@
+{% macro result_panel(result) %}
+<div class="result-panel">
+  {% if result.status == "success" %}
+    <div class="result-header success">
+      <h3>✅ Cálculo Exitoso</h3>
+    </div>
+
+    {% if result.formula_used %}
+    <div class="result-section">
+      <h4>Fórmula Utilizada</h4>
+      <div class="formula-info">
+        <p><strong>Nombre:</strong> {{ result.formula_used.name }}</p>
+        <p><strong>Categoría:</strong> {{ result.formula_used.category }}</p>
+        <p><strong>Descripción:</strong> {{ result.formula_used.description }}</p>
+        <p><strong>Variable calculada:</strong> {{ result.computed_variable }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="result-section">
+      <h4>Variables Utilizadas</h4>
+      <div class="variables-grid">
+        {% for var_id, value in result.used_variables.items() %}
+        <div class="variable-item">
+          <span class="variable-symbol">{{ variables[var_id].symbol if var_id in variables else var_id }}</span>
+          <span class="variable-value">{{ "%.4f"|format(value) if isinstance(value, float) else value }}</span>
+          <span class="variable-unit">{{ variables[var_id].unit if var_id in variables else '' }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="result-section">
+      <h4>Resultado</h4>
+      <div class="result-value">
+        <span class="result-number">{{ "%.4f"|format(result.computed_value) if isinstance(result.computed_value, float) else result.computed_value }}</span>
+        <span class="result-unit">{{ variables[result.computed_variable].unit if result.computed_variable in variables else '' }}</span>
+      </div>
+    </div>
+
+    {% if result.validation_result %}
+    <div class="result-section">
+      <h4>Validación</h4>
+      <div class="validation-result {{ 'valid' if result.validation_result == 'pass' else 'invalid' }}">
+        <span class="validation-status">
+          {{ '✅ Válido' if result.validation_result == 'pass' else '❌ Inválido' }}
+        </span>
+      </div>
+    </div>
+    {% endif %}
+
+  {% elif result.candidate_formulas %}
+    <div class="result-header info">
+      <h3>🔍 Fórmulas Candidatas Encontradas</h3>
+      <p>Se encontraron {{ result.candidate_formulas|length }} fórmula(s) posible(s).</p>
+    </div>
+
+    <div class="candidates-preview">
+      {% for candidate in result.candidate_formulas[:2] %}
+      <div class="candidate-preview">
+        <h4>{{ candidate.name }}</h4>
+        <p>{{ candidate.description }}</p>
+        <button class="btn btn-outline"
+                onclick="showModal('{{ candidate.id }}', '{{ candidate.name }}', '{{ candidate.category }}', '{{ candidate.result_variable }}')">
+          Ver detalles
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if result.candidate_formulas|length > 2 %}
+    <p class="info">Solo se muestran las primeras 2 fórmulas. Use el botón "Detectar Fórmulas" para ver todas las opciones.</p>
+    {% endif %}
+
+  {% else %}
+    <div class="result-header error">
+      <h3>❌ Error en el Cálculo</h3>
+    </div>
+
+    <div class="error-messages">
+      <ul>
+        {% for message in result.messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if result.warnings %}
+  <div class="result-section warnings">
+    <h4>⚠️ Advertencias</h4>
+    <ul>
+      {% for warning in result.warnings %}
+      <li>{{ warning }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}

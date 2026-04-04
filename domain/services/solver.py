@@ -57,9 +57,8 @@ class DefaultResultValidator(ResultValidator):
                 result.messages.append("Validation passed")
             else:
                 result.validation_result = ValidationResult.FAIL
-                result.messages.append(".6f")
-                result.messages.append(".6f")
-                result.messages.append(".6f")
+                result.status = CalculationStatus.FAILED
+                result.messages.append(f"Validation failed: expected {expected_float:.6f}, got {actual_float:.6f}, difference {abs_diff:.6f}")
 
         except (ValueError, TypeError, OverflowError) as e:
             result.status = CalculationStatus.FAILED

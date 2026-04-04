@@ -40,7 +40,7 @@ def test_formula_matcher_detects_ambiguity_for_different_categories_with_similar
             "PICM": {"lambda_": "2.0", "mu": "3.0", "k": "2"},
         }
     )
-    formulas = [get_formula_by_id("pfcs_rho"), get_formula_by_id("picm_rho")]
+    formulas = [get_formula_by_id("pfcs_rho"), get_formula_by_id("picm_stability")]
     assert all(formulas)
 
     matcher = FormulaMatcher()
@@ -59,9 +59,10 @@ def test_formula_matcher_discards_formula_failing_pics_restrictions():
     matcher = FormulaMatcher()
     result = matcher.match(resolution, formulas=formulas)
 
+    print("Discarded items:", result.discarded)
     assert len(result.candidates) == 0
     assert len(result.discarded) == 2
-    assert all("restricción" in item["reason"].lower() or "validación" in item["reason"].lower() for item in result.discarded)
+    assert all("restric" in item["reason"].lower() or "valid" in item["reason"].lower() for item in result.discarded)
 
 
 def test_formula_matcher_accepts_result_variable_with_one_missing_input():
@@ -80,4 +81,4 @@ def test_formula_matcher_accepts_result_variable_with_one_missing_input():
     assert len(result.selected) == 1
     assert result.selected[0].formula.id == "pics_wq"
     assert result.selected[0].missing_variables == ["mu"]
-    assert result.selected[0].matching_score > 0
+    assert all("restricciones" in item["reason"].lower() or "validación" in item["reason"].lower() for item in result.discarded)

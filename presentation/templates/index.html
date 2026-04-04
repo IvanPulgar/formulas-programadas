@@ -4,10 +4,109 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ title }}</title>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <h1>{{ title }}</h1>
-  <p>Base mínima de aplicación web para teoría de colas usando FastAPI, Jinja2 y HTMX.</p>
-  <p>Ruta de salud: <code>/health</code></p>
+  <header>
+    <h1>{{ title }}</h1>
+    <p>Calculadora de fórmulas de teoría de colas</p>
+  </header>
+
+  <main>
+    <!-- Global Variables Section -->
+    <section id="global-variables" class="section">
+      <h2>Variables Globales</h2>
+      <form id="global-form" hx-post="/api/detect-candidates" hx-target="#alerts" hx-swap="innerHTML">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="lambda_">λ (Tasa de llegada)</label>
+            <input type="number" id="lambda_" name="lambda_" step="0.01" placeholder="clientes/tiempo">
+          </div>
+          <div class="form-group">
+            <label for="mu">μ (Tasa de servicio)</label>
+            <input type="number" id="mu" name="mu" step="0.01" placeholder="clientes/tiempo">
+          </div>
+          <div class="form-group">
+            <label for="rho">ρ (Factor de ocupación)</label>
+            <input type="number" id="rho" name="rho" step="0.01" min="0" max="1" placeholder="0-1">
+          </div>
+          <div class="form-group">
+            <label for="CS">CS (Costo de servicio)</label>
+            <input type="number" id="CS" name="CS" step="0.01" placeholder="moneda/tiempo">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Detectar Fórmulas</button>
+      </form>
+    </section>
+
+    <!-- Category Sections -->
+    <section id="categories" class="section">
+      <h2>Categorías de Fórmulas</h2>
+
+      {% from 'partials/category_form.html' import category_form %}
+
+      <!-- Introduction/General -->
+      <div class="category-section">
+        <h3>Introducción / Generales</h3>
+        {{ category_form('INTRO', 'Introducción / Generales', categories.INTRO.independent_variables, categories.INTRO.dependent_variables, variables) }}
+      </div>
+
+      <!-- PICS -->
+      <div class="category-section">
+        <h3>PICS (Poisson, 1 servidor, capacidad infinita)</h3>
+        {{ category_form('PICS', 'PICS', categories.PICS.independent_variables, categories.PICS.dependent_variables, variables) }}
+      </div>
+
+      <!-- PICM -->
+      <div class="category-section">
+        <h3>PICM (Poisson, múltiples servidores, capacidad infinita)</h3>
+        {{ category_form('PICM', 'PICM', categories.PICM.independent_variables, categories.PICM.dependent_variables, variables) }}
+      </div>
+
+      <!-- PFCS -->
+      <div class="category-section">
+        <h3>PFCS (Poisson, 1 servidor, capacidad finita)</h3>
+        {{ category_form('PFCS', 'PFCS', categories.PFCS.independent_variables, categories.PFCS.dependent_variables, variables) }}
+      </div>
+
+      <!-- PFCM -->
+      <div class="category-section">
+        <h3>PFCM (Poisson, múltiples servidores, capacidad finita)</h3>
+        {{ category_form('PFCM', 'PFCM', categories.PFCM.independent_variables, categories.PFCM.dependent_variables, variables) }}
+      </div>
+    </section>
+
+    <!-- Alerts Panel -->
+    <section id="alerts" class="section alerts">
+      <h2>Mensajes y Alertas</h2>
+      <div id="alerts-content">
+        <!-- Dynamic content will be loaded here -->
+      </div>
+    </section>
+
+    <!-- Result Panel -->
+    <section id="results" class="section results">
+      <h2>Resultados</h2>
+      <div id="results-content">
+        <!-- Dynamic content will be loaded here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Formula Selection -->
+  <div id="formula-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Seleccionar Fórmula</h2>
+      <div id="modal-content">
+        <!-- Modal content will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
 </body>
 </html>

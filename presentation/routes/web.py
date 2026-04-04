@@ -25,10 +25,17 @@ orchestrator = CalculationOrchestrator()
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    from domain.entities.catalog import VARIABLE_CATALOG, CATEGORY_CATALOG
+
     return templates.TemplateResponse(
         request,
         "index.html",
-        {"request": request, "title": "Queue Theory Formula Engine"},
+        {
+            "request": request,
+            "title": "Queue Theory Formula Engine",
+            "variables": VARIABLE_CATALOG,
+            "categories": CATEGORY_CATALOG,
+        },
     )
 
 
@@ -41,15 +48,41 @@ async def detect_candidates(request: CandidateDetectionRequest, req: Request):
 
         if req.headers.get("HX-Request"):
             # Return HTML fragment for HTMX
-            candidates_html = ""
             if result.candidate_formulas:
-                candidates_html = "<ul>"
-                for f in result.candidate_formulas:
-                    candidates_html += f'<li><strong>{f.name}</strong> ({f.id}): {f.description}</li>'
-                candidates_html += "</ul>"
+                candidates_html = f"""
+                <div class="alert alert-info">
+                    <h4>🔍 Fórmulas Candidatas Encontradas</h4>
+                    <p>Se encontraron {len(result.candidate_formulas)} fórmula(s) posible(s).</p>
+                    <div class="candidates-list">
+                """
+                for f in result.candidate_formulas[:2]:  # Show max 2
+                    formula_latex = get_formula_latex(f.id)
+                    candidates_html += f"""
+                        <div class="candidate-card">
+                            <h4>{f.name}</h4>
+                            <p><strong>Categoría:</strong> {f.category}</p>
+                            <p><strong>Variable:</strong> {f.result_variable}</p>
+                            <div class="math-formula">$${formula_latex}$$</div>
+                            <button class="btn btn-primary"
+                                    onclick="showModal('{f.id}', '{f.name}', '{f.category}', '{f.result_variable}')">
+                                Ver detalles
+                            </button>
+                        </div>
+                    """
+                candidates_html += "</div>"
+
+                if len(result.candidate_formulas) > 2:
+                    candidates_html += '<p class="warning">Solo se muestran las primeras 2 fórmulas. Refine sus entradas para obtener resultados más precisos.</p>'
+
+                candidates_html += "</div>"
             else:
-                candidates_html = "<p>No candidates found.</p>"
-            
+                candidates_html = """
+                <div class="alert alert-warning">
+                    <h4>⚠️ No se encontraron fórmulas candidatas</h4>
+                    <p>Verifique que haya ingresado suficientes variables para identificar una fórmula específica.</p>
+                </div>
+                """
+
             return HTMLResponse(content=candidates_html)
 
         # Return JSON for API calls
@@ -92,24 +125,104 @@ async def calculate(request: APICalculationRequest, req: Request):
 
         if req.headers.get("HX-Request"):
             # Return HTML fragment for HTMX
+            from domain.entities.catalog import VARIABLE_CATALOG
+
+            # Prepare result data for template
+            result_data = {
+                "status": result.status.value,
+                "messages": result.messages,
+                "warnings": result.warnings,
+                "computed_variable": result.computed_variable,
+                "computed_value": result.computed_value,
+                "validation_result": result.validation_result.value if result.validation_result else None,
+                "candidate_formulas": [
+                    {
+                        "id": f.id,
+                        "name": f.name,
+                        "description": f.description,
+                        "category": f.category.value,
+                        "result_variable": f.result_variable,
+                        "input_variables": f.input_variables,
+                    }
+                    for f in result.candidate_formulas
+                ],
+                "used_variables": getattr(result, 'used_variables', {}),
+            }
+
+            if result.formula_used:
+                result_data["formula_used"] = {
+                    "id": result.formula_used.id,
+                    "name": result.formula_used.name,
+                    "description": result.formula_used.description,
+                    "category": result.formula_used.category.value,
+                    "result_variable": result.formula_used.result_variable,
+                    "input_variables": result.formula_used.input_variables,
+                }
+
+            # Render result panel
+            result_html = f"""
+            <div class="result-panel">
+                <div class="result-header {'success' if result.status.value == 'success' else 'info' if result.candidate_formulas else 'error'}">
+                    <h3>{"✅ Cálculo Exitoso" if result.status.value == "success" else "🔍 Candidatos Encontrados" if result.candidate_formulas else "❌ Error"}</h3>
+                </div>
+            """
+
             if result.status.value == "success" and result.computed_value is not None:
-                html = f"""
-                <div class="result-panel">
-                    <h3>Calculation Result</h3>
-                    <p><strong>Formula:</strong> {result.formula_used.name if result.formula_used else 'N/A'}</p>
-                    <p><strong>Computed Variable:</strong> {result.computed_variable}</p>
-                    <p><strong>Value:</strong> {result.computed_value}</p>
+                formula_latex = get_formula_latex(result.formula_used.id) if result.formula_used else ""
+                result_html += f"""
+                <div class="result-section">
+                    <h4>Resultado del Cálculo</h4>
+                    <div class="result-value">
+                        <span class="result-number">{result.computed_value:.4f}</span>
+                        <span class="result-unit">{VARIABLE_CATALOG[result.computed_variable].unit if result.computed_variable in VARIABLE_CATALOG else ''}</span>
+                    </div>
+                    <p><strong>Variable calculada:</strong> {VARIABLE_CATALOG[result.computed_variable].symbol if result.computed_variable in VARIABLE_CATALOG else result.computed_variable}</p>
+                    {"<div class='math-formula'>$$" + formula_latex + "$$</div>" if formula_latex else ""}
                 </div>
                 """
             elif result.candidate_formulas:
-                html = "<div class='candidates-panel'><h3>Select a Formula:</h3><ul>"
-                for f in result.candidate_formulas:
-                    html += f'<li><button onclick="selectFormula(\'{f.id}\')">{f.name}</button>: {f.description}</li>'
-                html += "</ul></div>"
+                result_html += f"""
+                <div class="result-section">
+                    <h4>Fórmulas Candidatas ({len(result.candidate_formulas)})</h4>
+                    <div class="candidates-preview">
+                """
+                for f in result.candidate_formulas[:2]:
+                    formula_latex = get_formula_latex(f.id)
+                    result_html += f"""
+                        <div class="candidate-preview">
+                            <h4>{f.name}</h4>
+                            <p>{f.description}</p>
+                            <div class="math-formula">$${formula_latex}$$</div>
+                            <button class="btn btn-outline"
+                                    onclick="showModal('{f.id}', '{f.name}', '{f.category}', '{f.result_variable}')">
+                                Ver detalles
+                            </button>
+                        </div>
+                    """
+                result_html += "</div></div>"
             else:
-                html = f"<div class='error-panel'><p>Error: {'; '.join(result.messages)}</p></div>"
-            
-            return HTMLResponse(content=html)
+                result_html += f"""
+                <div class="result-section">
+                    <h4>Errores</h4>
+                    <ul>
+                        {"".join(f"<li>{msg}</li>" for msg in result.messages)}
+                    </ul>
+                </div>
+                """
+
+            if result.warnings:
+                result_html += f"""
+                <div class="result-section warnings">
+                    <h4>Advertencias</h4>
+                    <ul>
+                        {"".join(f"<li>{warning}</li>" for warning in result.warnings)}
+                    </ul>
+                </div>
+                """
+
+            result_html += "</div>"
+
+            return HTMLResponse(content=result_html)
 
         # Return JSON for API calls
         response = CalculationResponse(
@@ -151,6 +264,69 @@ async def calculate(request: APICalculationRequest, req: Request):
         if req.headers.get("HX-Request"):
             return HTMLResponse(content=f"<div class='error-panel'><p>Error: {str(e)}</p></div>", status_code=500)
         raise HTTPException(status_code=500, detail=f"Error performing calculation: {str(e)}")
+
+
+@router.get("/api/formula-modal/{formula_id}", response_class=HTMLResponse)
+async def get_formula_modal(formula_id: str, request: Request):
+    """Get modal content for a specific formula."""
+    try:
+        # This is a simplified version - in a real app you'd fetch from your formula registry
+        from domain.formulas.registry import FORMULA_REGISTRY
+
+        formula = FORMULA_REGISTRY.get(formula_id)
+        if not formula:
+            return HTMLResponse(content="<p>Fórmula no encontrada</p>", status_code=404)
+
+        # Get formula representation (simplified)
+        formula_latex = get_formula_latex(formula_id)
+
+        html = f"""
+        <div class="modal-formula-detail">
+            <h3>{formula.name}</h3>
+            <p><strong>Categoría:</strong> {formula.category.value}</p>
+            <p><strong>Variable resultante:</strong> {formula.result_variable}</p>
+            <p><strong>Descripción:</strong> {formula.description}</p>
+
+            <div class="formula-display">
+                <strong>Representación matemática:</strong>
+                <div class="math-formula">
+                    $${formula_latex}$$
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary"
+                        hx-post="/api/calculate"
+                        hx-vals='{{"selected_formula_id": "{formula_id}", "inputs": {{}}}}'
+                        hx-target="#results-content"
+                        hx-swap="innerHTML"
+                        onclick="closeModal()">
+                    Usar esta fórmula
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            </div>
+        </div>
+        """
+
+        return HTMLResponse(content=html)
+    except Exception as e:
+        return HTMLResponse(content=f"<p>Error: {str(e)}</p>", status_code=500)
+
+
+def get_formula_latex(formula_id: str) -> str:
+    """Get LaTeX representation for a formula (simplified examples)."""
+    formulas = {
+        "pics_p0": "P_0 = 1 - \\rho",
+        "pics_pn": "P_n = (1 - \\rho) \\rho^n",
+        "pics_l": "L = \\frac{\\rho}{1 - \\rho}",
+        "pics_lq": "L_q = \\frac{\\rho^2}{1 - \\rho}",
+        "pics_w": "W = \\frac{1}{\\mu(1 - \\rho)}",
+        "pics_wq": "W_q = \\frac{\\rho}{\\mu(1 - \\rho)}",
+        "picm_p0": "P_0 = \\left[ \\sum_{k=0}^{c-1} \\frac{(\\lambda/\\mu)^k}{k!} + \\frac{(\\lambda/\\mu)^c}{c!} \\cdot \\frac{c\\mu}{c\\mu - \\lambda} \\right]^{-1}",
+        "pfcs_p0": "P_0 = \\frac{1 - \\rho}{1 - \\rho^{K+1}}",
+        "pfcm_p0": "P_0 = \\left[ \\sum_{n=0}^{c-1} \\frac{(c\\rho)^n}{n!} + \\frac{(c\\rho)^c}{c!} \\cdot \\frac{1 - \\rho^{K-c+1}}{1 - \\rho} \\right]^{-1}",
+    }
+    return formulas.get(formula_id, f"Fórmula: {formula_id}")
 
 
 @router.get("/health", response_model=HealthResponse)

@@ -27,7 +27,7 @@ class TestDefaultResultValidator:
         result = validator.validate(5.0, 5.1, tolerance=1e-6)
         assert result.status == CalculationStatus.FAILED
         assert result.validation_result == ValidationResult.FAIL
-        assert "Validation failed" in result.messages
+        assert any("Validation failed" in msg for msg in result.messages)
 
     def test_validate_none_values(self):
         validator = DefaultResultValidator()

@@ -1,0 +1,50 @@
+{% macro category_form(category_id, category_name, independent_vars, dependent_vars, variables) %}
+<div class="category-form" data-category="{{ category_id }}">
+  <form hx-post="/api/calculate" hx-target="#results-content" hx-swap="innerHTML" hx-indicator="#loading-{{ category_id }}">
+    <div class="form-section">
+      <h4>Variables Independientes</h4>
+      <div class="form-grid">
+        {% for var_id in independent_vars %}
+        <div class="form-group">
+          <label for="{{ var_id }}-{{ category_id }}">{{ variables[var_id].symbol }} ({{ variables[var_id].display_name }})</label>
+          <input type="number"
+                 id="{{ var_id }}-{{ category_id }}"
+                 name="{{ var_id }}"
+                 step="0.01"
+                 placeholder="{{ variables[var_id].unit }}"
+                 {% if variables[var_id].constraints.get('min') is not none %}min="{{ variables[var_id].constraints.min }}"{% endif %}
+                 {% if variables[var_id].constraints.get('max') is not none %}max="{{ variables[var_id].constraints.max }}"{% endif %}>
+          <small>{{ variables[var_id].description }}</small>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Variables Dependientes (Resultados)</h4>
+      <div class="form-grid">
+        {% for var_id in dependent_vars %}
+        <div class="form-group">
+          <label for="result-{{ var_id }}-{{ category_id }}">{{ variables[var_id].symbol }} ({{ variables[var_id].display_name }})</label>
+          <input type="number"
+                 id="result-{{ var_id }}-{{ category_id }}"
+                 name="result_{{ var_id }}"
+                 step="0.01"
+                 placeholder="{{ variables[var_id].unit }}"
+                 readonly>
+          <small>{{ variables[var_id].description }}</small>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-secondary" name="action" value="detect">Detectar Fórmulas</button>
+      <button type="submit" class="btn btn-primary" name="action" value="calculate">Calcular</button>
+      <div id="loading-{{ category_id }}" class="htmx-indicator">Procesando...</div>
+    </div>
+
+    <input type="hidden" name="category" value="{{ category_id }}">
+  </form>
+</div>
+{% endmacro %}
