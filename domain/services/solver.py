@@ -211,16 +211,20 @@ class FormulaSolver(MathResolver):
             expr = sp.sympify(formula.symbolic_expression)
             
             # Define symbols for all variables in the formula
-            symbols = {var: sp.Symbol(var) for var in formula.variables}
+            all_vars = formula.input_variables + [formula.result_variable]
+            symbols = {var: sp.Symbol(var) for var in all_vars}
             
             # Substitute known inputs into the expression
-            substituted_expr = expr.subs({symbols[var]: value for var, value in inputs.items() if var != missing_var})
+            substituted_expr = expr.subs({symbols[var]: value for var, value in inputs.items() if var != missing_var and var in symbols})
             
             # Set up the equation: substituted_expr = result_value
             equation = sp.Eq(substituted_expr, result_value)
             
             # Solve for the missing variable
-            solutions = sp.solve(equation, symbols[missing_var])
+            target_symbol = symbols.get(missing_var)
+            if target_symbol is None:
+                raise ValueError(f"Variable {missing_var} not found in formula variables")
+            solutions = sp.solve(equation, target_symbol)
             
             # Filter for real solutions
             real_solutions = [sol for sol in solutions if sol.is_real]

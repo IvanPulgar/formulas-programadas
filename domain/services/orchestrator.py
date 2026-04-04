@@ -14,6 +14,7 @@ from domain.services.contracts import (
     ResultValidator,
     VariableResolver,
 )
+from domain.services.input_processing import DefaultInputNormalizer, DefaultVariableResolver, VariableResolutionResult
 from domain.services.matcher import FormulaMatcher as DefaultFormulaMatcher
 from domain.services.solver import FormulaSolver
 
@@ -58,8 +59,8 @@ class CalculationOrchestrator:
         validator: Optional[ResultValidator] = None,
         premium_policy: Optional[PremiumPolicy] = None,
     ):
-        self.normalizer = normalizer
-        self.resolver = resolver
+        self.normalizer = normalizer or DefaultInputNormalizer()
+        self.resolver = resolver or DefaultVariableResolver()
         self.matcher = matcher or DefaultFormulaMatcher()
         self.solver = solver or FormulaSolver()
         self.validator = validator
@@ -71,19 +72,19 @@ class CalculationOrchestrator:
 
         try:
             # Step 1: Normalize inputs
-            normalized_inputs = self.normalizer.normalize(request.inputs) if self.normalizer else request.inputs
-            result.add_step("Input normalization", {"normalized": normalized_inputs})
+            normalized_inputs = self.normalizer.normalize(request.inputs)
+            result.add_step("Input normalization", {"count": len(normalized_inputs)})
 
             # Step 2: Resolve variables
-            resolved_inputs = self.resolver.resolve(normalized_inputs) if self.resolver else normalized_inputs
-            result.add_step("Variable resolution", {"resolved": resolved_inputs})
+            resolution: VariableResolutionResult = self.resolver.resolve(normalized_inputs)
+            result.add_step("Variable resolution", {"consolidated": list(resolution.consolidated_inputs.keys())})
 
             # Step 3: Check for conflicts
-            conflicts = self._detect_conflicts(resolved_inputs)
-            if conflicts:
+            if resolution.conflicts:
+                conflict_msgs = [c.message for c in resolution.conflicts]
                 result.status = CalculationStatus.FAILED
-                result.messages.append(f"Input conflicts detected: {conflicts}")
-                result.add_step("Conflict detection", {"conflicts": conflicts})
+                result.messages.append(f"Input conflicts detected: {conflict_msgs}")
+                result.add_step("Conflict detection", {"conflicts": conflict_msgs})
                 return result
 
             # Step 4: Validate premium policy
@@ -93,6 +94,9 @@ class CalculationOrchestrator:
                 result.messages.append(policy_result.message)
                 result.add_step("Premium policy check", {"blocked": True, "reason": policy_result.message})
                 return result
+
+            # Build a plain dict of consolidated values for the solver
+            resolved_values = {k: v.value for k, v in resolution.consolidated_inputs.items()}
 
             # If a specific formula is selected, use it directly
             if request.selected_formula_id:
@@ -104,33 +108,33 @@ class CalculationOrchestrator:
                     return result
                 result.add_step("Formula selection", {"formula_id": selected_formula.id})
             else:
-                # Step 5: Find candidate formulas
-                candidates = self.matcher.match_formulas(resolved_inputs)
-                result.add_step("Formula matching", {"candidates": [f.id for f in candidates.matched_formulas]})
+                # Step 5: Find candidate formulas using the matcher
+                match_result = self.matcher.match(resolution)
+                result.add_step("Formula matching", {"candidates": [c.formula.id for c in match_result.candidates]})
 
-                if not candidates.matched_formulas:
+                if not match_result.candidates:
                     result.messages.append("No matching formulas found")
                     result.add_step("No candidates", {})
                     return result
 
-                # Step 6: Score and rank candidates
-                scored_candidates = self._score_candidates(candidates.matched_formulas, resolved_inputs)
-                result.add_step("Candidate scoring", {"scored": [(f.id, score) for f, score in scored_candidates]})
-
-                # Step 7: Resolve ambiguity
-                selected_formula = self._resolve_ambiguity(scored_candidates)
-
-                if selected_formula is None:
-                    # Ambiguous case - return top 2
-                    top_candidates = scored_candidates[:2]
+                # Step 6: Handle ambiguity
+                if match_result.is_ambiguous:
+                    top_candidates = match_result.selected[:2]
                     result.status = CalculationStatus.SUCCESS
                     result.messages.append("Multiple formula options available")
-                    result.candidate_formulas = [f for f, _ in top_candidates]
-                    result.add_step("Ambiguity resolution", {"ambiguous": True, "top_candidates": [f.id for f, _ in top_candidates]})
+                    result.candidate_formulas = [c.formula for c in top_candidates]
+                    result.add_step("Ambiguity resolution", {"ambiguous": True, "top_candidates": [c.formula.id for c in top_candidates]})
                     return result
 
+                # Use the top selected candidate
+                if match_result.selected:
+                    selected_formula = match_result.selected[0].formula
+                else:
+                    selected_formula = match_result.candidates[0].formula
+                result.add_step("Formula selected", {"formula_id": selected_formula.id})
+
             # Step 8: Execute calculation or validation
-            final_result = self._execute_calculation(selected_formula, resolved_inputs)
+            final_result = self._execute_calculation(selected_formula, resolved_values)
             result.status = final_result.status
             result.messages.extend(final_result.messages)
             result.warnings.extend(final_result.warnings)
@@ -151,58 +155,6 @@ class CalculationOrchestrator:
     def _find_formula_by_id(self, formula_id: str) -> Optional[FormulaDefinition]:
         """Find a formula by its ID."""
         return get_formula_by_id(formula_id)
-
-    def _score_candidates(self, candidates: List[FormulaDefinition], inputs: Dict[str, Any]) -> List[tuple[FormulaDefinition, float]]:
-        """Score and rank candidate formulas."""
-        scored = []
-        for formula in candidates:
-            score = self._calculate_score(formula, inputs)
-            scored.append((formula, score))
-        return sorted(scored, key=lambda x: x[1], reverse=True)
-
-    def _calculate_score(self, formula: FormulaDefinition, inputs: Dict[str, Any]) -> float:
-        """Calculate relevance score for a formula."""
-        score = 0.0
-
-        # Score based on input variable matches
-        matched_inputs = sum(1 for var in formula.input_variables if inputs.get(var) is not None)
-        score += matched_inputs * 10
-
-        # Bonus for result variable match
-        if inputs.get(formula.result_variable) is not None:
-            score += 15
-
-        # Penalty for generic formulas
-        if len(formula.input_variables) > 5:
-            score -= 5
-
-        return score
-
-    def _detect_conflicts(self, resolved_inputs: Dict[str, Any]) -> List[str]:
-        """Detect conflicts in resolved inputs."""
-        # Simple conflict detection - check for duplicate variable definitions
-        conflicts = []
-        # For now, no conflicts detected
-        return conflicts
-
-    def _resolve_ambiguity(self, scored_candidates: List[tuple[FormulaDefinition, float]]) -> Optional[FormulaDefinition]:
-        """Resolve ambiguity by selecting the best candidate or None if ambiguous."""
-        if not scored_candidates:
-            return None
-
-        top_score = scored_candidates[0][1]
-        top_candidates = [f for f, s in scored_candidates if s == top_score]
-
-        if len(top_candidates) == 1:
-            return top_candidates[0]
-
-        # Check if top candidates are from different categories
-        categories = set(f.category for f in top_candidates)
-        if len(categories) > 1:
-            return None  # Ambiguous
-
-        # Same category - pick the first
-        return top_candidates[0]
 
     def _execute_calculation(self, formula: FormulaDefinition, inputs: Dict[str, Any]) -> CalculationResult:
         """Execute the final calculation or validation."""

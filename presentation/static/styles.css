@@ -452,3 +452,273 @@ header p {
 .MathJax {
   font-size: 1.1em !important;
 }
+
+/* Result Modal variant */
+.result-modal-content {
+  max-width: 900px;
+  border-top: 4px solid #3498db;
+}
+
+/* Demo badge */
+.demo-badge {
+  display: inline-block;
+  background: #f1c40f;
+  color: #2c3e50;
+  padding: 4px 14px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+
+/* Error panel inside modal */
+.error-panel {
+  padding: 20px;
+  background: #fde8e8;
+  border-left: 4px solid #e74c3c;
+  border-radius: 6px;
+  color: #c0392b;
+}
+
+/* ============================================================
+   Formula Catalog — Carousels & Cards
+   ============================================================ */
+
+/* --- Formula count badge in header --- */
+.formula-count-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.25);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 14px;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* --- Carousel block (one per group) --- */
+.carousel-block {
+  margin-bottom: 40px;
+}
+
+.carousel-title {
+  color: #2c3e50;
+  font-size: 1.35em;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #3498db;
+}
+
+/* --- Carousel layout --- */
+.carousel-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 4px 16px;
+  flex: 1;
+  /* hide scrollbar */
+  scrollbar-width: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Arrow buttons --- */
+.carousel-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #3498db;
+  border-radius: 50%;
+  background: white;
+  color: #3498db;
+  font-size: 1.3em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.carousel-arrow:hover {
+  background: #3498db;
+  color: white;
+}
+
+/* --- Counter --- */
+.carousel-counter {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.9em;
+  margin-top: 6px;
+}
+
+/* --- Formula card --- */
+.formula-card {
+  scroll-snap-align: start;
+  flex: 0 0 320px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 22px 20px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.formula-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+  transform: translateY(-3px);
+}
+
+/* --- Category badge --- */
+.card-category-badge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: #e8f4fd;
+  color: #2980b9;
+}
+
+/* --- Card title --- */
+.card-title {
+  font-size: 1.05em;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1.3;
+}
+
+/* --- Rendered LaTeX formula --- */
+.card-formula-render {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px 10px;
+  text-align: center;
+  min-height: 48px;
+  overflow-x: auto;
+}
+
+/* --- Raw LaTeX code --- */
+.card-latex-raw {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.78em;
+  color: #6c757d;
+  background: #f1f3f5;
+  padding: 6px 10px;
+  border-radius: 4px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+/* --- Details section (use / function) --- */
+.card-details p {
+  font-size: 0.88em;
+  color: #495057;
+  margin-bottom: 4px;
+}
+
+.card-details strong {
+  color: #2c3e50;
+}
+
+/* --- Variables section --- */
+.card-variables {
+  font-size: 0.85em;
+}
+
+.card-var-group {
+  margin-bottom: 6px;
+}
+
+.card-var-label {
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 2px;
+}
+
+.card-var-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-var-list li {
+  background: #eaf2f8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.92em;
+  color: #2c3e50;
+}
+
+/* --- Description --- */
+.card-description {
+  font-size: 0.85em;
+  color: #6c757d;
+  line-height: 1.45;
+}
+
+/* --- Variable details (expandable) --- */
+.card-var-details summary {
+  cursor: pointer;
+  color: #3498db;
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.card-var-details ul {
+  list-style: none;
+  padding: 8px 0 0;
+  margin: 0;
+  font-size: 0.82em;
+  color: #555;
+}
+
+.card-var-details li {
+  margin-bottom: 3px;
+}
+
+.card-var-details code {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* ============================================================
+   Responsive — Carousels
+   ============================================================ */
+@media (max-width: 768px) {
+  .formula-card {
+    flex: 0 0 280px;
+  }
+
+  .carousel-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1em;
+  }
+
+  .carousel-title {
+    font-size: 1.15em;
+  }
+}

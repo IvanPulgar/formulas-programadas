@@ -1,0 +1,24 @@
+{# Carousel wrapper — pure CSS scroll-snap with vanilla JS arrows #}
+{% from 'partials/formula_card.html' import formula_card %}
+
+{% macro carousel(group) %}
+<div class="carousel-block" id="carousel-{{ group.id }}">
+  <h3 class="carousel-title">{{ group.title }}</h3>
+
+  <div class="carousel-wrapper">
+    <button class="carousel-arrow carousel-prev" onclick="carouselScroll('{{ group.id }}', -1)" aria-label="Anterior">&lsaquo;</button>
+
+    <div class="carousel-track" id="track-{{ group.id }}">
+      {% for card in group.cards %}
+        {{ formula_card(card) }}
+      {% endfor %}
+    </div>
+
+    <button class="carousel-arrow carousel-next" onclick="carouselScroll('{{ group.id }}', 1)" aria-label="Siguiente">&rsaquo;</button>
+  </div>
+
+  <div class="carousel-counter">
+    <span id="counter-{{ group.id }}"></span> / {{ group.cards | length }} fórmulas
+  </div>
+</div>
+{% endmacro %}

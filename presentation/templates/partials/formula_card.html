@@ -1,0 +1,44 @@
+{# Single formula card for the informational gallery #}
+{% macro formula_card(card) %}
+<div class="formula-card">
+  <span class="card-category-badge">{{ card.category }}</span>
+  <h4 class="card-title">{{ card.name }}</h4>
+
+  <div class="card-formula-render">
+    $${{ card.latex }}$$
+  </div>
+
+  <div class="card-latex-raw">
+    <code>{{ card.latex }}</code>
+  </div>
+
+  <div class="card-details">
+    <p><strong>Uso:</strong> {{ card.use }}</p>
+    <p><strong>Función:</strong> {{ card.function }}</p>
+  </div>
+
+  <div class="card-variables">
+    <div class="card-var-group">
+      <span class="card-var-label">Variables independientes:</span>
+      <span class="card-var-list">{{ card.independent_vars | join(', ') }}</span>
+    </div>
+    <div class="card-var-group">
+      <span class="card-var-label">Variable dependiente:</span>
+      <span class="card-var-list">{{ card.dependent_var }}</span>
+    </div>
+  </div>
+
+  <p class="card-description">{{ card.description }}</p>
+
+  {% if card.var_descriptions %}
+  <details class="card-var-details">
+    <summary>Variables</summary>
+    <ul>
+      {% for sym, desc in card.var_descriptions.items() %}
+      <li><strong>{{ sym }}:</strong> {{ desc }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</div>
+{% endmacro %}

@@ -1,114 +1,75 @@
-// Modal functionality
-function showModal(formulaId, name, category, resultVar) {
-  const modal = document.getElementById('formula-modal');
-  const modalContent = document.getElementById('modal-content');
+// ============================================================
+// Carousel Controller — pure CSS scroll-snap + vanilla JS
+// ============================================================
 
-  // Load modal content via HTMX
-  htmx.ajax('GET', `/api/formula-modal/${formulaId}`, {
-    target: '#modal-content',
-    swap: 'innerHTML'
-  });
-
-  modal.style.display = 'block';
+/**
+ * Scroll a carousel track left (-1) or right (+1) by the width
+ * of one visible "page" (3 cards on desktop).
+ */
+function carouselScroll(groupId, direction) {
+  const track = document.getElementById('track-' + groupId);
+  if (!track) return;
+  const cardWidth = track.querySelector('.formula-card')?.offsetWidth || 320;
+  const gap = 20; // matches CSS gap
+  const scrollAmount = (cardWidth + gap) * 3 * direction;
+  track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
 }
 
-function closeModal() {
-  const modal = document.getElementById('formula-modal');
-  modal.style.display = 'none';
+/**
+ * Update the "X" / N counter label for a carousel.
+ */
+function updateCarouselCounter(groupId) {
+  const track = document.getElementById('track-' + groupId);
+  const counter = document.getElementById('counter-' + groupId);
+  if (!track || !counter) return;
+
+  const cards = track.querySelectorAll('.formula-card');
+  if (!cards.length) { counter.textContent = '0'; return; }
+
+  const trackRect = track.getBoundingClientRect();
+  let firstVisible = 1;
+  for (let i = 0; i < cards.length; i++) {
+    const r = cards[i].getBoundingClientRect();
+    if (r.left >= trackRect.left - 10) { firstVisible = i + 1; break; }
+  }
+  counter.textContent = firstVisible;
 }
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-  const modal = document.getElementById('formula-modal');
-  if (event.target === modal) {
-    modal.style.display = 'none';
-  }
-}
+// ============================================================
+// DOMContentLoaded — MathJax + carousel counters + demo guard
+// ============================================================
+document.addEventListener('DOMContentLoaded', function () {
 
-// Close modal with ESC key
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape') {
-    closeModal();
-  }
-});
-
-// Form validation
-function validateNumberInput(input) {
-  const value = parseFloat(input.value);
-  const min = input.min ? parseFloat(input.min) : null;
-  const max = input.max ? parseFloat(input.max) : null;
-
-  if (isNaN(value)) return true; // Allow empty
-
-  if (min !== null && value < min) {
-    input.setCustomValidity(`El valor debe ser mayor o igual a ${min}`);
-    return false;
-  }
-
-  if (max !== null && value > max) {
-    input.setCustomValidity(`El valor debe ser menor o igual a ${max}`);
-    return false;
-  }
-
-  input.setCustomValidity('');
-  return true;
-}
-
-// Add validation to number inputs
-document.addEventListener('DOMContentLoaded', function() {
-  const numberInputs = document.querySelectorAll('input[type="number"]');
-
-  numberInputs.forEach(input => {
-    input.addEventListener('input', function() {
-      validateNumberInput(this);
-    });
-
-    input.addEventListener('blur', function() {
-      validateNumberInput(this);
+  // --- Initialize carousel counters ---
+  document.querySelectorAll('.carousel-track').forEach(function (track) {
+    const groupId = track.id.replace('track-', '');
+    updateCarouselCounter(groupId);
+    track.addEventListener('scroll', function () {
+      updateCarouselCounter(groupId);
     });
   });
+
+  // --- Re-render MathJax after page load ---
+  if (window.MathJax) {
+    MathJax.typesetPromise();
+  }
+
+  // ============================================================
+  // DEMO MODE (dormant — only runs if __DEMO_MODE__ is true)
+  // To reactivate: set DEMO_MODE=true in .env and restart server.
+  // ============================================================
+  if (window.__DEMO_MODE__) {
+    runDemoSimulation();
+  }
 });
 
-// Auto-refresh MathJax when content changes
-document.addEventListener('DOMContentLoaded', function() {
-  // Re-render MathJax after HTMX swaps
-  document.body.addEventListener('htmx:afterSwap', function(evt) {
-    if (window.MathJax) {
-      MathJax.typesetPromise();
-    }
-  });
-});
-
-// Loading indicators
-document.addEventListener('DOMContentLoaded', function() {
-  // Show loading state for forms
-  document.body.addEventListener('htmx:beforeRequest', function(evt) {
-    const target = evt.target;
-    if (target.tagName === 'FORM') {
-      const submitBtn = target.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Procesando...';
-      }
-    }
-  });
-
-  document.body.addEventListener('htmx:afterRequest', function(evt) {
-    const target = evt.target;
-    if (target.tagName === 'FORM') {
-      const submitBtn = target.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = submitBtn.getAttribute('data-original-text') || 'Enviar';
-      }
-    }
-  });
-});
-
-// Store original button text
-document.addEventListener('DOMContentLoaded', function() {
-  const buttons = document.querySelectorAll('button[type="submit"]');
-  buttons.forEach(btn => {
-    btn.setAttribute('data-original-text', btn.textContent);
-  });
-});
+// ============================================================
+// Demo simulation (kept for future reactivation)
+// ============================================================
+function runDemoSimulation() {
+  console.log('Demo mode: auto-simulation is currently disabled in gallery view.');
+  // The demo previously auto-filled PICS form fields and submitted.
+  // In gallery mode there are no forms, so this is a no-op.
+  // To restore demo behavior, re-add calculator forms and enable
+  // DEMO_MODE=true in .env.
+}

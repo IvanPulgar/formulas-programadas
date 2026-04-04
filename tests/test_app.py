@@ -22,6 +22,11 @@ def test_home():
 
     assert response.status_code == 200
     assert "Queue Theory Formula Engine" in response.text
+    # Catalog view: carousels and formula cards, no old modals/forms
+    assert "carousel-track" in response.text
+    assert "formula-card" in response.text
+    assert 'id="results-content"' not in response.text
+    assert 'id="alerts-content"' not in response.text
 
 
 def test_detect_candidates():
@@ -37,6 +42,21 @@ def test_detect_candidates():
     assert "candidates" in json_response
 
 
+def test_detect_candidates_htmx_trigger():
+    """HTMX responses must include HX-Trigger header to open result modal."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/detect-candidates",
+        data={"lambda_": "4", "mu": "5"},
+        headers={"HX-Request": "true"},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    assert response.headers.get("hx-trigger") == "openResultModal"
+
+
 def test_calculate():
     transport = ASGITransport(app=app)
     client = httpx.AsyncClient(transport=transport, base_url="http://test")
@@ -48,3 +68,18 @@ def test_calculate():
     json_response = response.json()
     assert "status" in json_response
     assert "messages" in json_response
+
+
+def test_calculate_htmx_trigger():
+    """HTMX calculate responses must include HX-Trigger header."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/calculate",
+        data={"lambda_": "4", "mu": "5"},
+        headers={"HX-Request": "true"},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    assert response.headers.get("hx-trigger") == "openResultModal"

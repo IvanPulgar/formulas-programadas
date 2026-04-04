@@ -1,6 +1,7 @@
 from pathlib import Path
+from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -17,6 +18,32 @@ from presentation.schemas.health import HealthResponse
 
 router = APIRouter()
 
+
+async def _parse_inputs_from_request(req: Request) -> Dict[str, Any]:
+    """Parse inputs from either JSON body or form-encoded data."""
+    content_type = req.headers.get("content-type", "")
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await req.form()
+        inputs: Dict[str, Any] = {}
+        skip_keys = {"action", "category", "selected_formula_id"}
+        for key, value in form.items():
+            if key in skip_keys:
+                continue
+            if isinstance(value, str) and value.strip() == "":
+                continue
+            try:
+                inputs[key] = float(value)
+            except (ValueError, TypeError):
+                inputs[key] = value
+        selected_formula_id = form.get("selected_formula_id")
+        return {"inputs": inputs, "selected_formula_id": selected_formula_id if selected_formula_id else None, "action": form.get("action")}
+    else:
+        body = await req.json()
+        return {"inputs": body.get("inputs", {}), "selected_formula_id": body.get("selected_formula_id"), "action": None}
+
+
+
+
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parents[1] / "templates"))
 
 # Initialize orchestrator (in production, use dependency injection)
@@ -25,7 +52,9 @@ orchestrator = CalculationOrchestrator()
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    from domain.entities.catalog import VARIABLE_CATALOG, CATEGORY_CATALOG
+    from presentation.catalogs.formula_gallery import GALLERY_CAROUSELS, TOTAL_FORMULA_COUNT
+
+    demo_mode = getattr(request.app.state, "demo_mode", False)
 
     return templates.TemplateResponse(
         request,
@@ -33,17 +62,19 @@ async def home(request: Request):
         {
             "request": request,
             "title": "Queue Theory Formula Engine",
-            "variables": VARIABLE_CATALOG,
-            "categories": CATEGORY_CATALOG,
+            "carousels": GALLERY_CAROUSELS,
+            "total_formulas": TOTAL_FORMULA_COUNT,
+            "demo_mode": demo_mode,
         },
     )
 
 
 @router.post("/api/detect-candidates", response_model=CandidateDetectionResponse)
-async def detect_candidates(request: CandidateDetectionRequest, req: Request):
+async def detect_candidates(req: Request):
     """Detect candidate formulas based on input variables."""
     try:
-        calc_request = CalculationRequest(inputs=request.inputs)
+        parsed = await _parse_inputs_from_request(req)
+        calc_request = CalculationRequest(inputs=parsed["inputs"])
         result = orchestrator.orchestrate(calc_request)
 
         if req.headers.get("HX-Request"):
@@ -83,7 +114,7 @@ async def detect_candidates(request: CandidateDetectionRequest, req: Request):
                 </div>
                 """
 
-            return HTMLResponse(content=candidates_html)
+            return HTMLResponse(content=candidates_html, headers={"HX-Trigger": "openResultModal"})
 
         # Return JSON for API calls
         if result.candidate_formulas:
@@ -109,17 +140,18 @@ async def detect_candidates(request: CandidateDetectionRequest, req: Request):
             )
     except Exception as e:
         if req.headers.get("HX-Request"):
-            return HTMLResponse(content=f"<p>Error: {str(e)}</p>", status_code=500)
+            return HTMLResponse(content=f"<p>Error: {str(e)}</p>", status_code=500, headers={"HX-Trigger": "openResultModal"})
         raise HTTPException(status_code=500, detail=f"Error detecting candidates: {str(e)}")
 
 
 @router.post("/api/calculate", response_model=CalculationResponse)
-async def calculate(request: APICalculationRequest, req: Request):
+async def calculate(req: Request):
     """Perform calculation with selected formula or detect candidates."""
     try:
+        parsed = await _parse_inputs_from_request(req)
         calc_request = CalculationRequest(
-            inputs=request.inputs,
-            selected_formula_id=request.selected_formula_id
+            inputs=parsed["inputs"],
+            selected_formula_id=parsed["selected_formula_id"]
         )
         result = orchestrator.orchestrate(calc_request)
 
@@ -222,7 +254,7 @@ async def calculate(request: APICalculationRequest, req: Request):
 
             result_html += "</div>"
 
-            return HTMLResponse(content=result_html)
+            return HTMLResponse(content=result_html, headers={"HX-Trigger": "openResultModal"})
 
         # Return JSON for API calls
         response = CalculationResponse(
@@ -262,7 +294,7 @@ async def calculate(request: APICalculationRequest, req: Request):
         return response
     except Exception as e:
         if req.headers.get("HX-Request"):
-            return HTMLResponse(content=f"<div class='error-panel'><p>Error: {str(e)}</p></div>", status_code=500)
+            return HTMLResponse(content=f"<div class='error-panel'><p>Error: {str(e)}</p></div>", status_code=500, headers={"HX-Trigger": "openResultModal"})
         raise HTTPException(status_code=500, detail=f"Error performing calculation: {str(e)}")
 
 
@@ -270,10 +302,9 @@ async def calculate(request: APICalculationRequest, req: Request):
 async def get_formula_modal(formula_id: str, request: Request):
     """Get modal content for a specific formula."""
     try:
-        # This is a simplified version - in a real app you'd fetch from your formula registry
-        from domain.formulas.registry import FORMULA_REGISTRY
+        from domain.formulas.registry import get_formula_by_id
 
-        formula = FORMULA_REGISTRY.get(formula_id)
+        formula = get_formula_by_id(formula_id)
         if not formula:
             return HTMLResponse(content="<p>Fórmula no encontrada</p>", status_code=404)
 
@@ -296,11 +327,7 @@ async def get_formula_modal(formula_id: str, request: Request):
 
             <div class="modal-actions">
                 <button class="btn btn-primary"
-                        hx-post="/api/calculate"
-                        hx-vals='{{"selected_formula_id": "{formula_id}", "inputs": {{}}}}'
-                        hx-target="#results-content"
-                        hx-swap="innerHTML"
-                        onclick="closeModal()">
+                        onclick="selectFormula('{formula_id}')">
                     Usar esta fórmula
                 </button>
                 <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
