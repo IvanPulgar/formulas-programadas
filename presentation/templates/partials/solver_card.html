@@ -1,0 +1,14 @@
+{# Compact formula card for the solver page #}
+{% macro solver_card(card) %}
+<div class="solver-card" data-formula-id="{{ card.formula_id }}">
+  <span class="card-category-badge">{{ card.category }}</span>
+  <h4 class="card-title">{{ card.name }}</h4>
+  <div class="card-formula-render">$${{ card.latex }}$$</div>
+  <p class="solver-result-hint">Resultado: <strong>{{ card.result_symbol }}</strong> — {{ card.result_name }}</p>
+  <button class="btn btn-primary solver-open-btn"
+          type="button"
+          onclick="openSolverModal('{{ card.formula_id }}')">
+    Resolver fórmula
+  </button>
+</div>
+{% endmacro %}

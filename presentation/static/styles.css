@@ -722,3 +722,156 @@ header p {
     font-size: 1.15em;
   }
 }
+
+/* ============================================================
+   Navigation bar
+   ============================================================ */
+.site-nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.nav-btn {
+  display: inline-block;
+  padding: 7px 22px;
+  border-radius: 20px;
+  border: 2px solid rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.88em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+.nav-active {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border-color: white;
+}
+
+/* ============================================================
+   Solver page — compact cards & modal
+   ============================================================ */
+
+.solver-intro {
+  text-align: center;
+  color: #6c757d;
+  margin-bottom: 28px;
+  font-size: 1em;
+}
+
+/* --- Solver card (compact) --- */
+.solver-card {
+  scroll-snap-align: start;
+  flex: 0 0 300px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 18px 16px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.solver-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+  transform: translateY(-3px);
+}
+
+.solver-result-hint {
+  font-size: 0.82em;
+  color: #6c757d;
+  margin: 0;
+}
+
+.solver-open-btn {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* --- Download bar --- */
+.download-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 20px;
+  margin-bottom: 10px;
+}
+
+.download-btn {
+  font-size: 0.85em;
+}
+
+/* --- Solver modal overrides --- */
+.solver-modal-content {
+  max-width: 640px;
+  border-top: 4px solid #3498db;
+}
+
+.solver-modal-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.solver-modal-header h3 {
+  margin: 8px 0 4px;
+  color: #2c3e50;
+}
+
+.solver-preconditions {
+  background: #fff3cd;
+  color: #856404;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin-bottom: 14px;
+}
+
+.solver-form .form-group {
+  margin-bottom: 14px;
+}
+
+.solver-form label small {
+  color: #7f8c8d;
+  margin-left: 4px;
+}
+
+.field-error {
+  display: block;
+  color: #e74c3c;
+  font-size: 0.8em;
+  min-height: 1.1em;
+  margin-top: 2px;
+}
+
+.solver-result {
+  margin-top: 18px;
+}
+
+/* ============================================================
+   Responsive — Solver
+   ============================================================ */
+@media (max-width: 768px) {
+  .solver-card {
+    flex: 0 0 260px;
+  }
+
+  .solver-modal-content {
+    width: 95%;
+    padding: 18px;
+  }
+
+  .download-bar {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,19 @@
+{# Solver carousel — wraps solver_card macros in a scrollable track #}
+{% macro solver_carousel(group) %}
+{% from 'partials/solver_card.html' import solver_card %}
+<section class="carousel-block">
+  <h3 class="carousel-title">{{ group.title }}</h3>
+  <div class="carousel-wrapper">
+    <button class="carousel-arrow" type="button" onclick="carouselScroll('{{ group.id }}', -1)" aria-label="Anterior">&#8249;</button>
+    <div class="carousel-track" id="track-{{ group.id }}">
+      {% for card in group.cards %}
+        {{ solver_card(card) }}
+      {% endfor %}
+    </div>
+    <button class="carousel-arrow" type="button" onclick="carouselScroll('{{ group.id }}', 1)" aria-label="Siguiente">&#8250;</button>
+  </div>
+  <div class="carousel-counter">
+    <span id="counter-{{ group.id }}">1</span> / {{ group.cards | length }}
+  </div>
+</section>
+{% endmacro %}

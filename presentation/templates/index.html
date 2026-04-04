@@ -12,6 +12,8 @@
     <h1>{{ title }}</h1>
     <p>Biblioteca de fórmulas de teoría de colas</p>
     <span class="formula-count-badge">{{ total_formulas }} fórmulas</span>
+    {% from 'partials/nav.html' import nav %}
+    {{ nav('catalog') }}
   </header>
 
   <main>

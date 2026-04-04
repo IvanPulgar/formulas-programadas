@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }} — Resolver</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>{{ title }}</h1>
+    <p>Resolución manual de fórmulas</p>
+    <span class="formula-count-badge">{{ total_formulas }} fórmulas disponibles</span>
+    {% from 'partials/nav.html' import nav %}
+    {{ nav('resolver') }}
+  </header>
+
+  <!-- Download CSV button — hidden until first successful calculation -->
+  <div id="download-bar" class="download-bar" style="display:none;">
+    <button id="download-csv-btn" class="btn btn-secondary download-btn" type="button" onclick="downloadCSV()">
+      ⬇ Descargar resultados (CSV)
+    </button>
+  </div>
+
+  <main>
+    <p class="solver-intro">Selecciona una fórmula y haz clic en <strong>Resolver fórmula</strong> para ingresar los datos de entrada y obtener el resultado.</p>
+
+    {% from 'partials/solver_carousel.html' import solver_carousel %}
+    {% for group in solver_groups %}
+      {{ solver_carousel(group) }}
+    {% endfor %}
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SOLVER MODAL — single reusable modal for all formulas
+       ═══════════════════════════════════════════════════════ -->
+  <div id="solver-modal" class="modal">
+    <div class="modal-content solver-modal-content">
+      <span class="close" onclick="closeSolverModal()">&times;</span>
+      <div id="solver-modal-body">
+        <!-- Populated dynamically by solver.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Formula metadata for JS (all solver formulas) -->
+  <script id="solver-data" type="application/json">{{ solver_json | safe }}</script>
+
+  <script src="/static/app.js"></script>
+  <script src="/static/solver.js"></script>
+</body>
+</html>

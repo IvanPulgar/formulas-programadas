@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from domain.entities.definitions import CalculationRequest
@@ -354,6 +354,158 @@ def get_formula_latex(formula_id: str) -> str:
         "pfcm_p0": "P_0 = \\left[ \\sum_{n=0}^{c-1} \\frac{(c\\rho)^n}{n!} + \\frac{(c\\rho)^c}{c!} \\cdot \\frac{1 - \\rho^{K-c+1}}{1 - \\rho} \\right]^{-1}",
     }
     return formulas.get(formula_id, f"Fórmula: {formula_id}")
+
+
+# ─────────────────────────────────────────────────────────────────────
+# SOLVER PAGE — manual formula resolution
+# ─────────────────────────────────────────────────────────────────────
+
+@router.get("/resolver", response_class=HTMLResponse)
+async def solver_page(request: Request):
+    """Render the manual formula resolver page."""
+    from presentation.catalogs.solver_catalog import (
+        SOLVER_GROUPS,
+        SOLVER_FORMULA_COUNT,
+        solver_json_data,
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "solver.html",
+        {
+            "request": request,
+            "title": "Queue Theory Formula Engine",
+            "solver_groups": SOLVER_GROUPS,
+            "total_formulas": SOLVER_FORMULA_COUNT,
+            "solver_json": solver_json_data(),
+        },
+    )
+
+
+@router.post("/api/solve/{formula_id}")
+async def solve_formula(formula_id: str, request: Request):
+    """Validate inputs and compute a single formula by its ID.
+
+    Expects JSON body: {"inputs": {"lambda_": 4, "mu": 5, ...}}
+    Returns JSON with success/error + result.
+    """
+    from domain.entities.catalog import VARIABLE_CATALOG
+    from domain.formulas.registry import get_formula_by_id
+
+    formula = get_formula_by_id(formula_id)
+    if not formula:
+        return JSONResponse(
+            {"status": "error", "message": f"Fórmula no encontrada: {formula_id}"},
+            status_code=404,
+        )
+
+    # ── Parse body ───────────────────────────────────────────────
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(
+            {"status": "error", "message": "Cuerpo de la solicitud inválido."},
+            status_code=400,
+        )
+
+    raw_inputs: Dict[str, Any] = body.get("inputs", {})
+
+    # ── Backend validation ───────────────────────────────────────
+    errors: List[str] = []
+    validated: Dict[str, Any] = {}
+
+    for var_id in formula.input_variables:
+        raw = raw_inputs.get(var_id)
+
+        # Required check
+        if raw is None or (isinstance(raw, str) and raw.strip() == ""):
+            cat_entry = VARIABLE_CATALOG.get(var_id)
+            symbol = cat_entry.symbol if cat_entry else var_id
+            errors.append(f"El campo {symbol} es obligatorio.")
+            continue
+
+        # Numeric conversion
+        try:
+            value = float(raw)
+        except (ValueError, TypeError):
+            errors.append(f"{var_id}: debe ser un valor numérico.")
+            continue
+
+        # Integer check
+        cat_entry = VARIABLE_CATALOG.get(var_id)
+        if cat_entry and cat_entry.variable_type.value in ("integer", "count"):
+            if value != int(value) or value < 0:
+                errors.append(f"{cat_entry.symbol}: debe ser un entero no negativo.")
+                continue
+            value = int(value)
+
+        # Constraint checks
+        if cat_entry and cat_entry.constraints:
+            c = cat_entry.constraints
+            if c.get("strict_positive") and value <= 0:
+                errors.append(f"{cat_entry.symbol}: debe ser estrictamente positivo (> 0).")
+                continue
+            if "min" in c and value < c["min"]:
+                errors.append(f"{cat_entry.symbol}: debe ser ≥ {c['min']}.")
+                continue
+            if "max" in c and value > c["max"]:
+                errors.append(f"{cat_entry.symbol}: debe ser ≤ {c['max']}.")
+                continue
+
+        validated[var_id] = value
+
+    # ── Category-level preconditions ─────────────────────────────
+    if not errors:
+        cat = formula.category.value
+        lam = validated.get("lambda_")
+        mu = validated.get("mu")
+        k = validated.get("k")
+
+        if cat == "PICS":
+            if lam is not None and mu is not None and lam >= mu:
+                errors.append("Precondición PICS: λ debe ser menor que μ (λ < μ) para estabilidad.")
+        elif cat == "PICM":
+            if lam is not None and mu is not None and k is not None:
+                if lam >= k * mu:
+                    errors.append(f"Precondición PICM: λ debe ser menor que k·μ ({k}·{mu} = {k * mu}) para estabilidad.")
+        # PFCS / PFCM: basic constraints already enforced above
+
+    if errors:
+        return JSONResponse(
+            {"status": "error", "message": "; ".join(errors)},
+            status_code=422,
+        )
+
+    # ── Execute calculation ──────────────────────────────────────
+    try:
+        result_value = formula.manual_calculation(validated)
+    except (ValueError, ZeroDivisionError, OverflowError) as exc:
+        return JSONResponse(
+            {"status": "error", "message": f"Error de cálculo: {str(exc)}"},
+            status_code=422,
+        )
+    except Exception as exc:
+        return JSONResponse(
+            {"status": "error", "message": f"Error inesperado: {str(exc)}"},
+            status_code=500,
+        )
+
+    # ── Build success response ───────────────────────────────────
+    result_var = formula.result_variable
+    cat_entry = VARIABLE_CATALOG.get(result_var)
+
+    return JSONResponse({
+        "status": "success",
+        "formulaId": formula.id,
+        "formulaName": formula.name,
+        "category": formula.category.value,
+        "resultVariable": result_var,
+        "resultSymbol": cat_entry.symbol if cat_entry else result_var,
+        "resultName": cat_entry.display_name if cat_entry else result_var,
+        "resultValue": round(result_value, 8) if isinstance(result_value, float) else result_value,
+        "resultUnit": cat_entry.unit if cat_entry else "",
+        "inputsUsed": {v: validated[v] for v in formula.input_variables if v in validated},
+    })
 
 
 @router.get("/health", response_model=HealthResponse)

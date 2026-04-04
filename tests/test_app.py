@@ -25,8 +25,115 @@ def test_home():
     # Catalog view: carousels and formula cards, no old modals/forms
     assert "carousel-track" in response.text
     assert "formula-card" in response.text
+    # Navigation links present
+    assert 'nav-btn' in response.text
+    assert 'href="/resolver"' in response.text
     assert 'id="results-content"' not in response.text
     assert 'id="alerts-content"' not in response.text
+
+
+def test_solver_page():
+    """The /resolver page loads with solver cards and carousels."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.get("/resolver"))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    assert "Resolver" in response.text
+    assert "solver-card" in response.text
+    assert "carousel-track" in response.text
+    assert "solver-modal" in response.text
+    assert "solver-data" in response.text
+
+
+def test_solver_page_has_nav():
+    """Solver page has navigation buttons with active state."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.get("/resolver"))
+    asyncio.run(client.aclose())
+
+    assert 'nav-active' in response.text
+    assert 'href="/"' in response.text
+
+
+def test_solve_success():
+    """POST /api/solve/{id} with valid inputs returns success."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/pics_rho",
+        json={"inputs": {"lambda_": 2, "mu": 5}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["resultVariable"] == "rho"
+    assert abs(data["resultValue"] - 0.4) < 1e-6
+
+
+def test_solve_validation_error():
+    """POST /api/solve/{id} rejects invalid inputs (λ ≥ μ for PICS)."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/pics_rho",
+        json={"inputs": {"lambda_": 10, "mu": 5}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 422
+    data = response.json()
+    assert data["status"] == "error"
+    assert "estabilidad" in data["message"].lower()
+
+
+def test_solve_missing_input():
+    """POST /api/solve/{id} rejects missing required inputs."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/pics_rho",
+        json={"inputs": {"lambda_": 2}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 422
+    data = response.json()
+    assert data["status"] == "error"
+    assert "obligatorio" in data["message"].lower()
+
+
+def test_solve_not_found():
+    """POST /api/solve/{id} returns 404 for unknown formula."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/nonexistent",
+        json={"inputs": {}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 404
+
+
+def test_solve_picm():
+    """PICM formula with k servers returns correct result."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/picm_stability",
+        json={"inputs": {"lambda_": 4, "mu": 3, "k": 2}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert abs(data["resultValue"] - 4 / (2 * 3)) < 1e-6
 
 
 def test_detect_candidates():
