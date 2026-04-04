@@ -1,0 +1,228 @@
+import pytest
+
+from domain.entities.definitions import CalculationResult, FormulaDefinition
+from domain.entities.enums import CalculationStatus, FormulaCategory, FormulaType, ValidationResult
+from domain.formulas import get_formula_by_id
+from domain.services.solver import DefaultResultValidator, FormulaSolver
+
+
+class TestDefaultResultValidator:
+    """Test cases for DefaultResultValidator."""
+
+    def test_validate_pass_exact_match(self):
+        validator = DefaultResultValidator()
+        result = validator.validate(5.0, 5.0)
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.validation_result == ValidationResult.PASS
+        assert "Validation passed" in result.messages
+
+    def test_validate_pass_within_tolerance(self):
+        validator = DefaultResultValidator()
+        result = validator.validate(5.0, 5.0000001, tolerance=1e-6)
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.validation_result == ValidationResult.PASS
+
+    def test_validate_fail_outside_tolerance(self):
+        validator = DefaultResultValidator()
+        result = validator.validate(5.0, 5.1, tolerance=1e-6)
+        assert result.status == CalculationStatus.FAILED
+        assert result.validation_result == ValidationResult.FAIL
+        assert "Validation failed" in result.messages
+
+    def test_validate_none_values(self):
+        validator = DefaultResultValidator()
+        result = validator.validate(None, 5.0)
+        assert result.status == CalculationStatus.FAILED
+        assert result.validation_result == ValidationResult.UNKNOWN
+
+    def test_validate_nan_values(self):
+        import math
+        validator = DefaultResultValidator()
+        result = validator.validate(float('nan'), 5.0)
+        assert result.status == CalculationStatus.FAILED
+        assert result.validation_result == ValidationResult.UNKNOWN
+
+    def test_validate_infinite_values(self):
+        import math
+        validator = DefaultResultValidator()
+        result = validator.validate(float('inf'), 5.0)
+        assert result.status == CalculationStatus.FAILED
+        assert result.validation_result == ValidationResult.UNKNOWN
+
+
+class TestFormulaSolver:
+    """Test cases for FormulaSolver."""
+
+    @pytest.fixture
+    def solver(self):
+        return FormulaSolver()
+
+    @pytest.fixture
+    def time_between_arrivals_formula(self):
+        return get_formula_by_id("intro_time_between_arrivals")
+
+    @pytest.fixture
+    def time_between_services_formula(self):
+        return get_formula_by_id("intro_time_between_services")
+
+    @pytest.fixture
+    def system_response_time_formula(self):
+        return get_formula_by_id("intro_system_response_time")
+
+    def test_direct_calculation_success(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_": 2.0}
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.computed_value == 0.5
+        assert result.computed_variable == "lambda_inv"
+        assert result.formula_used == time_between_arrivals_formula
+        assert "Direct calculation completed" in result.messages
+
+    def test_direct_calculation_missing_input(self, solver, time_between_arrivals_formula):
+        inputs = {}  # Missing lambda_
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert "Cannot calculate: missing variables" in result.messages[0]
+
+    def test_despeje_single_missing_variable(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_inv": 0.5}  # Result provided, lambda_ missing
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.computed_value == 2.0
+        assert result.computed_variable == "lambda_"
+        assert "Despeje completed" in result.messages[0]
+
+    def test_despeje_multiple_missing_variables(self, solver, system_response_time_formula):
+        inputs = {"W": 2.0}  # Result provided, but both Wq and mu missing
+        result = solver.resolve(system_response_time_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert "Cannot solve: too many missing variables" in result.messages[0]
+
+    def test_validation_mode_pass(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_": 2.0, "lambda_inv": 0.5}  # All inputs + result
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.validation_result == ValidationResult.PASS
+        assert result.expected_value == 0.5
+        assert result.computed_value == 0.5
+
+    def test_validation_mode_fail(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_": 2.0, "lambda_inv": 1.0}  # All inputs + wrong result
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert result.validation_result == ValidationResult.FAIL
+        assert result.expected_value == 1.0
+        assert result.computed_value == 0.5
+
+    def test_system_response_time_despeje_wq(self, solver, system_response_time_formula):
+        inputs = {"mu": 2.0, "W": 2.0}  # Wq missing
+        result = solver.resolve(system_response_time_formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.computed_value == 1.5  # W - 1/μ = 2.0 - 0.5 = 1.5
+        assert result.computed_variable == "Wq"
+
+    def test_system_response_time_despeje_mu(self, solver, system_response_time_formula):
+        inputs = {"Wq": 1.5, "W": 2.0}  # mu missing
+        result = solver.resolve(system_response_time_formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.computed_value == 2.0  # 1/(W - Wq) = 1/(2.0 - 1.5) = 2.0
+        assert result.computed_variable == "mu"
+
+    def test_calculation_error_division_by_zero(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_": 0.0}  # Division by zero
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert "Calculation error" in result.messages[0]
+
+    def test_despeje_error_invalid_result(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_inv": 0.0}  # Would cause division by zero in despeje
+        result = solver.resolve(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert "Despeje error" in result.messages[0]
+
+    def test_solve_missing_legacy_method(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_inv": 0.25}
+        result = solver.solve_missing(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.computed_value == 4.0
+        assert result.computed_variable == "lambda_"
+
+    def test_solve_missing_no_result(self, solver, time_between_arrivals_formula):
+        inputs = {"lambda_": 2.0}  # No result provided
+        result = solver.solve_missing(time_between_arrivals_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert "No result value provided" in result.messages[0]
+
+    def test_solve_missing_multiple_missing(self, solver, system_response_time_formula):
+        inputs = {"W": 2.0}  # Result provided but multiple missing
+        result = solver.solve_missing(system_response_time_formula, inputs)
+
+        assert result.status == CalculationStatus.FAILED
+        assert "Expected exactly 1 missing variable" in result.messages[0]
+
+
+# Test with a mock formula that uses SymPy
+def create_mock_formula_with_symbolic():
+    """Create a mock formula for testing symbolic solving."""
+    def mock_calculation(inputs):
+        x = inputs.get("x", 0)
+        y = inputs.get("y", 0)
+        return 2 * x + y
+
+    def mock_despeje(inputs, result_value, missing_var):
+        if missing_var == "x":
+            y = inputs.get("y", 0)
+            return (result_value - y) / 2
+        elif missing_var == "y":
+            x = inputs.get("x", 0)
+            return result_value - 2 * x
+        raise ValueError(f"Cannot solve for {missing_var}")
+
+    return FormulaDefinition(
+        id="mock_symbolic",
+        name="Mock Symbolic Formula",
+        category=FormulaCategory.GENERAL,
+        description="Mock formula for testing: z = 2x + y",
+        result_variable="z",
+        input_variables=["x", "y"],
+        formula_type=FormulaType.DIRECT,
+        manual_calculation=mock_calculation,
+        manual_despeje=mock_despeje,
+        symbolic_expression="2*x + y"
+    )
+
+
+class TestSymbolicSolving:
+    """Test symbolic solving capabilities."""
+
+    @pytest.fixture
+    def solver(self):
+        return FormulaSolver()
+
+    def test_symbolic_solve_simple(self, solver):
+        formula = create_mock_formula_with_symbolic()
+        inputs = {"y": 3.0, "z": 7.0}  # Solve for x: 2x + 3 = 7 => x = 2
+        result = solver.resolve(formula, inputs)
+
+        assert result.status == CalculationStatus.SUCCESS
+        assert result.computed_value == 2.0
+        assert result.computed_variable == "x"</content>
+<parameter name="filePath">c:\Users\Hp\Desktop\octavo\octavo\tecnicasp simulacion\formulas programadas\tests\unit\test_solver.py 
+  
+ 
+ECHO está activado.
+ 
+ECHO está activado.
+ 
