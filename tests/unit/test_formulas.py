@@ -77,8 +77,51 @@ def test_registry_contains_intro_and_pics():
     assert "intro_time_between_arrivals" in ids
     assert "pics_rho" in ids
     assert "pics_wq" in ids
+    assert "pics_lq_from_rho" in ids
     assert "pfcs_p0" in ids
     assert "pfcm_p0" in ids
+
+
+def test_pics_lq_from_rho():
+    """Lq = ρ² / (1 − ρ) with ρ = 0.5 → 0.25/0.5 = 0.5"""
+    formula = get_formula_by_id("pics_lq_from_rho")
+    assert formula is not None
+    assert formula.result_variable == "Lq"
+    assert formula.input_variables == ["rho"]
+    result = formula.calculate({"rho": 0.5})
+    assert pytest.approx(result, rel=1e-9) == 0.5
+
+
+def test_pics_lq_from_rho_equivalence():
+    """Lq(ρ) must equal Lq(λ,μ) when ρ = λ/μ."""
+    lq_lambda = get_formula_by_id("pics_lq")
+    lq_rho = get_formula_by_id("pics_lq_from_rho")
+    inputs = {"lambda_": 2.0, "mu": 5.0}
+    rho = 2.0 / 5.0
+    lq_via_lambda = lq_lambda.calculate(inputs)
+    lq_via_rho = lq_rho.calculate({"rho": rho})
+    assert pytest.approx(lq_via_lambda, rel=1e-9) == pytest.approx(lq_via_rho, rel=1e-9)
+
+
+def test_pics_lq_from_rho_invalid_rho_one():
+    """ρ = 1 must raise ValueError (division by zero)."""
+    formula = get_formula_by_id("pics_lq_from_rho")
+    with pytest.raises(ValueError, match=r"0 < ρ < 1"):
+        formula.calculate({"rho": 1.0})
+
+
+def test_pics_lq_from_rho_invalid_rho_zero():
+    """ρ = 0 must raise ValueError."""
+    formula = get_formula_by_id("pics_lq_from_rho")
+    with pytest.raises(ValueError, match=r"0 < ρ < 1"):
+        formula.calculate({"rho": 0.0})
+
+
+def test_pics_lq_from_rho_invalid_negative():
+    """ρ < 0 must raise ValueError."""
+    formula = get_formula_by_id("pics_lq_from_rho")
+    with pytest.raises(ValueError, match=r"0 < ρ < 1"):
+        formula.calculate({"rho": -0.3})
 
 
 def test_pfcs_probabilities_and_waiting():
@@ -193,3 +236,214 @@ def test_picm_invalid_stability_raises():
 
     with pytest.raises(ValueError):
         p0_formula.calculate({"lambda_": 10.0, "mu": 1.0, "k": 2})
+
+
+# =====================================================================
+# A-group: PICS derived (1 formula)
+# =====================================================================
+
+def test_pics_prob_q_ge_2():
+    """A1: P(Q ≥ 2) = ρ³.  ρ=0.5 → 0.125"""
+    formula = get_formula_by_id("pics_prob_q_ge_2")
+    assert formula is not None
+    assert formula.input_variables == ["rho"]
+    result = formula.calculate({"rho": 0.5})
+    assert pytest.approx(result, rel=1e-9) == 0.125
+
+
+def test_pics_prob_q_ge_2_invalid():
+    formula = get_formula_by_id("pics_prob_q_ge_2")
+    with pytest.raises(ValueError):
+        formula.calculate({"rho": 1.0})
+    with pytest.raises(ValueError):
+        formula.calculate({"rho": 0.0})
+
+
+# =====================================================================
+# B-group: PICM derived probabilities (7 formulas)
+# =====================================================================
+
+def test_picm_prob_idle():
+    """B1: 1 − Pk.  Pk=0.35 → 0.65"""
+    formula = get_formula_by_id("picm_prob_idle")
+    assert formula is not None
+    result = formula.calculate({"Pk": 0.35})
+    assert pytest.approx(result, rel=1e-9) == 0.65
+
+
+def test_picm_prob_exactly_c():
+    """B2: Pc = (a^c / c!) P0.  a=1.8, c=3, P0=0.145985"""
+    formula = get_formula_by_id("picm_prob_exactly_c")
+    assert formula is not None
+    from math import factorial
+    a, c, p0 = 1.8, 3, 0.145985
+    expected = (a**c / factorial(c)) * p0
+    result = formula.calculate({"a": a, "k": c, "P0": p0})
+    assert pytest.approx(result, rel=1e-6) == expected
+
+
+def test_picm_prob_c_plus_r():
+    """B3: P_{c+r} = Pc·ρ^r.  Pc=0.141898, ρ=0.6, r=2"""
+    formula = get_formula_by_id("picm_prob_c_plus_r")
+    assert formula is not None
+    result = formula.calculate({"Pc": 0.141898, "rho": 0.6, "r": 2})
+    assert pytest.approx(result, rel=1e-6) == 0.141898 * 0.6**2
+
+
+def test_picm_prob_c_plus_1():
+    """B4: P_{c+1} = Pc·ρ"""
+    formula = get_formula_by_id("picm_prob_c_plus_1")
+    assert formula is not None
+    result = formula.calculate({"Pc": 0.2, "rho": 0.5})
+    assert pytest.approx(result, rel=1e-9) == 0.1
+
+
+def test_picm_prob_c_plus_2():
+    """B5: P_{c+2} = Pc·ρ²"""
+    formula = get_formula_by_id("picm_prob_c_plus_2")
+    assert formula is not None
+    result = formula.calculate({"Pc": 0.2, "rho": 0.5})
+    assert pytest.approx(result, rel=1e-9) == 0.05
+
+
+def test_picm_prob_q_waiting():
+    """B6: P(Q=q) = Pc·ρ^q"""
+    formula = get_formula_by_id("picm_prob_q_waiting")
+    assert formula is not None
+    result = formula.calculate({"Pc": 0.3, "rho": 0.4, "q": 3})
+    assert pytest.approx(result, rel=1e-9) == 0.3 * 0.4**3
+
+
+def test_picm_prob_q1_or_q2():
+    """B7: P(Q=q1 ∪ Q=q2) = Pc·ρ^q1 + Pc·ρ^q2"""
+    formula = get_formula_by_id("picm_prob_q1_or_q2")
+    assert formula is not None
+    result = formula.calculate({"Pc": 0.3, "rho": 0.4, "q1": 1, "q2": 3})
+    expected = 0.3 * 0.4 + 0.3 * 0.4**3
+    assert pytest.approx(result, rel=1e-9) == expected
+
+
+# =====================================================================
+# C-group / D1: PFHET — Pob. Finita Heterogénea (11 formulas)
+# =====================================================================
+
+def test_pfhet_mu_bar():
+    """C1: μ̄ = (μ1+μ2)/2.  μ1=3, μ2=4 → 3.5"""
+    formula = get_formula_by_id("pfhet_mu_bar")
+    assert formula is not None
+    result = formula.calculate({"mu1": 3.0, "mu2": 4.0})
+    assert pytest.approx(result, rel=1e-9) == 3.5
+
+
+def test_pfhet_lambda_n():
+    """C2: λ_n = (M-n)λ.  M=7, n=2, λ=0.2 → 1.0"""
+    formula = get_formula_by_id("pfhet_lambda_n")
+    assert formula is not None
+    result = formula.calculate({"M": 7, "n": 2, "lambda_": 0.2})
+    assert pytest.approx(result, rel=1e-9) == 1.0
+
+
+def test_pfhet_mu_n_cases():
+    """C3: μ_n piecewise: n=0→0, n=1→μ̄, n=2→μ1+μ2"""
+    formula = get_formula_by_id("pfhet_mu_n")
+    assert formula is not None
+    args = {"mu_bar": 3.5, "mu1": 3.0, "mu2": 4.0}
+    assert formula.calculate({"n": 0, **args}) == 0.0
+    assert pytest.approx(formula.calculate({"n": 1, **args}), rel=1e-9) == 3.5
+    assert pytest.approx(formula.calculate({"n": 2, **args}), rel=1e-9) == 7.0
+    assert pytest.approx(formula.calculate({"n": 5, **args}), rel=1e-9) == 7.0
+
+
+def test_pfhet_p0():
+    """C5: P₀ from heterogeneous model — must be between 0 and 1."""
+    formula = get_formula_by_id("pfhet_p0")
+    assert formula is not None
+    result = formula.calculate({"M": 7, "lambda_": 0.2, "mu1": 3.0, "mu2": 4.0})
+    assert 0 < result < 1
+
+
+def test_pfhet_pn_state_0_equals_p0():
+    """C4: P_n with n=0 must equal P₀ from C5."""
+    pn = get_formula_by_id("pfhet_pn")
+    p0 = get_formula_by_id("pfhet_p0")
+    assert pn is not None and p0 is not None
+    args = {"M": 7, "lambda_": 0.2, "mu1": 3.0, "mu2": 4.0}
+    assert pytest.approx(pn.calculate({"n": 0, **args}), rel=1e-9) == p0.calculate(args)
+
+
+def test_pfhet_pn_sum_to_one():
+    """All P_n for n=0..M must sum to 1."""
+    pn = get_formula_by_id("pfhet_pn")
+    M = 7
+    args = {"M": M, "lambda_": 0.2, "mu1": 3.0, "mu2": 4.0}
+    total = sum(pn.calculate({"n": n, **args}) for n in range(M + 1))
+    assert pytest.approx(total, rel=1e-9) == 1.0
+
+
+def test_pfhet_prob_no_wait():
+    """C6: Probability of no waiting — must be between 0 and 1."""
+    formula = get_formula_by_id("pfhet_prob_no_wait")
+    assert formula is not None
+    result = formula.calculate({"M": 7, "k": 2, "lambda_": 0.2, "mu1": 3.0, "mu2": 4.0})
+    assert 0 < result <= 1
+
+
+def test_pfhet_prob_n_ge_2():
+    """C7: P(N≥2) = 1-(P0+P1)."""
+    formula = get_formula_by_id("pfhet_prob_n_ge_2")
+    assert formula is not None
+    result = formula.calculate({"P0": 0.034386, "P1": 0.118211})
+    expected = 1.0 - (0.034386 + 0.118211)
+    assert pytest.approx(result, rel=1e-6) == expected
+
+
+def test_pfhet_prob_available():
+    """C8: P(available) = P0+P1.  P0=0.034386, P1=0.118211 → 0.152597"""
+    formula = get_formula_by_id("pfhet_prob_available")
+    assert formula is not None
+    result = formula.calculate({"P0": 0.034386, "P1": 0.118211})
+    assert pytest.approx(result, rel=1e-6) == 0.152597
+
+
+def test_pfhet_operating_units():
+    """C9: Operating = M-L.  M=7, L=3.308336 → 3.691664"""
+    formula = get_formula_by_id("pfhet_operating_units")
+    assert formula is not None
+    result = formula.calculate({"M": 7, "L": 3.308336})
+    assert pytest.approx(result, rel=1e-6) == 3.691664
+
+
+def test_pfhet_effective_arrival():
+    """C10: λ_ef = λ(M-L).  λ=0.2, M=7, L=3.308336"""
+    formula = get_formula_by_id("pfhet_effective_arrival")
+    assert formula is not None
+    result = formula.calculate({"lambda_": 0.2, "M": 7, "L": 3.308336})
+    expected = 0.2 * (7 - 3.308336)
+    assert pytest.approx(result, rel=1e-6) == expected
+
+
+def test_pfhet_percent_outside():
+    """D1: % = (M-L)/M·100.  M=15, L=0.863956 → ~94.24%"""
+    formula = get_formula_by_id("pfhet_percent_outside")
+    assert formula is not None
+    result = formula.calculate({"M": 15, "L": 0.863956})
+    expected = (15 - 0.863956) / 15 * 100
+    assert pytest.approx(result, rel=1e-4) == expected
+
+
+def test_registry_contains_all_new_formulas():
+    """Verify all 19 new formula IDs are in the registry."""
+    ids = {f.id for f in FORMULAS}
+    new_ids = [
+        "pics_prob_q_ge_2",
+        "picm_prob_idle", "picm_prob_exactly_c", "picm_prob_c_plus_r",
+        "picm_prob_c_plus_1", "picm_prob_c_plus_2",
+        "picm_prob_q_waiting", "picm_prob_q1_or_q2",
+        "pfhet_mu_bar", "pfhet_lambda_n", "pfhet_mu_n",
+        "pfhet_pn", "pfhet_p0", "pfhet_prob_no_wait",
+        "pfhet_prob_n_ge_2", "pfhet_prob_available",
+        "pfhet_operating_units", "pfhet_effective_arrival",
+        "pfhet_percent_outside",
+    ]
+    for fid in new_ids:
+        assert fid in ids, f"Formula {fid} missing from registry"

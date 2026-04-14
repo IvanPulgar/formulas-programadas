@@ -31,6 +31,7 @@ class FormulaCategory(str, Enum):
     PICM = "PICM"
     PFCS = "PFCS"
     PFCM = "PFCM"
+    PFHET = "PFHET"
 
 
 class CalculationStatus(str, Enum):

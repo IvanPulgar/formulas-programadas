@@ -136,6 +136,65 @@ def test_solve_picm():
     assert abs(data["resultValue"] - 4 / (2 * 3)) < 1e-6
 
 
+def test_solve_lq_from_rho_success():
+    """POST /api/solve/pics_lq_from_rho with ρ=0.5 → Lq=0.5."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/pics_lq_from_rho",
+        json={"inputs": {"rho": 0.5}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["formulaId"] == "pics_lq_from_rho"
+    assert data["resultVariable"] == "Lq"
+    assert abs(data["resultValue"] - 0.5) < 1e-6
+
+
+def test_solve_lq_from_rho_rejects_rho_one():
+    """POST /api/solve/pics_lq_from_rho with ρ=1 → 422."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/pics_lq_from_rho",
+        json={"inputs": {"rho": 1}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 422
+    data = response.json()
+    assert data["status"] == "error"
+
+
+def test_solve_lq_from_rho_rejects_rho_zero():
+    """POST /api/solve/pics_lq_from_rho with ρ=0 → 422."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/pics_lq_from_rho",
+        json={"inputs": {"rho": 0}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 422
+    data = response.json()
+    assert data["status"] == "error"
+
+
+def test_solver_page_contains_lq_from_rho():
+    """The /resolver page includes the Lq from rho formula card."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.get("/resolver"))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    assert "pics_lq_from_rho" in response.text
+
+
 def test_detect_candidates():
     transport = ASGITransport(app=app)
     client = httpx.AsyncClient(transport=transport, base_url="http://test")

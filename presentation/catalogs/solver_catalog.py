@@ -31,6 +31,7 @@ _LATEX: Dict[str, str] = {
     "pics_pn":  r"P_n = (1 - \rho)\,\rho^{n}",
     "pics_l":   r"L = \frac{\lambda}{\mu - \lambda}",
     "pics_lq":  r"L_q = \frac{\lambda^{2}}{\mu(\mu - \lambda)}",
+    "pics_lq_from_rho": r"L_q = \frac{\rho^{2}}{1 - \rho}",
     "pics_ln":  r"L_n = \frac{1}{1 - \rho}",
     "pics_w":   r"W = \frac{1}{\mu - \lambda}",
     "pics_wq":  r"W_q = \frac{\lambda}{\mu(\mu - \lambda)}",
@@ -84,6 +85,31 @@ _LATEX: Dict[str, str] = {
     "pfcm_rho": r"\rho = \frac{L - L_q}{k}",
     "pfcm_wq":  r"W_q = \frac{L_q}{\lambda_{ef}}",
     "pfcm_w":   r"W = \frac{L}{\lambda_{ef}}",
+
+    # PICS — derived (A-group)
+    "pics_prob_q_ge_2": r"P(Q \ge 2) = \rho^{3}",
+
+    # PICM — derived probabilities (B-group)
+    "picm_prob_idle":       r"P(\ge 1\;\text{desocupado}) = 1 - P_k",
+    "picm_prob_exactly_c":  r"P_c = \frac{a^c}{c!}\,P_0",
+    "picm_prob_c_plus_r":   r"P_{c+r} = P_c \cdot \rho^{r}",
+    "picm_prob_c_plus_1":   r"P_{c+1} = P_c \cdot \rho",
+    "picm_prob_c_plus_2":   r"P_{c+2} = P_c \cdot \rho^{2}",
+    "picm_prob_q_waiting":  r"P(Q = q) = P_c \cdot \rho^{q}",
+    "picm_prob_q1_or_q2":   r"P(Q=q_1 \cup Q=q_2) = P_c\rho^{q_1} + P_c\rho^{q_2}",
+
+    # PFHET — Pob. Finita Heterogénea (C-group + D1)
+    "pfhet_mu_bar":           r"\bar{\mu} = \frac{\mu_1 + \mu_2}{2}",
+    "pfhet_lambda_n":         r"\lambda_n = (M - n)\,\lambda",
+    "pfhet_mu_n":             r"\mu_n: 0\;(n{=}0),\;\bar{\mu}\;(n{=}1),\;\mu_1{+}\mu_2\;(n{\ge}2)",
+    "pfhet_pn":               r"P_n = P_0 \prod_{i=0}^{n-1}\frac{\lambda_i}{\mu_{i+1}}",
+    "pfhet_p0":               r"P_0 = \left[1 + \sum_{n=1}^{M}\prod_{i=0}^{n-1}\frac{\lambda_i}{\mu_{i+1}}\right]^{-1}",
+    "pfhet_prob_no_wait":     r"P(\text{no espera}) = \frac{\sum_{n=0}^{k-1}(M{-}n)P_n}{\sum_{n=0}^{M-1}(M{-}n)P_n}",
+    "pfhet_prob_n_ge_2":      r"P(N \ge 2) = 1 - (P_0 + P_1)",
+    "pfhet_prob_available":   r"P(\text{disponible}) = P_0 + P_1",
+    "pfhet_operating_units":  r"\text{Operando} = M - L",
+    "pfhet_effective_arrival":r"\lambda_{ef} = \lambda \cdot (M - L)",
+    "pfhet_percent_outside":  r"\%\;\text{fuera} = \frac{M - L}{M} \times 100",
 }
 
 
@@ -97,6 +123,10 @@ _VAR_SYMBOLS: Dict[str, str] = {
     "CT_TE": "CT_TE", "CT_TS": "CT_TS", "CT_TSE": "CT_TSE", "CT_S": "CT_S",
     "CT": "CT", "TT": "TT",
     "lambda_inv": "1/λ", "mu_inv": "1/μ",
+    "a": "a", "Pc": "Pc", "r": "r", "q": "q",
+    "q1": "q₁", "q2": "q₂",
+    "mu1": "μ₁", "mu2": "μ₂", "mu_bar": "μ̄", "P1": "P₁",
+    "lambda_n": "λₙ", "mu_n": "μₙ", "lambda_ef": "λ_ef",
 }
 
 _VAR_NAMES: Dict[str, str] = {
@@ -128,6 +158,19 @@ _VAR_NAMES: Dict[str, str] = {
     "TT": "Tiempo total",
     "lambda_inv": "Tiempo entre llegadas",
     "mu_inv": "Tiempo de servicio",
+    "a": "Intensidad de tráfico",
+    "Pc": "Prob. de c clientes",
+    "r": "Exceso sobre c",
+    "q": "Clientes esperando",
+    "q1": "Primer índice cola",
+    "q2": "Segundo índice cola",
+    "mu1": "Tasa servicio servidor 1",
+    "mu2": "Tasa servicio servidor 2",
+    "mu_bar": "Tasa media de servicio",
+    "P1": "Prob. 1 cliente",
+    "lambda_n": "Tasa de nacimiento",
+    "mu_n": "Tasa de muerte",
+    "lambda_ef": "Tasa efectiva de llegada",
 }
 
 _CATEGORY_LABELS: Dict[str, str] = {
@@ -136,6 +179,7 @@ _CATEGORY_LABELS: Dict[str, str] = {
     "PICM": "PICM",
     "PFCS": "PFCS",
     "PFCM": "PFCM",
+    "PFHET": "Pob. Finita Heterogénea",
 }
 
 # ── Preconditions by category ───────────────────────────────────────
@@ -145,6 +189,7 @@ _PRECONDITIONS: Dict[str, List[str]] = {
     "PICM": ["λ > 0", "μ > 0", "k ≥ 1 entero", "λ < k·μ (estabilidad)"],
     "PFCS": ["λ > 0", "μ > 0", "M ≥ 1 entero"],
     "PFCM": ["λ > 0", "μ > 0", "k ≥ 1 entero", "M ≥ 1 entero"],
+    "PFHET": ["μ₁ > 0", "μ₂ > 0", "M ≥ 1 entero"],
 }
 
 
@@ -237,7 +282,7 @@ def build_solver_groups() -> List[SolverGroup]:
     """Return solver cards grouped by category for carousel display."""
     from collections import OrderedDict
 
-    order = ["generales", "PICS", "PICM", "PFCS", "PFCM"]
+    order = ["generales", "PICS", "PICM", "PFCS", "PFCM", "PFHET"]
     groups: Dict[str, List[SolverCard]] = OrderedDict((k, []) for k in order)
 
     for fdef in FORMULAS:

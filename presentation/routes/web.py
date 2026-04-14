@@ -347,11 +347,37 @@ def get_formula_latex(formula_id: str) -> str:
         "pics_pn": "P_n = (1 - \\rho) \\rho^n",
         "pics_l": "L = \\frac{\\rho}{1 - \\rho}",
         "pics_lq": "L_q = \\frac{\\rho^2}{1 - \\rho}",
+        "pics_lq_from_rho": "L_q = \\frac{\\rho^2}{1 - \\rho}",
         "pics_w": "W = \\frac{1}{\\mu(1 - \\rho)}",
         "pics_wq": "W_q = \\frac{\\rho}{\\mu(1 - \\rho)}",
         "picm_p0": "P_0 = \\left[ \\sum_{k=0}^{c-1} \\frac{(\\lambda/\\mu)^k}{k!} + \\frac{(\\lambda/\\mu)^c}{c!} \\cdot \\frac{c\\mu}{c\\mu - \\lambda} \\right]^{-1}",
         "pfcs_p0": "P_0 = \\frac{1 - \\rho}{1 - \\rho^{K+1}}",
         "pfcm_p0": "P_0 = \\left[ \\sum_{n=0}^{c-1} \\frac{(c\\rho)^n}{n!} + \\frac{(c\\rho)^c}{c!} \\cdot \\frac{1 - \\rho^{K-c+1}}{1 - \\rho} \\right]^{-1}",
+
+        # PICS derived (A-group)
+        "pics_prob_q_ge_2": "P(Q \\ge 2) = \\rho^{3}",
+
+        # PICM derived (B-group)
+        "picm_prob_idle":       "P(\\ge 1\\;\\text{desocupado}) = 1 - P_k",
+        "picm_prob_exactly_c":  "P_c = \\frac{a^c}{c!}\\,P_0",
+        "picm_prob_c_plus_r":   "P_{c+r} = P_c \\cdot \\rho^{r}",
+        "picm_prob_c_plus_1":   "P_{c+1} = P_c \\cdot \\rho",
+        "picm_prob_c_plus_2":   "P_{c+2} = P_c \\cdot \\rho^{2}",
+        "picm_prob_q_waiting":  "P(Q = q) = P_c \\cdot \\rho^{q}",
+        "picm_prob_q1_or_q2":   "P(Q=q_1 \\cup Q=q_2) = P_c\\rho^{q_1} + P_c\\rho^{q_2}",
+
+        # PFHET (C-group + D1)
+        "pfhet_mu_bar":           "\\bar{\\mu} = \\frac{\\mu_1 + \\mu_2}{2}",
+        "pfhet_lambda_n":         "\\lambda_n = (M - n)\\,\\lambda",
+        "pfhet_mu_n":             "\\mu_n: 0\\;(n{=}0),\\;\\bar{\\mu}\\;(n{=}1),\\;\\mu_1{+}\\mu_2\\;(n{\\ge}2)",
+        "pfhet_pn":               "P_n = P_0 \\prod_{i=0}^{n-1}\\frac{\\lambda_i}{\\mu_{i+1}}",
+        "pfhet_p0":               "P_0 = \\left[1 + \\sum_{n=1}^{M}\\prod_{i=0}^{n-1}\\frac{\\lambda_i}{\\mu_{i+1}}\\right]^{-1}",
+        "pfhet_prob_no_wait":     "P(\\text{no espera}) = \\frac{\\sum_{n=0}^{k-1}(M{-}n)P_n}{\\sum_{n=0}^{M-1}(M{-}n)P_n}",
+        "pfhet_prob_n_ge_2":      "P(N \\ge 2) = 1 - (P_0 + P_1)",
+        "pfhet_prob_available":   "P(\\text{disponible}) = P_0 + P_1",
+        "pfhet_operating_units":  "\\text{Operando} = M - L",
+        "pfhet_effective_arrival":"\\lambda_{ef} = \\lambda \\cdot (M - L)",
+        "pfhet_percent_outside":  "\\%\\;\\text{fuera} = \\frac{M - L}{M} \\times 100",
     }
     return formulas.get(formula_id, f"Fórmula: {formula_id}")
 

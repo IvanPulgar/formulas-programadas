@@ -7,8 +7,9 @@ from .pics_formulas import PICS_FORMULAS
 from .picm_formulas import PICM_FORMULAS
 from .pfcs_formulas import PFCS_FORMULAS
 from .pfcm_formulas import PFCM_FORMULAS
+from .pfhet_formulas import PFHET_FORMULAS
 
-FORMULAS = [*INTRO_FORMULAS, *PICS_FORMULAS, *PICM_FORMULAS, *PFCS_FORMULAS, *PFCM_FORMULAS]
+FORMULAS = [*INTRO_FORMULAS, *PICS_FORMULAS, *PICM_FORMULAS, *PFCS_FORMULAS, *PFCM_FORMULAS, *PFHET_FORMULAS]
 
 
 def get_formula_by_id(formula_id: str) -> Optional[FormulaDefinition]:

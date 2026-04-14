@@ -54,6 +54,26 @@ def lq_formula(inputs: dict[str, Any]) -> float:
     return lambda_ ** 2 / (mu * (mu - lambda_))
 
 
+def lq_from_rho_formula(inputs: dict[str, Any]) -> float:
+    rho_val = inputs.get("rho")
+    if rho_val is None:
+        raise ValueError("ρ es obligatorio.")
+    rho_val = float(rho_val)
+    if rho_val <= 0 or rho_val >= 1:
+        raise ValueError("ρ debe estar estrictamente entre 0 y 1 (0 < ρ < 1).")
+    return rho_val ** 2 / (1 - rho_val)
+
+
+def prob_q_ge_2_from_rho_formula(inputs: dict[str, Any]) -> float:
+    rho_val = inputs.get("rho")
+    if rho_val is None:
+        raise ValueError("ρ es obligatorio.")
+    rho_val = float(rho_val)
+    if rho_val <= 0 or rho_val >= 1:
+        raise ValueError("ρ debe estar estrictamente entre 0 y 1 (0 < ρ < 1).")
+    return rho_val ** 3
+
+
 def ln_formula(inputs: dict[str, Any]) -> float:
     rho = rho_formula(inputs)
     lq = lq_formula(inputs)
@@ -196,6 +216,34 @@ PICS_FORMULAS: list[FormulaDefinition] = [
         manual_calculation=lq_formula,
         symbolic_expression="λ^2 / (μ(μ - λ))",
         constraints={"lambda_positive": True, "mu_positive": True},
+    ),
+    FormulaDefinition(
+        id="pics_lq_from_rho",
+        name="Número esperado de clientes en cola (desde ρ)",
+        category=FormulaCategory.PICS,
+        description="Longitud media de la cola usando directamente el factor de ocupación ρ. Equivalente a λ²/[μ(μ−λ)] cuando ρ = λ/μ.",
+        result_variable="Lq",
+        input_variables=["rho"],
+        formula_type=FormulaType.DIRECT,
+        priority=18,
+        premium_mode=False,
+        manual_calculation=lq_from_rho_formula,
+        symbolic_expression="ρ² / (1 − ρ)",
+        constraints={"rho_strict_0_1": True},
+    ),
+    FormulaDefinition(
+        id="pics_prob_q_ge_2",
+        name="Probabilidad de al menos 2 clientes esperando (desde ρ)",
+        category=FormulaCategory.PICS,
+        description="Probabilidad de que haya al menos dos clientes esperando en un M/M/1. P(Q ≥ 2) = ρ³.",
+        result_variable="Pn",
+        input_variables=["rho"],
+        formula_type=FormulaType.DIRECT,
+        priority=15,
+        premium_mode=False,
+        manual_calculation=prob_q_ge_2_from_rho_formula,
+        symbolic_expression="ρ³",
+        constraints={"rho_strict_0_1": True},
     ),
     FormulaDefinition(
         id="pics_ln",

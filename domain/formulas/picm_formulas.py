@@ -185,6 +185,77 @@ def qualifies_for_service_time(inputs: dict[str, Any], threshold: float = 0.20) 
     return w_formula(inputs) <= threshold
 
 
+# ── B-group: flexible derived probabilities ─────────────────────────
+
+def _validate_probability(name: str, value: Any) -> float:
+    if value is None:
+        raise ValueError(f"{name} es obligatorio.")
+    v = float(value)
+    if v < 0 or v > 1:
+        raise ValueError(f"{name} debe estar entre 0 y 1.")
+    return v
+
+
+def _validate_rho_strict(value: Any) -> float:
+    if value is None:
+        raise ValueError("ρ es obligatorio.")
+    v = float(value)
+    if v <= 0 or v >= 1:
+        raise ValueError("ρ debe estar estrictamente entre 0 y 1.")
+    return v
+
+
+def prob_idle_formula(inputs: dict[str, Any]) -> float:
+    pk = _validate_probability("P(esperar)", inputs.get("Pk"))
+    return 1.0 - pk
+
+
+def prob_exactly_c_formula(inputs: dict[str, Any]) -> float:
+    a = inputs.get("a")
+    if a is None:
+        raise ValueError("a (intensidad) es obligatorio.")
+    a = float(a)
+    if a < 0:
+        raise ValueError("a debe ser ≥ 0.")
+    c = validate_positive_integer("c", inputs.get("k"))
+    p0 = _validate_probability("P0", inputs.get("P0"))
+    return (a ** c / factorial(c)) * p0
+
+
+def prob_c_plus_r_formula(inputs: dict[str, Any]) -> float:
+    pc = _validate_probability("Pc", inputs.get("Pc"))
+    rho = _validate_rho_strict(inputs.get("rho"))
+    r = validate_non_negative_integer("r", inputs.get("r"))
+    return pc * rho ** r
+
+
+def prob_c_plus_1_formula(inputs: dict[str, Any]) -> float:
+    pc = _validate_probability("Pc", inputs.get("Pc"))
+    rho = _validate_rho_strict(inputs.get("rho"))
+    return pc * rho
+
+
+def prob_c_plus_2_formula(inputs: dict[str, Any]) -> float:
+    pc = _validate_probability("Pc", inputs.get("Pc"))
+    rho = _validate_rho_strict(inputs.get("rho"))
+    return pc * rho ** 2
+
+
+def prob_q_waiting_formula(inputs: dict[str, Any]) -> float:
+    pc = _validate_probability("Pc", inputs.get("Pc"))
+    rho = _validate_rho_strict(inputs.get("rho"))
+    q = validate_non_negative_integer("q", inputs.get("q"))
+    return pc * rho ** q
+
+
+def prob_q1_or_q2_waiting_formula(inputs: dict[str, Any]) -> float:
+    pc = _validate_probability("Pc", inputs.get("Pc"))
+    rho = _validate_rho_strict(inputs.get("rho"))
+    q1 = validate_non_negative_integer("q1", inputs.get("q1"))
+    q2 = validate_non_negative_integer("q2", inputs.get("q2"))
+    return pc * rho ** q1 + pc * rho ** q2
+
+
 PICM_FORMULAS: list[FormulaDefinition] = [
     FormulaDefinition(
         id="picm_stability",
@@ -452,5 +523,104 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         manual_calculation=tt_formula,
         symbolic_expression="λ · 8 · 0.30 · Wq",
         constraints={"lambda_positive": True, "Wq_non_negative": True},
+    ),
+    # ── B-group: flexible derived probabilities ─────────────────
+    FormulaDefinition(
+        id="picm_prob_idle",
+        name="Probabilidad de al menos un servidor desocupado",
+        category=FormulaCategory.PICM,
+        description="Complemento de P(esperar). P(≥1 desocupado) = 1 − Pk.",
+        result_variable="PNE",
+        input_variables=["Pk"],
+        formula_type=FormulaType.DIRECT,
+        priority=15,
+        premium_mode=False,
+        manual_calculation=prob_idle_formula,
+        symbolic_expression="1 − Pk",
+        constraints={"Pk_probability": True},
+    ),
+    FormulaDefinition(
+        id="picm_prob_exactly_c",
+        name="Probabilidad de exactamente c clientes",
+        category=FormulaCategory.PICM,
+        description="Probabilidad de que haya exactamente c clientes en el sistema. Pc = (a^c / c!) P0.",
+        result_variable="Pc",
+        input_variables=["a", "k", "P0"],
+        formula_type=FormulaType.DIRECT,
+        priority=15,
+        premium_mode=False,
+        manual_calculation=prob_exactly_c_formula,
+        symbolic_expression="(a^c / c!) P0",
+        constraints={"a_non_negative": True, "k_positive_integer": True, "P0_probability": True},
+    ),
+    FormulaDefinition(
+        id="picm_prob_c_plus_r",
+        name="Probabilidad de exactamente c+r clientes",
+        category=FormulaCategory.PICM,
+        description="Probabilidad flexible: P_{c+r} = Pc · ρ^r. Generaliza todos los casos P_{c+1}, P_{c+2}, etc.",
+        result_variable="Pn",
+        input_variables=["Pc", "rho", "r"],
+        formula_type=FormulaType.DIRECT,
+        priority=15,
+        premium_mode=False,
+        manual_calculation=prob_c_plus_r_formula,
+        symbolic_expression="Pc · ρ^r",
+        constraints={"Pc_probability": True, "rho_strict_0_1": True, "r_non_negative": True},
+    ),
+    FormulaDefinition(
+        id="picm_prob_c_plus_1",
+        name="Probabilidad de exactamente c+1 clientes",
+        category=FormulaCategory.PICM,
+        description="Caso particular: P_{c+1} = Pc · ρ.",
+        result_variable="Pn",
+        input_variables=["Pc", "rho"],
+        formula_type=FormulaType.DIRECT,
+        priority=12,
+        premium_mode=False,
+        manual_calculation=prob_c_plus_1_formula,
+        symbolic_expression="Pc · ρ",
+        constraints={"Pc_probability": True, "rho_strict_0_1": True},
+    ),
+    FormulaDefinition(
+        id="picm_prob_c_plus_2",
+        name="Probabilidad de exactamente c+2 clientes",
+        category=FormulaCategory.PICM,
+        description="Caso particular: P_{c+2} = Pc · ρ².",
+        result_variable="Pn",
+        input_variables=["Pc", "rho"],
+        formula_type=FormulaType.DIRECT,
+        priority=12,
+        premium_mode=False,
+        manual_calculation=prob_c_plus_2_formula,
+        symbolic_expression="Pc · ρ²",
+        constraints={"Pc_probability": True, "rho_strict_0_1": True},
+    ),
+    FormulaDefinition(
+        id="picm_prob_q_waiting",
+        name="Probabilidad de exactamente q clientes esperando",
+        category=FormulaCategory.PICM,
+        description="P(Q = q) = Pc · ρ^q. Número exacto de clientes en cola.",
+        result_variable="Pn",
+        input_variables=["Pc", "rho", "q"],
+        formula_type=FormulaType.DIRECT,
+        priority=15,
+        premium_mode=False,
+        manual_calculation=prob_q_waiting_formula,
+        symbolic_expression="Pc · ρ^q",
+        constraints={"Pc_probability": True, "rho_strict_0_1": True, "q_non_negative": True},
+    ),
+    FormulaDefinition(
+        id="picm_prob_q1_or_q2",
+        name="Probabilidad de q₁ o q₂ clientes esperando",
+        category=FormulaCategory.PICM,
+        description="P(Q = q₁ o q₂) = Pc·ρ^q₁ + Pc·ρ^q₂. Suma de dos probabilidades de cola.",
+        result_variable="Pn",
+        input_variables=["Pc", "rho", "q1", "q2"],
+        formula_type=FormulaType.DIRECT,
+        priority=15,
+        premium_mode=False,
+        manual_calculation=prob_q1_or_q2_waiting_formula,
+        symbolic_expression="Pc·ρ^{q₁} + Pc·ρ^{q₂}",
+        constraints={"Pc_probability": True, "rho_strict_0_1": True, "q1_non_negative": True, "q2_non_negative": True},
     ),
 ]
