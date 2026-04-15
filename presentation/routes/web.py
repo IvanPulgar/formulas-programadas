@@ -351,6 +351,7 @@ def get_formula_latex(formula_id: str) -> str:
         "pics_w": "W = \\frac{1}{\\mu(1 - \\rho)}",
         "pics_wq": "W_q = \\frac{\\rho}{\\mu(1 - \\rho)}",
         "picm_p0": "P_0 = \\left[ \\sum_{k=0}^{c-1} \\frac{(\\lambda/\\mu)^k}{k!} + \\frac{(\\lambda/\\mu)^c}{c!} \\cdot \\frac{c\\mu}{c\\mu - \\lambda} \\right]^{-1}",
+        "picm_pk": "P(\\text{esperar}) = P_k = \\frac{(\\lambda/\\mu)^c}{c!} \\cdot \\frac{1}{1-\\rho} \\cdot P_0",
         "pfcs_p0": "P_0 = \\frac{1 - \\rho}{1 - \\rho^{K+1}}",
         "pfcm_p0": "P_0 = \\left[ \\sum_{n=0}^{c-1} \\frac{(c\\rho)^n}{n!} + \\frac{(c\\rho)^c}{c!} \\cdot \\frac{1 - \\rho^{K-c+1}}{1 - \\rho} \\right]^{-1}",
 
@@ -365,6 +366,17 @@ def get_formula_latex(formula_id: str) -> str:
         "picm_prob_c_plus_2":   "P_{c+2} = P_c \\cdot \\rho^{2}",
         "picm_prob_q_waiting":  "P(Q = q) = P_c \\cdot \\rho^{q}",
         "picm_prob_q1_or_q2":   "P(Q=q_1 \\cup Q=q_2) = P_c\\rho^{q_1} + P_c\\rho^{q_2}",
+
+        # Intro — Ley de Little
+        "intro_little_system":  "L = \\lambda \\cdot W",
+        "intro_little_queue":   "L_q = \\lambda \\cdot W_q",
+
+        # PICS — alternative TT
+        "pics_tt_alt": "TT = \\lambda \\cdot 8 \\cdot 0.30 \\cdot \\rho \\cdot W_n",
+
+        # PICM — simplified CT and alternative TT
+        "picm_ct_simplified": "CT = \\lambda \\cdot 8 \\cdot W \\cdot C_{TS} + k \\cdot C_S",
+        "picm_tt_alt": "TT = \\lambda \\cdot 8 \\cdot 0.30 \\cdot P_k \\cdot W_n",
 
         # PFHET (C-group + D1)
         "pfhet_mu_bar":           "\\bar{\\mu} = \\frac{\\mu_1 + \\mu_2}{2}",
@@ -527,7 +539,7 @@ async def solve_formula(formula_id: str, request: Request):
         "category": formula.category.value,
         "resultVariable": result_var,
         "resultSymbol": cat_entry.symbol if cat_entry else result_var,
-        "resultName": cat_entry.display_name if cat_entry else result_var,
+        "resultName": "Probabilidad de esperar (Erlang C)" if formula.id == "picm_pk" else (cat_entry.display_name if cat_entry else result_var),
         "resultValue": round(result_value, 8) if isinstance(result_value, float) else result_value,
         "resultUnit": cat_entry.unit if cat_entry else "",
         "inputsUsed": {v: validated[v] for v in formula.input_variables if v in validated},

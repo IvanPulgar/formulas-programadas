@@ -789,6 +789,14 @@ header p {
   transform: translateY(-3px);
 }
 
+.solver-card-description {
+  font-size: 0.78em;
+  color: #495057;
+  margin: 4px 0 6px;
+  line-height: 1.35;
+  font-style: italic;
+}
+
 .solver-result-hint {
   font-size: 0.82em;
   color: #6c757d;

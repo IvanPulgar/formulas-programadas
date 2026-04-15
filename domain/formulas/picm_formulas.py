@@ -59,7 +59,10 @@ def pk_formula(inputs: dict[str, Any]) -> float:
     p0 = p0_formula(inputs)
     a = arrival_service_ratio(inputs)
     k = validate_positive_integer("k", inputs.get("k"))
-    return p0 * a**k / factorial(k)
+    rho = stability_ratio(inputs)
+    if rho >= 1.0:
+        raise ValueError("El sistema no es estable: λ/(k·μ) debe ser menor que 1 para P(esperar).")
+    return p0 * a**k / factorial(k) * (1.0 / (1.0 - rho))
 
 
 def pne_formula(inputs: dict[str, Any]) -> float:
@@ -176,6 +179,22 @@ def tt_formula(inputs: dict[str, Any]) -> float:
     return lambda_ * 8.0 * 0.30 * wq
 
 
+def ct_simplified_formula(inputs: dict[str, Any]) -> float:
+    lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
+    w = validate_positive_number("W", inputs.get("W"))
+    cts = validate_positive_number("CTS", inputs.get("CTS"))
+    k = validate_positive_integer("k", inputs.get("k"))
+    cs = validate_positive_number("CS", inputs.get("CS"))
+    return lambda_ * 8.0 * w * cts + k * cs
+
+
+def tt_alt_formula(inputs: dict[str, Any]) -> float:
+    lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
+    pk = validate_positive_number("Pk", inputs.get("Pk"))
+    wn = validate_positive_number("Wn", inputs.get("Wn"))
+    return lambda_ * 8.0 * 0.30 * pk * wn
+
+
 def qualifies_for_pne(inputs: dict[str, Any], threshold: float = 0.85) -> bool:
     return pne_formula(inputs) >= threshold
 
@@ -287,16 +306,16 @@ PICM_FORMULAS: list[FormulaDefinition] = [
     ),
     FormulaDefinition(
         id="picm_pk",
-        name="Probabilidad de k servidores ocupados",
+        name="Probabilidad de esperar (Erlang C)",
         category=FormulaCategory.PICM,
-        description="Probabilidad de que todos los servidores estén ocupados en el modelo PICM.",
+        description="Probabilidad de que una llegada deba esperar en el modelo M/M/c (Erlang C).",
         result_variable="Pk",
         input_variables=["lambda_", "mu", "k"],
         formula_type=FormulaType.DIRECT,
         priority=20,
         premium_mode=False,
         manual_calculation=pk_formula,
-        symbolic_expression="P0 · a^k / k!",
+        symbolic_expression="P(esperar) = P0 · a^k/k! · 1/(1-ρ)",
         constraints={"lambda_positive": True, "mu_positive": True, "k_positive_integer": True},
     ),
     FormulaDefinition(
@@ -622,5 +641,33 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         manual_calculation=prob_q1_or_q2_waiting_formula,
         symbolic_expression="Pc·ρ^{q₁} + Pc·ρ^{q₂}",
         constraints={"Pc_probability": True, "rho_strict_0_1": True, "q1_non_negative": True, "q2_non_negative": True},
+    ),
+    FormulaDefinition(
+        id="picm_ct_simplified",
+        name="Costo total simplificado",
+        category=FormulaCategory.PICM,
+        description="Versión reducida del costo total para comparar alternativas de servidores.",
+        result_variable="CT",
+        input_variables=["lambda_", "W", "CTS", "k", "CS"],
+        formula_type=FormulaType.DIRECT,
+        priority=6,
+        premium_mode=False,
+        manual_calculation=ct_simplified_formula,
+        symbolic_expression="λ · 8 · W · CTS + k · CS",
+        constraints={"lambda_positive": True, "W_non_negative": True, "CTS_non_negative": True, "k_positive_integer": True, "CS_non_negative": True},
+    ),
+    FormulaDefinition(
+        id="picm_tt_alt",
+        name="Tiempo total diario (usando Pk y Wn)",
+        category=FormulaCategory.PICM,
+        description="Expresión alternativa del tiempo total diario usando probabilidad de esperar y espera condicionada.",
+        result_variable="TT",
+        input_variables=["lambda_", "Pk", "Wn"],
+        formula_type=FormulaType.DIRECT,
+        priority=5,
+        premium_mode=False,
+        manual_calculation=tt_alt_formula,
+        symbolic_expression="λ · 8 · 0.30 · Pk · Wn",
+        constraints={"lambda_positive": True, "Pk_probability": True, "Wn_non_negative": True},
     ),
 ]

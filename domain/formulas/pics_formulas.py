@@ -146,6 +146,13 @@ def tt_formula(inputs: dict[str, Any]) -> float:
     return lambda_ * 8.0 * 0.30 * wq
 
 
+def tt_alt_formula(inputs: dict[str, Any]) -> float:
+    lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
+    rho = validate_positive_number("ρ", inputs.get("rho"))
+    wn = validate_positive_number("Wn", inputs.get("Wn"))
+    return lambda_ * 8.0 * 0.30 * rho * wn
+
+
 PICS_FORMULAS: list[FormulaDefinition] = [
     FormulaDefinition(
         id="pics_rho",
@@ -389,5 +396,19 @@ PICS_FORMULAS: list[FormulaDefinition] = [
         manual_calculation=tt_formula,
         symbolic_expression="λ · 8 · 0.30 · Wq",
         constraints={"lambda_positive": True, "Wq_non_negative": True},
+    ),
+    FormulaDefinition(
+        id="pics_tt_alt",
+        name="Tiempo total diario (usando ρ y Wn)",
+        category=FormulaCategory.PICS,
+        description="Expresión alternativa del tiempo total diario usando ocupación y espera condicionada.",
+        result_variable="TT",
+        input_variables=["lambda_", "rho", "Wn"],
+        formula_type=FormulaType.DIRECT,
+        priority=5,
+        premium_mode=False,
+        manual_calculation=tt_alt_formula,
+        symbolic_expression="λ · 8 · 0.30 · ρ · Wn",
+        constraints={"lambda_positive": True, "rho_positive": True, "Wn_non_negative": True},
     ),
 ]

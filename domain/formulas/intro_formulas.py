@@ -56,6 +56,18 @@ def system_response_time_despeje(inputs: dict[str, Any], result_value: Any, miss
     raise ValueError(f"Cannot solve for variable {missing_var}")
 
 
+def little_law_system(inputs: dict[str, Any]) -> float:
+    lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
+    w = validate_positive_number("W", inputs.get("W"))
+    return lambda_ * w
+
+
+def little_law_queue(inputs: dict[str, Any]) -> float:
+    lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
+    wq = validate_positive_number("Wq", inputs.get("Wq"))
+    return lambda_ * wq
+
+
 INTRO_FORMULAS: list[FormulaDefinition] = [
     FormulaDefinition(
         id="intro_time_between_arrivals",
@@ -101,5 +113,33 @@ INTRO_FORMULAS: list[FormulaDefinition] = [
         manual_despeje=system_response_time_despeje,
         symbolic_expression="Wq + 1/μ",
         constraints={"Wq_non_negative": True, "mu_positive": True},
+    ),
+    FormulaDefinition(
+        id="intro_little_system",
+        name="Ley de Little (sistema)",
+        category=FormulaCategory.GENERAL,
+        description="Relaciona la cantidad promedio de clientes en el sistema con la tasa de llegada y el tiempo promedio en el sistema.",
+        result_variable="L",
+        input_variables=["lambda_", "W"],
+        formula_type=FormulaType.DIRECT,
+        priority=5,
+        premium_mode=False,
+        manual_calculation=little_law_system,
+        symbolic_expression="λ · W",
+        constraints={"lambda_positive": True, "W_non_negative": True},
+    ),
+    FormulaDefinition(
+        id="intro_little_queue",
+        name="Ley de Little (cola)",
+        category=FormulaCategory.GENERAL,
+        description="Relaciona la cantidad promedio de clientes en cola con la tasa de llegada y el tiempo promedio de espera.",
+        result_variable="Lq",
+        input_variables=["lambda_", "Wq"],
+        formula_type=FormulaType.DIRECT,
+        priority=5,
+        premium_mode=False,
+        manual_calculation=little_law_queue,
+        symbolic_expression="λ · Wq",
+        constraints={"lambda_positive": True, "Wq_non_negative": True},
     ),
 ]

@@ -136,6 +136,25 @@ def test_solve_picm():
     assert abs(data["resultValue"] - 4 / (2 * 3)) < 1e-6
 
 
+def test_solve_picm_p_wait_erlang_c():
+    """PICM waiting probability (Erlang C) must include the 1/(1-rho) factor."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/picm_pk",
+        json={"inputs": {"lambda_": 18, "mu": 10, "k": 3}},
+    ))
+    asyncio.run(client.aclose())
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["formulaId"] == "picm_pk"
+    assert "Erlang C" in data["formulaName"]
+    assert "Erlang C" in data["resultName"]
+    assert abs(data["resultValue"] - 0.35474453) < 1e-6
+
+
 def test_solve_lq_from_rho_success():
     """POST /api/solve/pics_lq_from_rho with ρ=0.5 → Lq=0.5."""
     transport = ASGITransport(app=app)
@@ -193,6 +212,46 @@ def test_solver_page_contains_lq_from_rho():
 
     assert response.status_code == 200
     assert "pics_lq_from_rho" in response.text
+
+
+def test_solve_intro_little_system():
+    """POST /api/solve/intro_little_system computes L = λ·W."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/intro_little_system",
+        json={"inputs": {"lambda_": 5.0, "W": 2.0}},
+    ))
+    asyncio.run(client.aclose())
+    assert response.status_code == 200
+    data = response.json()
+    assert abs(data["resultValue"] - 10.0) < 1e-6
+
+
+def test_solve_picm_ct_simplified():
+    """POST /api/solve/picm_ct_simplified computes CT = λ·8·W·CTS + k·CS."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.post(
+        "/api/solve/picm_ct_simplified",
+        json={"inputs": {"lambda_": 10.0, "W": 0.5, "CTS": 2.0, "k": 3, "CS": 50.0}},
+    ))
+    asyncio.run(client.aclose())
+    assert response.status_code == 200
+    data = response.json()
+    expected = 10.0 * 8.0 * 0.5 * 2.0 + 3 * 50.0
+    assert abs(data["resultValue"] - expected) < 1e-6
+
+
+def test_solver_page_contains_new_formulas():
+    """The /resolver page includes the new formula cards."""
+    transport = ASGITransport(app=app)
+    client = httpx.AsyncClient(transport=transport, base_url="http://test")
+    response = asyncio.run(client.get("/resolver"))
+    asyncio.run(client.aclose())
+    assert response.status_code == 200
+    for fid in ["intro_little_system", "intro_little_queue", "pics_tt_alt", "picm_ct_simplified", "picm_tt_alt"]:
+        assert fid in response.text, f"Formula {fid} missing from solver page"
 
 
 def test_detect_candidates():

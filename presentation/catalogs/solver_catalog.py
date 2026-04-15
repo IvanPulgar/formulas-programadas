@@ -25,6 +25,10 @@ _LATEX: Dict[str, str] = {
     "intro_time_between_services": r"T_{servicio} = \frac{1}{\mu}",
     "intro_system_response_time":  r"W = W_q + \frac{1}{\mu}",
 
+    # Intro — Ley de Little
+    "intro_little_system":  r"L = \lambda \cdot W",
+    "intro_little_queue":   r"L_q = \lambda \cdot W_q",
+
     # PICS — stability / probability
     "pics_rho": r"\rho = \frac{\lambda}{\mu}",
     "pics_p0":  r"P_0 = 1 - \rho",
@@ -32,7 +36,7 @@ _LATEX: Dict[str, str] = {
     "pics_l":   r"L = \frac{\lambda}{\mu - \lambda}",
     "pics_lq":  r"L_q = \frac{\lambda^{2}}{\mu(\mu - \lambda)}",
     "pics_lq_from_rho": r"L_q = \frac{\rho^{2}}{1 - \rho}",
-    "pics_ln":  r"L_n = \frac{1}{1 - \rho}",
+    "pics_ln":  r"L_n = \frac{L_q}{\rho}",
     "pics_w":   r"W = \frac{1}{\mu - \lambda}",
     "pics_wq":  r"W_q = \frac{\lambda}{\mu(\mu - \lambda)}",
     "pics_wn":  r"W_n = \frac{W_q}{\rho}",
@@ -43,12 +47,13 @@ _LATEX: Dict[str, str] = {
     "pics_ct_tse": r"CT_{TSE} = \lambda \cdot 8 \cdot \frac{1}{\mu} \cdot C_{TSE}",
     "pics_ct_s":   r"CT_S = C_S",
     "pics_ct":     r"CT = CT_{TE} + CT_{TS} + CT_{TSE} + CT_S",
-    "pics_tt":     r"TT = \lambda \cdot W_q",
+    "pics_tt":     r"TT = \lambda \cdot 8 \cdot 0.30 \cdot W_q",
+    "pics_tt_alt": r"TT = \lambda \cdot 8 \cdot 0.30 \cdot \rho \cdot W_n",
 
     # PICM — stability / probability
     "picm_stability": r"\rho = \frac{\lambda}{k\,\mu}",
     "picm_p0":  r"P_0 = \left[\sum_{n=0}^{k-1}\frac{a^n}{n!} + \frac{a^k}{k!}\cdot\frac{1}{1-\rho}\right]^{-1}",
-    "picm_pk":  r"P_k = \frac{a^k}{k!}\,P_0",
+    "picm_pk":  r"P(\text{esperar}) = P_k = \frac{a^k}{k!}\cdot\frac{1}{1-\rho}\,P_0",
     "picm_pne": r"P_{NE} = 1 - P_k",
     "picm_pn_without_queue": r"P_n = \frac{a^n}{n!}\,P_0 \quad (n < k)",
     "picm_pn_with_queue":   r"P_n = \frac{a^n}{k!\,k^{n-k}}\,P_0 \quad (n \ge k)",
@@ -56,8 +61,8 @@ _LATEX: Dict[str, str] = {
     "picm_l":   r"L = a + L_q",
     "picm_wq":  r"W_q = \frac{L_q}{\lambda}",
     "picm_w":   r"W = W_q + \frac{1}{\mu}",
-    "picm_ln":  r"L_n = L_q + \frac{\lambda}{\mu}",
-    "picm_wn":  r"W_n = W_q + \frac{1}{\mu}",
+    "picm_ln":  r"L_n = \frac{L_q}{P_k}",
+    "picm_wn":  r"W_n = \frac{W_q}{P_k}",
 
     # PICM — costs
     "picm_ct_te":  r"CT_{TE} = \lambda \cdot 8 \cdot W_q \cdot C_{TE}",
@@ -65,7 +70,9 @@ _LATEX: Dict[str, str] = {
     "picm_ct_tse": r"CT_{TSE} = \lambda \cdot 8 \cdot \frac{1}{\mu} \cdot C_{TSE}",
     "picm_ct_s":   r"CT_S = k \cdot C_S",
     "picm_ct":     r"CT = CT_{TE} + CT_{TS} + CT_{TSE} + CT_S",
-    "picm_tt":     r"TT = \lambda \cdot W_q",
+    "picm_tt":     r"TT = \lambda \cdot 8 \cdot 0.30 \cdot W_q",
+    "picm_ct_simplified": r"CT = \lambda \cdot 8 \cdot W \cdot C_{TS} + k \cdot C_S",
+    "picm_tt_alt": r"TT = \lambda \cdot 8 \cdot 0.30 \cdot P_k \cdot W_n",
 
     # PFCS
     "pfcs_p0":  r"P_0 = \left[\sum_{n=0}^{M}\binom{M}{n}\,a^n\right]^{-1}",
@@ -192,6 +199,10 @@ _PRECONDITIONS: Dict[str, List[str]] = {
     "PFHET": ["μ₁ > 0", "μ₂ > 0", "M ≥ 1 entero"],
 }
 
+_RESULT_NAME_OVERRIDES: Dict[str, str] = {
+    "picm_pk": "Prob. de esperar (Erlang C)",
+}
+
 
 # ── Dataclasses ──────────────────────────────────────────────────────
 
@@ -221,6 +232,7 @@ class SolverCard:
     result_name: str
     input_fields: List[InputField]
     preconditions: List[str]
+    description: str = ""
 
 
 @dataclass(frozen=True)
@@ -270,9 +282,13 @@ def _build_solver_card(fdef) -> SolverCard:
         latex=_LATEX.get(fdef.id, fdef.symbolic_expression or fdef.id),
         result_var_id=fdef.result_variable,
         result_symbol=_VAR_SYMBOLS.get(fdef.result_variable, fdef.result_variable),
-        result_name=_VAR_NAMES.get(fdef.result_variable, fdef.result_variable),
+        result_name=_RESULT_NAME_OVERRIDES.get(
+            fdef.id,
+            _VAR_NAMES.get(fdef.result_variable, fdef.result_variable),
+        ),
         input_fields=[_build_input_field(v) for v in fdef.input_variables],
         preconditions=_PRECONDITIONS.get(cat_value, []),
+        description=fdef.description or "",
     )
 
 
@@ -320,6 +336,7 @@ def solver_json_data() -> str:
                 "resultSymbol": card.result_symbol,
                 "resultName": card.result_name,
                 "preconditions": card.preconditions,
+                "description": card.description,
                 "inputs": [
                     {
                         "varId": f.var_id,

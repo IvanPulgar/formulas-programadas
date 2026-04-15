@@ -238,6 +238,66 @@ def test_picm_invalid_stability_raises():
         p0_formula.calculate({"lambda_": 10.0, "mu": 1.0, "k": 2})
 
 
+def test_picm_p_wait_erlang_c_known_case():
+    """Erlang C known case: λ=18, μ=10, c=3 => P0≈0.145985 and P(wait)≈0.354745."""
+    p0_formula = get_formula_by_id("picm_p0")
+    p_wait_formula = get_formula_by_id("picm_pk")
+    assert p0_formula is not None
+    assert p_wait_formula is not None
+
+    inputs = {"lambda_": 18.0, "mu": 10.0, "k": 3}
+    p0 = p0_formula.calculate(inputs)
+    p_wait = p_wait_formula.calculate(inputs)
+
+    assert pytest.approx(p0, rel=1e-6) == 0.14598540145985403
+    assert pytest.approx(p_wait, rel=1e-6) == 0.3547445255474453
+
+
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        {"lambda_": 0.0, "mu": 10.0, "k": 3},
+        {"lambda_": -1.0, "mu": 10.0, "k": 3},
+        {"lambda_": 18.0, "mu": 0.0, "k": 3},
+        {"lambda_": 18.0, "mu": -2.0, "k": 3},
+        {"lambda_": 18.0, "mu": 10.0, "k": 0},
+        {"lambda_": 18.0, "mu": 10.0, "k": -1},
+        {"lambda_": 18.0, "mu": 10.0, "k": 2.5},
+        {"lambda_": 30.0, "mu": 10.0, "k": 3},
+        {"lambda_": 31.0, "mu": 10.0, "k": 3},
+    ],
+)
+def test_picm_p_wait_invalid_inputs_raise(inputs):
+    formula = get_formula_by_id("picm_pk")
+    assert formula is not None
+    with pytest.raises(ValueError):
+        formula.calculate(inputs)
+
+
+def test_picm_p_wait_solver_and_gallery_latex_are_complete():
+    from presentation.catalogs.formula_gallery import GALLERY_CAROUSELS
+    from presentation.catalogs.solver_catalog import SOLVER_GROUPS
+
+    solver_card = next(
+        card
+        for group in SOLVER_GROUPS
+        for card in group.cards
+        if card.formula_id == "picm_pk"
+    )
+    assert "\\frac{1}{1-\\rho}" in solver_card.latex
+    assert "Erlang C" in solver_card.name
+
+    gallery_card = next(
+        card
+        for carousel in GALLERY_CAROUSELS
+        for card in carousel.cards
+        if card.id == "f33"
+    )
+    assert "k\\mu" in gallery_card.latex
+    assert "k\\mu-\\lambda" in gallery_card.latex
+    assert "Erlang C" in gallery_card.name
+
+
 # =====================================================================
 # A-group: PICS derived (1 formula)
 # =====================================================================
@@ -447,3 +507,98 @@ def test_registry_contains_all_new_formulas():
     ]
     for fid in new_ids:
         assert fid in ids, f"Formula {fid} missing from registry"
+
+
+# ── Little's Law tests ──────────────────────────────────────────────
+
+def test_intro_little_system():
+    formula = get_formula_by_id("intro_little_system")
+    assert formula is not None
+    result = formula.calculate({"lambda_": 5.0, "W": 2.0})
+    assert pytest.approx(result, rel=1e-9) == 10.0
+
+
+def test_intro_little_queue():
+    formula = get_formula_by_id("intro_little_queue")
+    assert formula is not None
+    result = formula.calculate({"lambda_": 5.0, "Wq": 0.8})
+    assert pytest.approx(result, rel=1e-9) == 4.0
+
+
+def test_intro_little_system_consistency():
+    """L = λ·W should match the L computed directly from PICS formulas."""
+    pics_l = get_formula_by_id("pics_l")
+    pics_w = get_formula_by_id("pics_w")
+    little = get_formula_by_id("intro_little_system")
+    inputs = {"lambda_": 3.0, "mu": 5.0}
+    l_direct = pics_l.calculate(inputs)
+    w_value = pics_w.calculate(inputs)
+    l_little = little.calculate({"lambda_": 3.0, "W": w_value})
+    assert pytest.approx(l_direct, rel=1e-9) == l_little
+
+
+def test_intro_little_queue_consistency():
+    """Lq = λ·Wq should match the Lq computed directly from PICS formulas."""
+    pics_lq = get_formula_by_id("pics_lq")
+    pics_wq = get_formula_by_id("pics_wq")
+    little = get_formula_by_id("intro_little_queue")
+    inputs = {"lambda_": 3.0, "mu": 5.0}
+    lq_direct = pics_lq.calculate(inputs)
+    wq_value = pics_wq.calculate(inputs)
+    lq_little = little.calculate({"lambda_": 3.0, "Wq": wq_value})
+    assert pytest.approx(lq_direct, rel=1e-9) == lq_little
+
+
+# ── Alternative TT / CT simplified tests ────────────────────────────
+
+def test_pics_tt_alt_equivalence():
+    """TT = λ·8·0.30·ρ·Wn should equal TT = λ·8·0.30·Wq (since Wq = ρ·Wn)."""
+    pics_tt = get_formula_by_id("pics_tt")
+    pics_tt_alt = get_formula_by_id("pics_tt_alt")
+    lambda_, mu = 3.0, 5.0
+    rho = lambda_ / mu
+    wq = lambda_ / (mu * (mu - lambda_))
+    wn = wq / rho
+    tt_direct = pics_tt.calculate({"lambda_": lambda_, "Wq": wq})
+    tt_alt = pics_tt_alt.calculate({"lambda_": lambda_, "rho": rho, "Wn": wn})
+    assert pytest.approx(tt_direct, rel=1e-9) == tt_alt
+
+
+def test_picm_ct_simplified():
+    formula = get_formula_by_id("picm_ct_simplified")
+    assert formula is not None
+    result = formula.calculate({"lambda_": 10.0, "W": 0.5, "CTS": 2.0, "k": 3, "CS": 50.0})
+    expected = 10.0 * 8.0 * 0.5 * 2.0 + 3 * 50.0
+    assert pytest.approx(result, rel=1e-9) == expected
+
+
+def test_picm_tt_alt():
+    formula = get_formula_by_id("picm_tt_alt")
+    assert formula is not None
+    result = formula.calculate({"lambda_": 10.0, "Pk": 0.4, "Wn": 0.25})
+    expected = 10.0 * 8.0 * 0.30 * 0.4 * 0.25
+    assert pytest.approx(result, rel=1e-9) == expected
+
+
+# ── Solver count and coverage audit ─────────────────────────────────
+
+def test_solver_formula_count_at_least_76():
+    """After adding 5 new formulas, solver should have at least 76."""
+    from presentation.catalogs.solver_catalog import SOLVER_FORMULA_COUNT
+    assert SOLVER_FORMULA_COUNT >= 76
+
+
+def test_all_solver_latex_keys_exist_in_registry():
+    """Every formula in _LATEX dict should have a matching domain FormulaDefinition."""
+    from presentation.catalogs.solver_catalog import _LATEX
+    registry_ids = {f.id for f in FORMULAS}
+    for fid in _LATEX:
+        assert fid in registry_ids, f"LaTeX key '{fid}' has no domain FormulaDefinition"
+
+
+def test_solver_cards_have_descriptions():
+    """All solver cards should have a non-empty description."""
+    from presentation.catalogs.solver_catalog import SOLVER_GROUPS
+    for group in SOLVER_GROUPS:
+        for card in group.cards:
+            assert card.description, f"SolverCard '{card.formula_id}' has empty description"
