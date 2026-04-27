@@ -1,0 +1,145 @@
+{
+  "detectable_variables": [
+    {
+      "id": "lambda_",
+      "type": "float",
+      "unit": "clientes/tiempo",
+      "min": 0.0,
+      "strict_positive": true,
+      "description": "Tasa de llegada de clientes al sistema por unidad de tiempo.",
+      "regex_hints": ["(\\d+(?:\\.\\d+)?)\\s*(?:por|/)\\s*(?:hora|minuto|segundo|dia)", "intensidad\\s+(\\d+(?:\\.\\d+)?)", "tasa.*?de.*?llegada.*?(\\d+)"]
+    },
+    {
+      "id": "mu",
+      "type": "float",
+      "unit": "clientes/tiempo",
+      "min": 0.0,
+      "strict_positive": true,
+      "description": "Tasa de servicio del sistema por unidad de tiempo.",
+      "regex_hints": ["media\\s+(\\d+(?:\\.\\d+)?)\\s*minutos", "(\\d+(?:\\.\\d+)?)\\s*(?:clientes|programas|llamadas)\\s*(?:por|/)\\s*hora", "tiempo.*?medio.*?(\\d+(?:\\.\\d+)?)"]
+    },
+    {
+      "id": "mu1",
+      "type": "float",
+      "unit": "clientes/tiempo",
+      "min": 0.0,
+      "strict_positive": true,
+      "description": "Tasa de servicio del primer servidor heterogeneo (mu1)."
+    },
+    {
+      "id": "mu2",
+      "type": "float",
+      "unit": "clientes/tiempo",
+      "min": 0.0,
+      "strict_positive": true,
+      "description": "Tasa de servicio del segundo servidor heterogeneo (mu2)."
+    },
+    {
+      "id": "k",
+      "type": "integer",
+      "unit": "servidores",
+      "min": 1,
+      "strict_positive": true,
+      "description": "Numero de servidores identicos en el sistema.",
+      "regex_hints": ["(\\d+)\\s*(?:servidores|cajeros|operarios|operadores|tecnicos|inspectores|farmaceuticos|mecanicos|examinadores|surtidores|plataformas)"]
+    },
+    {
+      "id": "M",
+      "type": "integer",
+      "unit": "clientes",
+      "min": 1,
+      "strict_positive": true,
+      "description": "Tamano total de la poblacion finita (fuente cerrada).",
+      "regex_hints": ["(\\d+)\\s*(?:aviones|montacargas|equipos|maquinas|empleados)", "numero limitado.*?(\\d+)", "total de (\\d+)"]
+    },
+    {
+      "id": "n",
+      "type": "integer",
+      "unit": "clientes",
+      "min": 0,
+      "description": "Numero especifico de clientes para calcular probabilidad Pn."
+    },
+    {
+      "id": "rho",
+      "type": "float",
+      "unit": "adimensional",
+      "min": 0.0,
+      "max": 1.0,
+      "description": "Factor de ocupacion del sistema (lambda/mu o lambda/(k*mu))."
+    },
+    {
+      "id": "P0",
+      "type": "float",
+      "unit": "adimensional",
+      "min": 0.0,
+      "max": 1.0,
+      "description": "Probabilidad de que el sistema este vacio (cero clientes)."
+    },
+    {
+      "id": "Pn",
+      "type": "float",
+      "unit": "adimensional",
+      "min": 0.0,
+      "max": 1.0,
+      "description": "Probabilidad de que haya exactamente n clientes en el sistema."
+    },
+    {
+      "id": "Pk",
+      "type": "float",
+      "unit": "adimensional",
+      "min": 0.0,
+      "max": 1.0,
+      "description": "Probabilidad de esperar (todos k servidores ocupados) — Erlang C — solo PICM."
+    },
+    {
+      "id": "PNE",
+      "type": "float",
+      "unit": "adimensional",
+      "min": 0.0,
+      "max": 1.0,
+      "description": "Probabilidad de no esperar = 1 - Pk. Solo PICM."
+    },
+    {
+      "id": "L",
+      "type": "float",
+      "unit": "clientes",
+      "min": 0.0,
+      "description": "Numero promedio de clientes en el sistema (cola + servicio)."
+    },
+    {
+      "id": "Lq",
+      "type": "float",
+      "unit": "clientes",
+      "min": 0.0,
+      "description": "Numero promedio de clientes esperando en la cola."
+    },
+    {
+      "id": "Ln",
+      "type": "float",
+      "unit": "clientes",
+      "min": 0.0,
+      "description": "Numero de clientes en el sistema condicional a n. Solo PICS."
+    },
+    {
+      "id": "W",
+      "type": "float",
+      "unit": "tiempo",
+      "min": 0.0,
+      "description": "Tiempo promedio que un cliente permanece en el sistema."
+    },
+    {
+      "id": "Wq",
+      "type": "float",
+      "unit": "tiempo",
+      "min": 0.0,
+      "description": "Tiempo promedio que un cliente pasa esperando en la cola."
+    },
+    {
+      "id": "Wn",
+      "type": "float",
+      "unit": "tiempo",
+      "min": 0.0,
+      "description": "Tiempo promedio en el sistema condicional a n clientes. Solo PICS."
+    }
+  ]
+}

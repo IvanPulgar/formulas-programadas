@@ -1,0 +1,62 @@
+{
+  "models": [
+    {
+      "id": "GENERAL",
+      "name": "Generales",
+      "description": "Relaciones introductorias y Ley de Little.",
+      "required_variables": [],
+      "forbidden_terms": []
+    },
+    {
+      "id": "PICS",
+      "name": "Poblacion Infinita, Canal Simple",
+      "description": "Modelo equivalente a M/M/1. Poblacion fuente ilimitada, un unico servidor.",
+      "required_variables": ["lambda_", "mu"],
+      "forbidden_terms": [
+        "varios servidores", "multiples servidores", "k servidores",
+        "poblacion finita", "fuente finita", "numero limitado",
+        "heterogeneo", "tasas distintas", "diferentes velocidades"
+      ]
+    },
+    {
+      "id": "PICM",
+      "name": "Poblacion Infinita, Canales Multiples",
+      "description": "Modelo equivalente a M/M/c. Poblacion fuente ilimitada, multiples servidores identicos.",
+      "required_variables": ["lambda_", "mu", "k"],
+      "forbidden_terms": [
+        "un servidor", "servidor unico", "un solo servidor",
+        "poblacion finita", "fuente finita", "numero limitado",
+        "heterogeneo", "tasas distintas"
+      ]
+    },
+    {
+      "id": "PFCS",
+      "name": "Poblacion Finita, Canal Simple",
+      "description": "Modelo de fuente finita con un servidor. Equivale a M/M/1/K/K.",
+      "required_variables": ["lambda_", "mu", "M"],
+      "forbidden_terms": [
+        "varios servidores", "multiples servidores", "k servidores",
+        "heterogeneo", "tasas distintas", "diferentes velocidades"
+      ]
+    },
+    {
+      "id": "PFCM",
+      "name": "Poblacion Finita, Canales Multiples",
+      "description": "Modelo de fuente finita con multiples servidores identicos.",
+      "required_variables": ["lambda_", "mu", "M", "k"],
+      "forbidden_terms": [
+        "un servidor", "servidor unico", "un solo servidor",
+        "heterogeneo", "tasas distintas"
+      ]
+    },
+    {
+      "id": "PFHET",
+      "name": "Poblacion Finita Heterogenea",
+      "description": "Modelo de fuente finita con servidores heterogeneos (distintas tasas de servicio).",
+      "required_variables": ["lambda_", "mu1", "mu2", "M"],
+      "forbidden_terms": [
+        "servidores identicos", "misma tasa", "igual velocidad"
+      ]
+    }
+  ]
+}

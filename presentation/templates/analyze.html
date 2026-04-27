@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }} — Analizar enunciado</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    /* ── Analyze-page-only styles ───────────────────────────── */
+    .analyze-intro {
+      color: #555;
+      margin-bottom: 20px;
+      font-size: 0.97em;
+    }
+    .analyze-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      resize: vertical;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+    .analyze-textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+    .char-counter {
+      text-align: right;
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-top: 4px;
+    }
+    .char-counter.over-limit {
+      color: #e74c3c;
+      font-weight: 600;
+    }
+    #analyze-btn {
+      margin-top: 14px;
+    }
+    #analyze-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    /* spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* result panel */
+    #result-area { margin-top: 24px; }
+    .ar-model-badge {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 0.88em;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: #3498db;
+      color: white;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .ar-confidence {
+      font-size: 0.82em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #eaf0fb;
+      color: #2980b9;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .ar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93em;
+    }
+    .ar-table th {
+      background: #f0f4f8;
+      color: #2c3e50;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 2px solid #dee2e6;
+    }
+    .ar-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+    }
+    .ar-table tr:last-child td { border-bottom: none; }
+    .ar-table .mono { font-family: 'Courier New', monospace; color: #27ae60; font-weight: 600; }
+    .ar-table .var-id { font-family: 'Courier New', monospace; color: #2c3e50; font-weight: 700; }
+    .step-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.8em;
+      font-weight: 600;
+    }
+    .step-badge.executable { background: #d4edda; color: #155724; }
+    .step-badge.blocked    { background: #f8d7da; color: #721c24; }
+    .step-badge.primary    { background: #cce5ff; color: #004085; margin-left: 4px; }
+    .primary-values-grid {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .pv-card {
+      background: white;
+      border: 2px solid #27ae60;
+      border-radius: 8px;
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 130px;
+    }
+    .pv-card .pv-var { font-size: 1em; color: #555; margin-bottom: 4px; }
+    .pv-card .pv-num {
+      font-size: 2em;
+      font-weight: bold;
+      color: #27ae60;
+      font-family: 'Courier New', monospace;
+    }
+    .issues-list { margin: 0; padding-left: 18px; }
+    .issues-list li { padding: 2px 0; font-size: 0.9em; color: #555; }
+    .tag-exec  { color: #856404; }
+    .tag-plan  { color: #0c5460; }
+    .empty-hint { color: #aaa; font-style: italic; font-size: 0.9em; }
+    /* Literals section (Phase 8) */
+    .literal-card {
+      background: #f8fafc;
+      border: 1px solid #dee2e6;
+      border-left: 4px solid #764ba2;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+    .literal-card:last-child { margin-bottom: 0; }
+    .literal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .literal-id-badge {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      background: #764ba2;
+      color: white;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9em;
+      flex-shrink: 0;
+    }
+    .literal-text { color: #2c3e50; font-size: 0.95em; }
+    .literal-obj-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.78em;
+      font-weight: 600;
+      background: #e8d5f5;
+      color: #5a2d82;
+      margin-left: 4px;
+    }
+    .literal-steps {
+      margin-top: 6px;
+      font-size: 0.82em;
+      color: #7f8c8d;
+    }
+    .literal-steps code {
+      background: #eee;
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-family: 'Courier New', monospace;
+      margin-right: 3px;
+    }
+    /* Per-literal issues (Phase 9) */
+    .literal-issues { margin-top: 6px; }
+    .literal-issue {
+      font-size: 0.82em;
+      color: #856404;
+      background: #fff3cd;
+      border-radius: 3px;
+      padding: 2px 6px;
+      margin-top: 3px;
+    }
+    .literal-issue.issue-info {
+      color: #0c5460;
+      background: #d1ecf1;
+    }
+    /* Formula plan table (Phase 11) */
+    .fp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82em;
+      margin-top: 8px;
+    }
+    .fp-table th {
+      background: #ede9f7;
+      color: #4a2580;
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 2px solid #c8b9e8;
+    }
+    .fp-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+    .fp-table tr:last-child td { border-bottom: none; }
+    .fp-order {
+      display: inline-block;
+      width: 22px; height: 22px; line-height: 22px;
+      text-align: center;
+      border-radius: 50%;
+      background: #764ba2;
+      color: white;
+      font-weight: 700;
+      font-size: 0.85em;
+      flex-shrink: 0;
+    }
+    .fp-expr {
+      font-family: 'Courier New', monospace;
+      color: #2c3e50;
+      font-size: 0.95em;
+      white-space: pre-wrap;
+    }
+    .fp-why { color: #7f8c8d; font-style: italic; font-size: 0.88em; }
+    .fp-missing {
+      margin-top: 6px;
+      font-size: 0.82em;
+      color: #721c24;
+      background: #f8d7da;
+      border-radius: 3px;
+      padding: 4px 8px;
+    }
+    .fp-missing code {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      margin: 0 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>{{ title }}</h1>
+    <p>Análisis automático de enunciados de teoría de colas</p>
+    {% from 'partials/nav.html' import nav %}
+    {{ nav('analyze') }}
+  </header>
+
+  <main>
+
+    <!-- ── Input section ───────────────────────────────────── -->
+    <section class="section">
+      <h2>Enunciado del problema</h2>
+      <p class="analyze-intro">
+        Escribe el enunciado tal como aparece en el ejercicio. El motor identificará el modelo,
+        extraerá las variables y calculará los resultados automáticamente.
+      </p>
+
+      <div class="form-section">
+        <textarea
+          id="statement-input"
+          class="analyze-textarea"
+          maxlength="2000"
+          placeholder="Ejemplo: Una tienda de alimentación es atendida por una persona. Llegan 10 clientes por hora con proceso Poisson. Tiempo medio de atención 4 minutos. Calcular tiempo de espera."
+        ></textarea>
+        <div class="char-counter" id="char-counter">0 / 2000</div>
+      </div>
+
+      <div class="form-section" style="margin-top:14px">
+        <label for="hint-model-select" style="font-weight:600;color:#2c3e50;display:block;margin-bottom:6px">
+          Modelo (opcional)
+        </label>
+        <select id="hint-model-select" style="padding:8px 12px;border:2px solid #ddd;border-radius:6px;font-size:14px;color:#2c3e50;background:white;min-width:180px">
+          <option value="">— Detectar automáticamente —</option>
+          <option value="PICS">PICS — Cola infinita, 1 servidor</option>
+          <option value="PICM">PICM — Cola infinita, k servidores</option>
+          <option value="PFCS">PFCS — Cola finita, 1 servidor</option>
+          <option value="PFCM">PFCM — Cola finita, k servidores</option>
+          <option value="PFHET">PFHET — Cola finita, servidores heterogéneos</option>
+        </select>
+        <small style="display:block;color:#7f8c8d;margin-top:4px">Si el modelo es conocido, selecciónalo para mejorar la precisión.</small>
+      </div>
+
+      <div class="form-actions">
+        <button id="analyze-btn" class="btn btn-primary" onclick="runAnalysis()" disabled>
+          Analizar
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">Limpiar</button>
+      </div>
+    </section>
+
+    <!-- ── Result area ──────────────────────────────────────── -->
+    <div id="result-area"></div>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+  <script>
+  // ================================================================
+  // analyze.js — inline script for analyze.html only
+  // ================================================================
+
+  const MIN_LEN = 5;
+  const MAX_LEN = 2000;
+
+  const textArea     = document.getElementById('statement-input');
+  const charCount    = document.getElementById('char-counter');
+  const analyzeBtn   = document.getElementById('analyze-btn');
+  const resultArea   = document.getElementById('result-area');
+  const modelSelect  = document.getElementById('hint-model-select');
+
+  // ── Character counter & button guard ────────────────────────────
+  textArea.addEventListener('input', () => {
+    const len = textArea.value.length;
+    charCount.textContent = `${len} / ${MAX_LEN}`;
+    charCount.classList.toggle('over-limit', len > MAX_LEN);
+    analyzeBtn.disabled = len < MIN_LEN || len > MAX_LEN;
+  });
+
+  // ── Clear ────────────────────────────────────────────────────────
+  function clearAll() {
+    textArea.value = '';
+    charCount.textContent = '0 / 2000';
+    charCount.classList.remove('over-limit');
+    analyzeBtn.disabled = true;
+    resultArea.innerHTML = '';
+    modelSelect.value = '';
+  }
+
+  // ── Main analysis call ───────────────────────────────────────────
+  async function runAnalysis() {
+    const text = textArea.value.trim();
+    if (text.length < MIN_LEN) return;
+
+    setLoading(true);
+    resultArea.innerHTML = '';
+
+    try {
+      const hint = modelSelect.value || null;
+      const payload = { text };
+      if (hint) payload.hint_model = hint;
+
+      const resp = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        renderError(data.detail || `Error HTTP ${resp.status}`);
+        return;
+      }
+
+      renderResult(data);
+
+      // Re-typeset MathJax for any inline math we rendered
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([resultArea]).catch(() => {});
+      }
+
+    } catch (err) {
+      renderError(`Error de red o del servidor: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── Loading state ────────────────────────────────────────────────
+  function setLoading(on) {
+    analyzeBtn.disabled = on;
+    if (on) {
+      analyzeBtn.innerHTML = '<span class="spinner"></span>Analizando…';
+    } else {
+      analyzeBtn.innerHTML = 'Analizar';
+      const len = textArea.value.length;
+      analyzeBtn.disabled = len < MIN_LEN || len > MAX_LEN;
+    }
+  }
+
+  // ── Error panel ──────────────────────────────────────────────────
+  function renderError(msg) {
+    resultArea.innerHTML = `
+      <div class="section">
+        <div class="result-header error">✗ Error en el análisis</div>
+        <p class="error-panel">${escHtml(msg)}</p>
+      </div>`;
+  }
+
+  // ── Full result render ───────────────────────────────────────────
+  function renderResult(d) {
+    const sections = [];
+
+    // 1 — Model & confidence
+    sections.push(buildModelSection(d));
+
+    // 2 — Extracted variables
+    sections.push(buildVariablesSection(d.extracted_variables));
+
+    // 3 — Inferred objectives
+    sections.push(buildObjectivesSection(d.inferred_objectives));
+
+    // 4 — Detected literals (Phase 8)
+    if (d.literals && d.literals.length > 0) {
+      sections.push(buildLiteralsSection(d.statement_context, d.literals));
+    }
+
+    // 5 — Primary values (main answers)
+    sections.push(buildPrimaryValuesSection(d.primary_values, d.is_complete));
+
+    // 6 — Execution steps
+    sections.push(buildStepsSection(d.plan_steps, d.step_results));
+
+    // 6 — Issues / warnings
+    if (d.issues && d.issues.length > 0) {
+      sections.push(buildIssuesSection(d.issues));
+    }
+
+    const headerClass = d.is_complete ? 'success' : (d.plan_is_executable ? 'info' : 'error');
+    const headerIcon  = d.is_complete ? '✓' : (d.plan_is_executable ? '⚠' : '✗');
+    const headerMsg   = d.is_complete
+      ? 'Análisis completado con éxito'
+      : (d.plan_is_executable ? 'Análisis parcial — algunos pasos no pudieron ejecutarse'
+                               : 'No se pudo construir un plan ejecutable');
+
+    resultArea.innerHTML = `
+      <div class="section">
+        <div class="result-header ${headerClass}">${headerIcon} ${escHtml(headerMsg)}</div>
+        ${sections.join('')}
+      </div>`;
+  }
+
+  // ── Section builders ─────────────────────────────────────────────
+
+  function buildModelSection(d) {
+    const modelHtml = d.model_id
+      ? `<span class="ar-model-badge">${escHtml(d.model_id)}</span>
+         <span class="ar-confidence">${escHtml(d.model_confidence)}</span>`
+      : '<span class="empty-hint">No identificado</span>';
+
+    return `
+      <div class="result-section">
+        <h4>Modelo detectado ${modelHtml}</h4>
+      </div>`;
+  }
+
+  function buildVariablesSection(vars) {
+    if (!vars || vars.length === 0) {
+      return `<div class="result-section">
+        <h4>Variables extraídas</h4>
+        <p class="empty-hint">No se extrajeron variables.</p>
+      </div>`;
+    }
+    const rows = vars.map(v => {
+      const norm = v.normalized_value !== null && v.normalized_value !== undefined
+        ? fmt(v.normalized_value)
+        : '—';
+      const conf = (v.confidence * 100).toFixed(0) + '%';
+      return `<tr>
+        <td><span class="var-id">${escHtml(v.variable_id)}</span></td>
+        <td class="mono">${escHtml(String(v.raw_value))}</td>
+        <td>${escHtml(v.unit || '—')}</td>
+        <td class="mono">${escHtml(norm)}</td>
+        <td>${escHtml(conf)}</td>
+      </tr>`;
+    }).join('');
+    return `
+      <div class="result-section">
+        <h4>Variables extraídas</h4>
+        <table class="ar-table">
+          <thead><tr>
+            <th>Variable</th><th>Valor bruto</th><th>Unidad</th><th>Normalizado</th><th>Confianza</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function buildObjectivesSection(objs) {
+    if (!objs || objs.length === 0) {
+      return `<div class="result-section">
+        <h4>Objetivos inferidos</h4>
+        <p class="empty-hint">No se identificaron objetivos de cálculo.</p>
+      </div>`;
+    }
+    const tags = objs.map(o => `<span class="ar-model-badge" style="background:#764ba2">${escHtml(o)}</span>`).join(' ');
+    return `<div class="result-section"><h4>Objetivos inferidos</h4><p>${tags}</p></div>`;
+  }
+
+  function buildPrimaryValuesSection(pv, isComplete) {
+    const entries = Object.entries(pv || {});
+    const nonNull = entries.filter(([, v]) => v !== null && v !== undefined);
+    if (nonNull.length === 0) {
+      return `<div class="result-section">
+        <h4>Resultados principales</h4>
+        <p class="empty-hint">${isComplete ? 'Sin valores primarios.' : 'No se calcularon resultados.'}</p>
+      </div>`;
+    }
+    const cards = nonNull.map(([k, v]) => `
+      <div class="pv-card">
+        <div class="pv-var">${escHtml(k)}</div>
+        <div class="pv-num">${fmt(v)}</div>
+      </div>`).join('');
+    return `
+      <div class="result-section">
+        <h4>Resultados principales</h4>
+        <div class="primary-values-grid">${cards}</div>
+      </div>`;
+  }
+
+  function buildStepsSection(planSteps, stepResults) {
+    if (!planSteps || planSteps.length === 0) {
+      return `<div class="result-section">
+        <h4>Pasos ejecutados</h4>
+        <p class="empty-hint">No se generó ningún plan.</p>
+      </div>`;
+    }
+
+    // Index results by formula_id for quick lookup
+    const resMap = {};
+    (stepResults || []).forEach(r => { resMap[r.formula_id] = r; });
+
+    const rows = planSteps.map(s => {
+      const r = resMap[s.formula_id];
+      const statusBadge = `<span class="step-badge ${escHtml(s.status)}">${escHtml(s.status)}</span>`;
+      const primaryBadge = s.is_primary ? '<span class="step-badge primary">primario</span>' : '';
+      const produces = (s.produces || []).join(', ') || '—';
+      let resultCell = '—';
+      if (r) {
+        if (r.skipped) {
+          resultCell = '<span style="color:#aaa">omitido</span>';
+        } else if (r.success && r.computed_value !== null && r.computed_value !== undefined) {
+          resultCell = `<span class="mono">${fmt(r.computed_value)}</span>`;
+        } else if (!r.success) {
+          resultCell = `<span style="color:#e74c3c">error</span>`;
+        }
+      }
+      return `<tr>
+        <td><span class="var-id" style="font-size:0.85em">${escHtml(s.formula_id)}</span></td>
+        <td>${statusBadge}${primaryBadge}</td>
+        <td>${escHtml(produces)}</td>
+        <td>${resultCell}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="result-section">
+        <h4>Pasos del plan</h4>
+        <table class="ar-table">
+          <thead><tr>
+            <th>Fórmula</th><th>Estado</th><th>Produce</th><th>Resultado</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function buildLiteralsSection(statementContext, literals) {
+    const ctxHtml = statementContext
+      ? `<p style="color:#555;font-size:0.9em;margin-bottom:12px;border-bottom:1px dashed #ddd;padding-bottom:8px">${escHtml(statementContext)}</p>`
+      : '';
+
+    const cards = literals.map(lit => {
+      const objBadge = lit.inferred_objective
+        ? `<span class="literal-obj-badge">${escHtml(lit.inferred_objective)}</span>`
+        : '';
+      const stepsHtml = (lit.planned_step_ids && lit.planned_step_ids.length > 0)
+        ? `<div class="literal-steps">Fórmulas: ${lit.planned_step_ids.map(s => `<code>${escHtml(s)}</code>`).join('')}</div>`
+        : '';
+      const issuesHtml = (lit.issues && lit.issues.length > 0)
+        ? `<div class="literal-issues">${lit.issues.map(i => {
+            const cls = i.startsWith('[info]') || i.startsWith('[INFO]') ? 'literal-issue issue-info' : 'literal-issue';
+            return `<div class="${cls}">${escHtml(i)}</div>`;
+          }).join('')}</div>`
+        : '';
+
+      // Formula plan table (Phase 11)
+      const fpHtml = buildFormulaPlanTable(lit.formula_plan, lit.missing_variables);
+
+      return `
+        <div class="literal-card">
+          <div class="literal-header">
+            <span class="literal-id-badge">${escHtml(lit.literal_id)}</span>
+            <span class="literal-text">${escHtml(lit.literal_text)}</span>
+            ${objBadge}
+          </div>
+          ${stepsHtml}
+          ${fpHtml}
+          ${issuesHtml}
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="result-section" style="border-left-color:#764ba2">
+        <h4>Literales detectados</h4>
+        ${ctxHtml}
+        ${cards}
+      </div>`;
+  }
+
+  function buildFormulaPlanTable(plan, missingVars) {
+    if (!plan || plan.length === 0) return '';
+
+    const rows = plan.map(step => {
+      const reqVars = (step.required_variables || []).map(v => `<code style="background:#eee;border-radius:3px;padding:1px 3px;font-family:monospace">${escHtml(v)}</code>`).join(' ');
+      const produces = `<code style="background:#d4edda;border-radius:3px;padding:1px 3px;font-family:monospace;color:#155724">${escHtml(step.produces)}</code>`;
+      return `<tr>
+        <td style="width:32px;text-align:center"><span class="fp-order">${escHtml(String(step.order))}</span></td>
+        <td>
+          <strong>${escHtml(step.formula_name)}</strong>
+          <div class="fp-expr">${escHtml(step.formula_expression)}</div>
+          <div class="fp-why">${escHtml(step.why_needed)}</div>
+        </td>
+        <td>${reqVars}</td>
+        <td>${produces}</td>
+      </tr>`;
+    }).join('');
+
+    const missingHtml = (missingVars && missingVars.length > 0)
+      ? `<div class="fp-missing">⚠ Variables faltantes en el enunciado: ${missingVars.map(v => `<code>${escHtml(v)}</code>`).join(', ')}</div>`
+      : '';
+
+    return `
+      <details style="margin-top:8px">
+        <summary style="cursor:pointer;font-size:0.88em;color:#764ba2;font-weight:600">
+          Plan de fórmulas (${plan.length} paso${plan.length !== 1 ? 's' : ''})
+        </summary>
+        <table class="fp-table">
+          <thead><tr>
+            <th>#</th>
+            <th>Fórmula</th>
+            <th>Requiere</th>
+            <th>Produce</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        ${missingHtml}
+      </details>`;
+  }
+
+  function buildIssuesSection(issues) {
+    const items = issues.map(i => {
+      let cls = '';
+      if (i.startsWith('[exec]')) cls = 'tag-exec';
+      else if (i.startsWith('[plan]')) cls = 'tag-plan';
+      return `<li class="${cls}">${escHtml(i)}</li>`;
+    }).join('');
+    return `
+      <div class="result-section" style="border-left-color:#e67e22">
+        <h4>Advertencias y diagnósticos</h4>
+        <ul class="issues-list">${items}</ul>
+      </div>`;
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────
+
+  function fmt(n) {
+    if (n === null || n === undefined) return '—';
+    const abs = Math.abs(n);
+    if (abs === 0) return '0';
+    if (abs >= 1000 || (abs < 0.001 && abs > 0)) return n.toExponential(4);
+    return parseFloat(n.toPrecision(6)).toString();
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  </script>
+</body>
+</html>

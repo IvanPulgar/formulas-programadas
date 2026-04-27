@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from presentation.routes import web_router
+from presentation.routes import analysis_router, web_router
 
 load_dotenv()
 
@@ -44,3 +44,4 @@ app.state.demo_mode = DEMO_MODE
 
 app.mount("/static", StaticFiles(directory="presentation/static"), name="static")
 app.include_router(web_router)
+app.include_router(analysis_router)

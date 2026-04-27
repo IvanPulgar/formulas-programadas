@@ -1,0 +1,394 @@
+{
+  "meta": {
+    "source": "Ejercicios Propuestos de Teoria de Colas - ESPOCH, Tecnicas de Simulacion, Marzo 2026",
+    "purpose": "Corpus de referencia para pruebas del analizador de enunciados (Fase 2).",
+    "version": "1.0",
+    "total_exercises": 26
+  },
+  "exercises": [
+    {
+      "id": "ex01",
+      "source": "Ejercicio 1",
+      "model": "PICS",
+      "statement": "Una tienda de alimentacion es atendida por una persona. El patron de llegadas sigue un proceso de Poisson con una tasa de llegadas de 10 personas por hora. El tiempo de atencion se distribuye exponencialmente con un tiempo medio de 4 minutos.",
+      "given_variables": {
+        "lambda_": {"value": 10, "unit": "clientes/hora", "normalized": 0.1666666},
+        "mu": {"value": 4, "unit": "minutos/cliente", "normalized_mu": 0.25}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_Pk", "text": "La probabilidad de que haya linea de espera."},
+        {"id": "b", "objective": "compute_Lq", "text": "La longitud media de la linea de espera."},
+        {"id": "c", "objective": "compute_Wq", "text": "El tiempo medio que los clientes permanecen en cola."},
+        {"id": "d", "objective": "compute_P0", "text": "Total de minutos diarios que permanece desocupada la persona que atiende."},
+        {"id": "e", "objective": "compute_Lq", "text": "Estimacion del numero diario de clientes que esperan para ser atendidos."},
+        {"id": "f", "objective": "compute_k_optimal", "text": "Numero de personas si se desea que el 50% del tiempo todas esten desocupadas."}
+      ],
+      "discriminating_phrases": [
+        "atendida por una persona",
+        "proceso de Poisson con una tasa de llegadas",
+        "tiempo medio de 4 minutos"
+      ]
+    },
+    {
+      "id": "ex02",
+      "source": "Ejercicio 2",
+      "model": "PICM",
+      "statement": "Una compania de correo urgente tiene 3 personas para recibir las llamadas telefonicas. Las llamadas se producen segun un proceso de Poisson de intensidad 2 por minuto y la duracion de las llamadas es una variable exponencial de media 1 minuto por llamada.",
+      "given_variables": {
+        "lambda_": {"value": 2, "unit": "clientes/minuto"},
+        "mu": {"value": 1, "unit": "minutos/cliente", "normalized_mu": 1.0},
+        "k": {"value": 3, "unit": "servidores"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_Pk", "text": "Probabilidad de que una llamada encuentre exactamente todas las lineas ocupadas y ninguna en espera."},
+        {"id": "b", "objective": "compute_P0", "text": "Cantidad de tiempo al dia que estaran desocupadas todas las personas a la vez."},
+        {"id": "c", "objective": "compute_Wq", "text": "Tiempo medio de espera en la cola."},
+        {"id": "d", "objective": "compute_Pk", "text": "La probabilidad de que haya linea de espera."},
+        {"id": "e", "objective": "compute_k_optimal", "text": "Cuantas personas debe tener para minimizar los costos."}
+      ],
+      "discriminating_phrases": [
+        "3 personas para recibir",
+        "proceso de Poisson de intensidad 2 por minuto",
+        "variable exponencial de media 1 minuto"
+      ]
+    },
+    {
+      "id": "ex03",
+      "source": "Ejercicio 3",
+      "model": "PICM",
+      "statement": "El propietario de una farmacia estima en 60 personas por hora la afluencia de clientes segun un proceso de Poisson. La farmacia es atendida por farmaceuticos quienes tienen la capacidad de atender un promedio de 25 clientes por hora cada uno segun una distribucion poisson.",
+      "given_variables": {
+        "lambda_": {"value": 60, "unit": "clientes/hora"},
+        "mu": {"value": 25, "unit": "clientes/hora"},
+        "k": {"value": null, "note": "a determinar - minimo para estabilidad"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_k_optimal", "text": "Cuantos farmaceuticos como minimo debe contratar."},
+        {"id": "b", "objective": "compute_W", "text": "Calcular el tiempo medio de permanencia de los clientes en la farmacia."},
+        {"id": "c", "objective": "compute_L", "text": "Cual es el numero esperado de clientes en la farmacia."},
+        {"id": "d", "objective": "compute_k_optimal_cost", "text": "Cual seria la rentabilidad diaria de la farmacia."}
+      ],
+      "discriminating_phrases": [
+        "afluencia de clientes",
+        "farmaceuticos",
+        "25 clientes por hora cada uno"
+      ]
+    },
+    {
+      "id": "ex04",
+      "source": "Ejercicio 4",
+      "model": "PICS",
+      "statement": "En una fabrica existe una oficina de la Seguridad Social. El numero medio de obreros que acudian a la ventanilla era de 1.25 por periodo de 5 minutos y el tiempo entre llegadas seguia una distribucion exponencial. La duracion de las conversaciones se distribuian exponencialmente con duracion media de 3.33 minutos.",
+      "given_variables": {
+        "lambda_": {"value": 1.25, "unit": "clientes/5min", "normalized": 0.25},
+        "mu": {"value": 3.33, "unit": "minutos/cliente", "normalized_mu": 0.3003}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_Lq", "text": "Numero medio de obreros en cola."},
+        {"id": "b", "objective": "compute_Wq", "text": "Tiempo medio de espera en la cola."},
+        {"id": "c", "objective": "compute_rho", "text": "Que porcentaje del tiempo estara ocioso el oficinista."},
+        {"id": "d", "objective": "compute_cost", "text": "El costo para la empresa. Seria rentable poner otra ventanilla?"},
+        {"id": "e", "objective": "compute_Pk", "text": "La probabilidad de que haya linea de espera."}
+      ],
+      "discriminating_phrases": [
+        "oficinista de la ventanilla",
+        "1.25 por periodo",
+        "duracion media de 3.33 minutos"
+      ]
+    },
+    {
+      "id": "ex05",
+      "source": "Ejercicio 5",
+      "model": "PICM",
+      "statement": "El Call Center del IESS tiene 3 operadores para recibir las llamadas telefonicas. Las llamadas se producen segun un proceso de Poisson de intensidad 2 por minuto y la duracion de las llamadas es una variable exponencial de media 1 minuto.",
+      "given_variables": {
+        "lambda_": {"value": 2, "unit": "clientes/minuto"},
+        "mu": {"value": 1, "unit": "minutos/cliente", "normalized_mu": 1.0},
+        "k": {"value": 3, "unit": "servidores"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_Pk", "text": "Probabilidad de que todas las lineas se encuentren ocupadas."},
+        {"id": "b", "objective": "compute_Pk", "text": "Que fraccion de afiliados debe esperar para recibir el servicio."},
+        {"id": "c", "objective": "compute_Wq", "text": "Cuanto tiempo debe esperar un afiliado para ser atendido."},
+        {"id": "d", "objective": "compute_cost", "text": "Cual es el costo ocasionado en el Call Center."}
+      ],
+      "discriminating_phrases": [
+        "3 operadores",
+        "intensidad 2 por minuto",
+        "media 1 minuto"
+      ]
+    },
+    {
+      "id": "ex07",
+      "source": "Ejercicio 7",
+      "model": "PICS",
+      "statement": "Una Compania debe contratar un mecanico para reparar los equipos que se descomponen con una tasa promedio de 4 por hora segun una distribucion Poisson. El mecanico lento repara a una tasa promedio de 6 por hora; el mecanico rapido repara a razon de 8 por hora.",
+      "given_variables": {
+        "lambda_": {"value": 4, "unit": "clientes/hora"},
+        "mu_slow": {"value": 6, "unit": "clientes/hora", "note": "mecanico lento"},
+        "mu_fast": {"value": 8, "unit": "clientes/hora", "note": "mecanico rapido"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compare_cost", "text": "Cual mecanico debe contratarse."},
+        {"id": "b", "objective": "compute_Pn", "text": "Probabilidad de que esten esperando mas de un equipo."},
+        {"id": "c", "objective": "compute_L", "text": "Tiempo improductivo total diario de los equipos."},
+        {"id": "d", "objective": "compute_Lq", "text": "Numero estimado de equipos esperando por el mecanico."}
+      ],
+      "discriminating_phrases": [
+        "un mecanico",
+        "tasa promedio de 4 por hora",
+        "tasa promedio de 6 por hora"
+      ]
+    },
+    {
+      "id": "ex08",
+      "source": "Ejercicio 8 (parte PFCS)",
+      "model": "PFCS",
+      "statement": "En cada departamento laboran unicamente cinco (5) empleados y cada uno no elabora un nuevo manuscrito hasta que el anterior sea devuelto por la mecanografa. La mecanografa puede escribir diez paginas en una hora y los empleados elaboran ocho manuscritos por hora de 0.9 paginas en promedio.",
+      "given_variables": {
+        "lambda_": {"value": 8, "unit": "manuscritos/hora", "note": "por empleado"},
+        "mu": {"value": 10, "unit": "paginas/hora", "note": "conversion: 10/0.9 = 11.11 manuscritos/hora"},
+        "M": {"value": 5, "unit": "empleados"}
+      },
+      "literals": [
+        {"id": "d", "objective": "compute_L", "text": "Para toda la empresa, calcule el numero esperado de manuscritos en el sistema."},
+        {"id": "e", "objective": "compute_operating", "text": "Para toda la empresa, calcule el numero esperado de empleados elaborando manuscritos."}
+      ],
+      "discriminating_phrases": [
+        "cinco (5) empleados",
+        "no elabora un nuevo manuscrito hasta que el anterior sea devuelto",
+        "fuente finita"
+      ]
+    },
+    {
+      "id": "ex09",
+      "source": "Ejercicio 9",
+      "model": "PFCS",
+      "statement": "El Dpto. de mantenimiento tiene un taller que brinda servicios a los equipos de refrigeracion central. Cada entidad maneja un unico equipo. Un equipo requiere mantenimiento cada 10 dias con distribucion exponencial. El tiempo de mantenimiento de dos equipos es exponencial con media de 15 dias.",
+      "given_variables": {
+        "lambda_": {"value": 10, "unit": "dias/cliente", "note": "un equipo requiere servicio cada 10 dias"},
+        "mu": {"value": 15, "unit": "dias por 2 equipos", "note": "media de 15 dias por 2 equipos = 7.5 dias por equipo"},
+        "M": {"value": null, "note": "numero de entidades - a determinar"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_P0", "text": "Probabilidad de que un equipo solicite al taller y no encuentre a ningun otro esperando."},
+        {"id": "b", "objective": "compute_rho", "text": "Fraccion de equipos que deben estar funcionando en espera del mantenimiento."},
+        {"id": "c", "objective": "compute_k_optimal", "text": "Numero de talleres para servicio mas economico."},
+        {"id": "d", "objective": "compute_Pn", "text": "Probabilidad de encontrar maximo un equipo esperando."}
+      ],
+      "discriminating_phrases": [
+        "cada entidad maneja un unico equipo",
+        "mantenimiento cada 10 dias",
+        "fuente finita"
+      ]
+    },
+    {
+      "id": "ex13_b",
+      "source": "Ejercicio 13 (alternativa con 5 aviones - PFCS)",
+      "model": "PFCS",
+      "statement": "La base aerea cuenta con 5 aviones. Los aviones llegan segun una distribucion de Poisson de tasa media uno al dia. El tiempo requerido para revisar un motor tiene una distribucion exponencial de media 1/2 dia.",
+      "given_variables": {
+        "lambda_": {"value": 1, "unit": "aviones/dia"},
+        "mu": {"value": 2, "unit": "aviones/dia", "note": "1/(0.5 dias) = 2 por dia"},
+        "M": {"value": 5, "unit": "aviones"}
+      },
+      "literals": [
+        {"id": "d_pfcs", "objective": "compute_L", "text": "Si la base cuenta con 5 aviones, cual sera el numero medio de aviones que se encuentran operando."}
+      ],
+      "discriminating_phrases": [
+        "5 aviones",
+        "numero limitado de aviones",
+        "fuente finita"
+      ]
+    },
+    {
+      "id": "ex14",
+      "source": "Ejercicio 14",
+      "model": "PFCS",
+      "statement": "Una base aerea con aviones (fuente finita). Los aviones llegan segun una distribucion exponencial de media cada dos dias. El tiempo de revision tiene una distribucion exponencial de media 1 dia.",
+      "given_variables": {
+        "lambda_": {"value": 2, "unit": "dias/cliente", "note": "media de 2 dias entre llegadas"},
+        "mu": {"value": 1, "unit": "dias/cliente", "note": "media de 1 dia de servicio"},
+        "M": {"value": null, "note": "a determinar segun condicion de 20% del tiempo libre"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_M_from_rho", "text": "Por cuantos aviones debe responder la base si se desea que el 20% del tiempo el taller preste servicios a otras aeronaves."},
+        {"id": "b", "objective": "compute_rho", "text": "Tiempo total semanal que estara ocupado el equipo."},
+        {"id": "c", "objective": "compute_Pn", "text": "Probabilidad de que exista algun avion esperando."},
+        {"id": "d", "objective": "compute_L", "text": "Numero medio de aviones en el taller de mantenimiento."},
+        {"id": "e", "objective": "compute_cost", "text": "Cual es el costo total diario del taller."}
+      ],
+      "discriminating_phrases": [
+        "base aerea",
+        "aviones",
+        "numero limitado",
+        "fuente finita",
+        "un taller"
+      ]
+    },
+    {
+      "id": "ex20",
+      "source": "Ejercicio 20",
+      "model": "PFHET",
+      "statement": "Un numero limitado de montacargas son atendidos por el taller de mantenimiento. El taller cuenta con dos tecnicos que demoran en promedio 130 y 170 minutos, respectivamente segun una distribucion exponencial, en atender a cada montacargas. Ambos tecnicos atienden a todos los montacargas de la fabrica. Los montacargas llegan al taller cada medio dia segun una exponencial.",
+      "given_variables": {
+        "lambda_": {"value": 0.5, "unit": "dias/cliente", "note": "cada medio dia = 0.5 dias entre llegadas"},
+        "mu1": {"value": 130, "unit": "minutos/cliente", "note": "tecnico 1"},
+        "mu2": {"value": 170, "unit": "minutos/cliente", "note": "tecnico 2"},
+        "M": {"value": null, "note": "a determinar segun condicion 20% sin espera"}
+      },
+      "literals": [
+        {"id": "a", "objective": "compute_M_from_P0", "text": "Cuantos montacargas se deben asignar al taller si al menos el 20% no les corresponda esperar."},
+        {"id": "b", "objective": "compute_rho", "text": "Cantidad de horas diarias que estaran ocupados ambos tecnicos."},
+        {"id": "c", "objective": "compute_P0", "text": "Probabilidad de que algun tecnico este disponible."},
+        {"id": "d", "objective": "compute_L", "text": "Numero estimado de montacargas en operacion."},
+        {"id": "e", "objective": "compute_Lq", "text": "Cantidad de montacargas que en una semana deben esperar."},
+        {"id": "f", "objective": "compute_cost", "text": "Cual es el costo total semanal del taller."}
+      ],
+      "discriminating_phrases": [
+        "numero limitado de montacargas",
+        "130 y 170 minutos",
+        "ambos tecnicos atienden a todos",
+        "heterogeneo"
+      ]
+    },
+    {
+      "id": "ex23",
+      "source": "Ejercicio 23",
+      "model": "PFCS",
+      "statement": "Un numero limitado de montacargas con dos tecnicos A y B que demoran en promedio 120 y 150 minutos. Cada tecnico atiende exclusivamente a un grupo de montacargas. Los montacargas requieren ser atendidos cada cuatro dias segun una exponencial.",
+      "given_variables": {
+        "lambda_": {"value": 4, "unit": "dias/cliente", "note": "cada 4 dias"},
+        "mu_A": {"value": 120, "unit": "minutos/cliente", "note": "tecnico A"},
+        "mu_B": {"value": 150, "unit": "minutos/cliente", "note": "tecnico B"},
+        "M": {"value": null, "note": "a determinar por grupo"}
+      },
+      "model_note": "Dos sistemas PFCS independientes (un tecnico por grupo), NO es PFHET (cada tecnico atiende su grupo exclusivo).",
+      "literals": [
+        {"id": "a", "objective": "compute_M_from_P0", "text": "Cuantos montacargas se deben asignar a cada tecnico si al menos el 10% no les corresponda esperar."},
+        {"id": "b", "objective": "compute_P0", "text": "Cantidad de minutos diarios que estaran desocupados cada tecnico."},
+        {"id": "c", "objective": "compute_L", "text": "Numero estimado de montacargas en el taller."},
+        {"id": "d", "objective": "compute_Lq", "text": "Cantidad de montacargas que en una semana deben esperar."},
+        {"id": "e", "objective": "compute_cost", "text": "Cual es el costo total semanal del taller."},
+        {"id": "f", "objective": "compute_P0_unified", "text": "Si el taller unifica la atencion, en cuantas horas diarias el sistema permanecera con algun tecnico desocupado."}
+      ],
+      "discriminating_phrases": [
+        "cada tecnico atiende exclusivamente a un grupo",
+        "tecnico A y tecnico B",
+        "numero limitado de montacargas"
+      ]
+    }
+  ],
+  "ambiguous_examples": [
+    {
+      "id": "amb01",
+      "text": "Una tienda es atendida por una persona (un servidor). Llegan 10 clientes por hora.",
+      "ambiguity": "PICS vs PFCS - 'un servidor' aparece en ambos modelos. Discriminar por ausencia/presencia de 'poblacion finita' o 'numero limitado'.",
+      "correct_model": "PICS",
+      "resolution": "No menciona 'numero limitado', 'fuente finita', ni un numero especifico de fuentes. Por defecto: PICS."
+    },
+    {
+      "id": "amb02",
+      "text": "El taller tiene dos tecnicos con diferentes tiempos de atencion. Un numero limitado de equipos.",
+      "ambiguity": "PFHET vs PFCM - dos servidores con tasas distintas. Si atienden a TODOS los clientes conjuntamente: PFHET. Si cada uno tiene su grupo exclusivo: dos PFCS.",
+      "correct_model": "PFHET",
+      "resolution": "Clave: 'ambos tecnicos atienden a todos'. Si dice 'cada uno atiende exclusivamente' -> PFCS separados."
+    },
+    {
+      "id": "amb03",
+      "text": "Probabilidad de que haya linea de espera.",
+      "ambiguity": "compute_rho (PICS) vs compute_Pk (PICM). En PICS: P(esperar) = rho. En PICM: P(esperar) = Pk (Erlang C).",
+      "resolution": "El modelo ya debe estar identificado antes de resolver el objetivo. Con PICS -> compute_rho, con PICM -> compute_Pk."
+    },
+    {
+      "id": "amb04",
+      "text": "El sistema cuenta con varios cajeros y una cola unica. Los cajeros atienden a todos los clientes.",
+      "ambiguity": "PICM (poblacion infinita) vs PFCM (poblacion finita). Discriminar por presencia/ausencia de 'numero limitado' de fuentes.",
+      "correct_model": "PICM",
+      "resolution": "Ausencia de restriccion en el numero de fuentes = poblacion infinita = PICM."
+    }
+  ],
+  "incomplete_examples": [
+    {
+      "id": "inc01",
+      "text": "Los clientes llegan a razon de 8 por hora. Calcular Wq.",
+      "missing": ["mu", "k_or_model"],
+      "expected_behavior": "El analizador debe pedir mu (tasa de servicio) y confirmar si es un servidor o varios."
+    },
+    {
+      "id": "inc02",
+      "text": "Un taller atiende equipos. La tasa de llegada es 2 por dia y la tasa de servicio es 3 por dia.",
+      "missing": ["M"],
+      "expected_behavior": "Sin indicacion de 'fuente finita' o numero de equipos, el modelo deberia ser PICS por defecto. Si el ejercicio luego menciona M equipos, reclasificar a PFCS."
+    },
+    {
+      "id": "inc03",
+      "text": "Dos tecnicos con tiempos medios de 130 y 170 minutos atienden a los montacargas de la fabrica.",
+      "missing": ["lambda_", "M"],
+      "expected_behavior": "Modelo candidato: PFHET. Faltan lambda_ y M. El analizador debe solicitar el intervalo entre llegadas y el numero total de montacargas."
+    }
+  ],
+  "frequent_vocabulary": {
+    "lambda_phrases": [
+      "tasa de llegadas de X por hora",
+      "proceso de Poisson con media X",
+      "proceso de Poisson de intensidad X",
+      "X clientes por hora",
+      "X llamadas por minuto",
+      "X por minuto",
+      "afluencia de X por hora",
+      "arriban a la tasa de X",
+      "llegan a razon de X",
+      "X vehiculos por hora",
+      "X aviones al dia",
+      "requiere mantenimiento cada X dias"
+    ],
+    "mu_phrases": [
+      "tiempo medio de X minutos",
+      "distribucion exponencial de media X minutos",
+      "puede atender X clientes por hora",
+      "X clientes por hora cada uno",
+      "tarda en atender X minutos",
+      "demoran en promedio X minutos",
+      "media de X minutos por llamada",
+      "tiempo de ejecucion de X segundos",
+      "X paginas en una hora"
+    ],
+    "k_phrases": [
+      "X personas para recibir",
+      "X operarios que atienden",
+      "X cajeros",
+      "X tecnicos",
+      "X farmaceuticos",
+      "X surtidores de gasolina",
+      "X examinadores electronicos",
+      "X operadores",
+      "X inspectores",
+      "atendida por X personas"
+    ],
+    "M_phrases": [
+      "numero limitado de montacargas",
+      "X aviones en la base",
+      "X equipos de refrigeracion",
+      "X empleados (cuando no elaboran nuevos hasta recibir respuesta)",
+      "cada entidad maneja un unico equipo"
+    ],
+    "population_discriminators": {
+      "infinite_population": [
+        "clientes llegan segun Poisson",
+        "llegadas aleatorias sin restriccion",
+        "gran numero de empleados",
+        "distribucion Poisson"
+      ],
+      "finite_population": [
+        "numero limitado",
+        "fuente finita",
+        "poblacion finita",
+        "X equipos en total",
+        "cada entidad tiene un equipo",
+        "X aviones en la base",
+        "no elabora nuevo hasta recibir el anterior"
+      ]
+    }
+  }
+}

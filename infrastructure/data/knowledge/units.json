@@ -1,0 +1,29 @@
+{
+  "base_unit": "clientes/minuto",
+  "conversions": [
+    {"from": "clientes/hora",    "to": "clientes/minuto",  "factor": 0.016666666666666666},
+    {"from": "clientes/minuto", "to": "clientes/hora",    "factor": 60.0},
+    {"from": "clientes/segundo","to": "clientes/minuto",  "factor": 60.0},
+    {"from": "clientes/minuto", "to": "clientes/segundo", "factor": 0.016666666666666666},
+    {"from": "clientes/hora",   "to": "clientes/segundo", "factor": 0.000277777777777778},
+    {"from": "clientes/dia",    "to": "clientes/hora",    "factor": 0.041666666666666664},
+    {"from": "clientes/hora",   "to": "clientes/dia",     "factor": 24.0},
+    {"from": "minutos/cliente", "to": "clientes/minuto",  "factor_expression": "1/x"},
+    {"from": "horas/cliente",   "to": "clientes/hora",    "factor_expression": "1/x"},
+    {"from": "segundos/cliente","to": "clientes/segundo", "factor_expression": "1/x"},
+    {"from": "dias/cliente",    "to": "clientes/dia",     "factor_expression": "1/x"},
+    {"from": "dias/cliente",    "to": "clientes/hora",    "factor_expression": "1/(x*24)"},
+    {"from": "horas/cliente",   "to": "clientes/minuto",  "factor_expression": "60/x"}
+  ],
+  "time_unit_aliases": {
+    "hora":    ["hora", "horas", "hr", "h"],
+    "minuto":  ["minuto", "minutos", "min"],
+    "segundo": ["segundo", "segundos", "seg", "s"],
+    "dia":     ["dia", "dias", "day"]
+  },
+  "notes": [
+    "El analizador debe convertir todas las tasas a una unidad comun antes de calcular.",
+    "Si lambda esta en /hora y mu en /minuto, se debe convertir ambas a la misma unidad.",
+    "Ejercicios frecuentes: lambda en /hora, mu como tiempo-medio-en-minutos (requiere inversion)."
+  ]
+}

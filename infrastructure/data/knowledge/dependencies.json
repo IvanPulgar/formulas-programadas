@@ -1,0 +1,172 @@
+{
+  "formula_dependencies": [
+    {
+      "formula_id": "pics_rho",
+      "requires": ["lambda_", "mu"],
+      "produces": ["rho"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pics_p0",
+      "requires": ["lambda_", "mu"],
+      "produces": ["P0"],
+      "depends_on_formulas": ["pics_rho"]
+    },
+    {
+      "formula_id": "pics_l",
+      "requires": ["lambda_", "mu"],
+      "produces": ["L"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pics_lq",
+      "requires": ["lambda_", "mu"],
+      "produces": ["Lq"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pics_w",
+      "requires": ["lambda_", "mu"],
+      "produces": ["W"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pics_wq",
+      "requires": ["lambda_", "mu"],
+      "produces": ["Wq"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "picm_p0",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["P0"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "picm_stability",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["rho"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "picm_pk",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["Pk"],
+      "depends_on_formulas": ["picm_p0"]
+    },
+    {
+      "formula_id": "picm_lq",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["Lq"],
+      "depends_on_formulas": ["picm_p0"]
+    },
+    {
+      "formula_id": "picm_l",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["L"],
+      "depends_on_formulas": ["picm_lq"]
+    },
+    {
+      "formula_id": "picm_wq",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["Wq"],
+      "depends_on_formulas": ["picm_lq"]
+    },
+    {
+      "formula_id": "picm_w",
+      "requires": ["lambda_", "mu", "k"],
+      "produces": ["W"],
+      "depends_on_formulas": ["picm_wq"]
+    },
+    {
+      "formula_id": "pfcs_p0",
+      "requires": ["lambda_", "mu", "M"],
+      "produces": ["P0"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pfcs_rho",
+      "requires": ["lambda_", "mu", "M"],
+      "produces": ["rho"],
+      "depends_on_formulas": ["pfcs_p0"]
+    },
+    {
+      "formula_id": "pfcs_l",
+      "requires": ["lambda_", "mu", "M"],
+      "produces": ["L"],
+      "depends_on_formulas": ["pfcs_p0"]
+    },
+    {
+      "formula_id": "pfcs_lq",
+      "requires": ["lambda_", "mu", "M"],
+      "produces": ["Lq"],
+      "depends_on_formulas": ["pfcs_l"]
+    },
+    {
+      "formula_id": "pfcs_wq",
+      "requires": ["lambda_", "mu", "M"],
+      "produces": ["Wq"],
+      "depends_on_formulas": ["pfcs_lq"]
+    },
+    {
+      "formula_id": "pfcs_w",
+      "requires": ["lambda_", "mu", "M"],
+      "produces": ["W"],
+      "depends_on_formulas": ["pfcs_l"]
+    },
+    {
+      "formula_id": "pfcm_p0",
+      "requires": ["lambda_", "mu", "M", "k"],
+      "produces": ["P0"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pfcm_rho",
+      "requires": ["lambda_", "mu", "M", "k"],
+      "produces": ["rho"],
+      "depends_on_formulas": ["pfcm_p0"]
+    },
+    {
+      "formula_id": "pfcm_lq",
+      "requires": ["lambda_", "mu", "M", "k"],
+      "produces": ["Lq"],
+      "depends_on_formulas": ["pfcm_p0"]
+    },
+    {
+      "formula_id": "pfcm_l",
+      "requires": ["lambda_", "mu", "M", "k"],
+      "produces": ["L"],
+      "depends_on_formulas": ["pfcm_lq"]
+    },
+    {
+      "formula_id": "pfcm_wq",
+      "requires": ["lambda_", "mu", "M", "k"],
+      "produces": ["Wq"],
+      "depends_on_formulas": ["pfcm_lq"]
+    },
+    {
+      "formula_id": "pfcm_w",
+      "requires": ["lambda_", "mu", "M", "k"],
+      "produces": ["W"],
+      "depends_on_formulas": ["pfcm_wq"]
+    },
+    {
+      "formula_id": "pfhet_p0",
+      "requires": ["lambda_", "mu1", "mu2", "M"],
+      "produces": ["P0"],
+      "depends_on_formulas": []
+    },
+    {
+      "formula_id": "pfhet_operating_units",
+      "requires": ["lambda_", "mu1", "mu2", "M"],
+      "produces": ["L"],
+      "depends_on_formulas": ["pfhet_p0"]
+    },
+    {
+      "formula_id": "pfhet_effective_arrival",
+      "requires": ["lambda_", "mu1", "mu2", "M"],
+      "produces": ["lambda_"],
+      "depends_on_formulas": ["pfhet_p0"]
+    }
+  ]
+}

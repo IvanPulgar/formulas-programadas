@@ -1,0 +1,73 @@
+{
+  "objectives": [
+    {
+      "id": "compute_Wq",
+      "description": "Calcular tiempo promedio en cola",
+      "targets": [
+        {"model": "PICS", "formula_id": "pics_wq", "priority": 100},
+        {"model": "PICM", "formula_id": "picm_wq", "priority": 100},
+        {"model": "PFCS", "formula_id": "pfcs_wq", "priority": 100},
+        {"model": "PFCM", "formula_id": "pfcm_wq", "priority": 100}
+      ]
+    },
+    {
+      "id": "compute_W",
+      "description": "Calcular tiempo promedio en sistema",
+      "targets": [
+        {"model": "GENERAL", "formula_id": "intro_system_response_time", "priority": 90},
+        {"model": "PICS", "formula_id": "pics_w", "priority": 100},
+        {"model": "PICM", "formula_id": "picm_w", "priority": 100},
+        {"model": "PFCS", "formula_id": "pfcs_w", "priority": 100},
+        {"model": "PFCM", "formula_id": "pfcm_w", "priority": 100}
+      ]
+    },
+    {
+      "id": "compute_L",
+      "description": "Calcular numero promedio de clientes en el sistema",
+      "targets": [
+        {"model": "PICS", "formula_id": "pics_l", "priority": 100},
+        {"model": "PICM", "formula_id": "picm_l", "priority": 100},
+        {"model": "PFCS", "formula_id": "pfcs_l", "priority": 100},
+        {"model": "PFCM", "formula_id": "pfcm_l", "priority": 100}
+      ]
+    },
+    {
+      "id": "compute_Lq",
+      "description": "Calcular clientes promedio en cola",
+      "targets": [
+        {"model": "PICS", "formula_id": "pics_lq", "priority": 100},
+        {"model": "PICM", "formula_id": "picm_lq", "priority": 100},
+        {"model": "PFCS", "formula_id": "pfcs_lq", "priority": 100},
+        {"model": "PFCM", "formula_id": "pfcm_lq", "priority": 100}
+      ]
+    },
+    {
+      "id": "compute_P0",
+      "description": "Calcular probabilidad de sistema vacio",
+      "targets": [
+        {"model": "PICS", "formula_id": "pics_p0", "priority": 100},
+        {"model": "PICM", "formula_id": "picm_p0", "priority": 100},
+        {"model": "PFCS", "formula_id": "pfcs_p0", "priority": 100},
+        {"model": "PFCM", "formula_id": "pfcm_p0", "priority": 100},
+        {"model": "PFHET", "formula_id": "pfhet_p0", "priority": 100}
+      ]
+    },
+    {
+      "id": "compute_rho",
+      "description": "Calcular factor de ocupacion del sistema",
+      "targets": [
+        {"model": "PICS", "formula_id": "pics_rho", "priority": 100},
+        {"model": "PICM", "formula_id": "picm_stability", "priority": 100},
+        {"model": "PFCS", "formula_id": "pfcs_rho", "priority": 100},
+        {"model": "PFCM", "formula_id": "pfcm_rho", "priority": 100}
+      ]
+    },
+    {
+      "id": "compute_Pk",
+      "description": "Calcular probabilidad de esperar (todos los servidores ocupados) — exclusivo PICM",
+      "targets": [
+        {"model": "PICM", "formula_id": "picm_pk", "priority": 100}
+      ]
+    }
+  ]
+}

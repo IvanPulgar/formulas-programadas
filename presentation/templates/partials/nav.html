@@ -1,7 +1,8 @@
-{# Navigation bar — shared between catalog and resolver pages #}
+{# Navigation bar — shared between catalog, resolver and analyze pages #}
 {% macro nav(active) %}
 <nav class="site-nav">
   <a href="/" class="nav-btn{% if active == 'catalog' %} nav-active{% endif %}">Catálogo</a>
   <a href="/resolver" class="nav-btn{% if active == 'resolver' %} nav-active{% endif %}">Resolver fórmulas</a>
+  <a href="/analyze" class="nav-btn{% if active == 'analyze' %} nav-active{% endif %}">Analizar enunciado</a>
 </nav>
 {% endmacro %}

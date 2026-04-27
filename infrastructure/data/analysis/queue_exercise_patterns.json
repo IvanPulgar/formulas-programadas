@@ -1,0 +1,1465 @@
+{
+  "_metadata": {
+    "version": "1.0",
+    "source": "Ejercicios Propuestos Teoría de Colas.pdf",
+    "institution": "ESPOCH – FIE – Software – Técnicas de Simulación",
+    "period": "Marzo 2026 – Julio 2026",
+    "total_exercises": 30,
+    "description": "Structural patterns extracted from the 30 PDF exercises. Values are intentionally ABSENT. Only model structure, variable roles, formula order and literal intentions are encoded."
+  },
+  "model_trigger_patterns": {
+    "PICS": {
+      "description": "M/M/1: Poisson arrivals, exponential service, 1 server, infinite queue",
+      "structural_clues": [
+        "un solo servidor",
+        "una sola persona",
+        "una sola copiadora",
+        "un solo cajero",
+        "un mecanico",
+        "un tecnico especialista",
+        "un taller",
+        "un inspector",
+        "tiempos de llegada y de servicio son exponenciales",
+        "proceso de poisson",
+        "distribucion exponencial",
+        "atiende una persona",
+        "atendida por una persona",
+        "atendida por un empleado",
+        "atendido por un tecnico",
+        "servidor unico",
+        "cola unica",
+        "atendidos por un"
+      ],
+      "contra_indicators": [
+        "poblacion finita",
+        "numero limitado",
+        "numero de aviones",
+        "heterogeneo",
+        "dos tecnicos",
+        "tecnico a",
+        "tecnico b"
+      ],
+      "required_variables": ["lambda", "mu"],
+      "optional_variables": ["hours_per_day", "days_per_week", "cost_server", "cost_wait"]
+    },
+    "PICM": {
+      "description": "M/M/c: Poisson arrivals, exponential service, c servers, infinite queue",
+      "structural_clues": [
+        "personas para recibir",
+        "operadores",
+        "ventanillas",
+        "farmaceuticos",
+        "inspectores",
+        "asesoras",
+        "servidores",
+        "cajeros",
+        "plataformas",
+        "cajas",
+        "surtidores",
+        "tecnicos especialistas",
+        "cola unica",
+        "unica cola",
+        "cada ventanilla",
+        "cada servidor",
+        "erlang",
+        "c servidores",
+        "varios servidores",
+        "minimizar costos"
+      ],
+      "contra_indicators": [
+        "poblacion finita",
+        "numero limitado de",
+        "heterogeneo",
+        "cada tecnico atiende exclusivamente"
+      ],
+      "required_variables": ["lambda", "mu", "c"],
+      "optional_variables": ["hours_per_day", "days_per_week", "cost_server", "cost_wait", "wq_condition", "l_condition", "pw_condition"]
+    },
+    "PFCS": {
+      "description": "M/M/1/M/M: Finite population M, 1 server (or each independent server), exponential",
+      "structural_clues": [
+        "poblacion finita",
+        "numero limitado de",
+        "numero de aviones",
+        "numero de montacargas",
+        "numero de equipos",
+        "empleados en cada departamento",
+        "cinco empleados",
+        "mecanografa asignada",
+        "cada departamento",
+        "cada uno no elabora un nuevo",
+        "hasta que el anterior sea devuelto",
+        "equipo de refrigeracion",
+        "avion",
+        "fluencia finita"
+      ],
+      "contra_indicators": [
+        "dos tecnicos",
+        "tecnicos que demoran",
+        "heterogeneo"
+      ],
+      "required_variables": ["M", "lambda_per_unit", "mu"],
+      "optional_variables": ["hours_per_day", "cost_idle", "cost_server"]
+    },
+    "PFCM": {
+      "description": "M/M/k/M/M: Finite population M, k servers (talleres/técnicos)",
+      "structural_clues": [
+        "numero de talleres",
+        "talleres en paralelo",
+        "varios talleres",
+        "k talleres",
+        "evaluar",
+        "cuantos talleres",
+        "forma mas economica"
+      ],
+      "contra_indicators": [
+        "heterogeneo",
+        "cada tecnico atiende exclusivamente"
+      ],
+      "required_variables": ["M", "lambda_per_unit", "mu", "k"],
+      "optional_variables": ["cost_idle", "cost_server"]
+    },
+    "PFHET": {
+      "description": "Finite population, heterogeneous servers (different μ per server), birth-death process",
+      "structural_clues": [
+        "dos tecnicos",
+        "tecnico 1",
+        "tecnico 2",
+        "tecnico a",
+        "tecnico b",
+        "demoran en promedio",
+        "respectivamente",
+        "heterogeneo",
+        "cada tecnico atiende",
+        "tasas diferentes",
+        "tecnicos que demoran"
+      ],
+      "contra_indicators": [],
+      "required_variables": ["M", "lambda_per_unit", "mu1", "mu2"],
+      "optional_variables": ["hours_per_day", "days_per_week", "cost_idle", "cost_server"]
+    }
+  },
+  "unit_conversion_patterns": [
+    {
+      "description": "Service time in minutes → rate per hour",
+      "trigger_phrases": ["tiempo medio de", "tiempo que se tarda", "tiempo de servicio", "tarda en atender", "media de", "promedio de"],
+      "unit_from": "minutos",
+      "unit_to": "por_hora",
+      "formula": "mu = 60 / service_time_minutes",
+      "example": "tiempo medio de 4 minutos → μ = 15 clientes/hora"
+    },
+    {
+      "description": "Service time in seconds → rate per minute",
+      "trigger_phrases": ["segundos"],
+      "unit_from": "segundos",
+      "unit_to": "por_minuto",
+      "formula": "mu = 60 / service_time_seconds",
+      "example": "5 segundos por programa → μ = 12 programas/minuto"
+    },
+    {
+      "description": "Inter-arrival time → arrival rate",
+      "trigger_phrases": ["llegan cada", "arriban cada", "cada medio dia", "cada cuatro dias", "cada dos dias"],
+      "unit_from": "tiempo_entre_llegadas",
+      "unit_to": "tasa_llegada",
+      "formula": "lambda = 1 / interarrival_time",
+      "example": "llegan cada 2 días → λ = 0.5/día"
+    },
+    {
+      "description": "Arrivals per 5-minute period → rate per hour",
+      "trigger_phrases": ["periodos de 5 minutos", "por periodo de 5"],
+      "unit_from": "por_periodo_5min",
+      "unit_to": "por_hora",
+      "formula": "lambda = rate_per_5min * 12",
+      "example": "1.25 por periodo de 5min → λ = 15/hora"
+    },
+    {
+      "description": "Batch service rate (N units in T days) → μ per unit",
+      "trigger_phrases": ["atiende a dos equipos", "en media de"],
+      "unit_from": "lote_por_dias",
+      "unit_to": "tasa_unitaria",
+      "formula": "mu = batch_count / service_days",
+      "example": "atiende 2 equipos en 15 días → μ = 2/15 por día"
+    },
+    {
+      "description": "Manuscripts rate: pages/hour × 1/pages_per_manuscript",
+      "trigger_phrases": ["paginas en una hora", "manuscritos", "paginas por manuscrito"],
+      "unit_from": "paginas_por_hora",
+      "unit_to": "manuscritos_por_hora",
+      "formula": "mu_manuscripts = pages_per_hour / pages_per_manuscript",
+      "example": "10 páginas/hora, 0.9 páginas/manuscrito → μ = 11.11 manuscritos/hora"
+    },
+    {
+      "description": "Effective lambda with reproceso/failure probability",
+      "trigger_phrases": ["reproceso", "defectuoso", "resultan defectuosos", "fallan", "porcentaje falla"],
+      "unit_from": "lambda_nominal",
+      "unit_to": "lambda_efectiva",
+      "formula": "lambda_eff = lambda / (1 - p_defective)",
+      "note": "Only when defective items re-enter the same station"
+    }
+  ],
+  "dimensioning_patterns": [
+    {
+      "pattern_id": "find_min_c_stability",
+      "description": "Find minimum c (servers) for system stability: ρ = λ/(c·μ) < 1",
+      "trigger_phrases": ["cuantos", "minimo", "como minimo", "debe contratar", "deben atender"],
+      "model": "PICM",
+      "condition": "rho < 1",
+      "formula": "c_min = ceil(lambda / mu)"
+    },
+    {
+      "pattern_id": "find_c_for_pw_condition",
+      "description": "Find c such that P(wait) ≤ threshold",
+      "trigger_phrases": ["no mas de la mitad", "al menos", "50%", "80%", "20%", "se desea que"],
+      "model": "PICM",
+      "condition": "Pw <= threshold",
+      "formula": "try c from c_min upward until condition met"
+    },
+    {
+      "pattern_id": "find_c_for_l_condition",
+      "description": "Find c such that L ≤ threshold (mean number in system)",
+      "trigger_phrases": ["no permanezcan mas de", "promedio no mas de", "no mas de"],
+      "model": "PICM",
+      "condition": "L <= threshold",
+      "formula": "try c from c_min upward until condition met"
+    },
+    {
+      "pattern_id": "find_c_for_w_condition",
+      "description": "Find c such that W ≤ threshold (mean time in system)",
+      "trigger_phrases": ["no permanezcan mas de", "no supere", "no mas de"],
+      "model": "PICM",
+      "condition": "W <= threshold",
+      "formula": "try c from c_min upward until condition met"
+    },
+    {
+      "pattern_id": "find_c_for_wq_cond_condition",
+      "description": "Find c such that Wq_cond = Wq/Pw ≤ threshold (conditional wait, only those who wait)",
+      "trigger_phrases": ["que si deban esperar", "no supere", "condicionado a esperar"],
+      "model": "PICM",
+      "condition": "Wq / Pw <= threshold",
+      "formula": "try c from c_min upward until condition met"
+    },
+    {
+      "pattern_id": "find_k_for_cost_min",
+      "description": "Find optimal k (servers/talleres) minimizing total cost",
+      "trigger_phrases": ["minimizar costos", "forma mas economica", "menor costo total", "optimo"],
+      "model": "PICM",
+      "condition": "minimize cost_total(k)",
+      "formula": "cost_total = k * cost_server + lambda * Wq * cost_wait"
+    },
+    {
+      "pattern_id": "find_M_pfcs_p0_condition",
+      "description": "PFCS: Find M (population size) given P0 condition",
+      "trigger_phrases": ["20% del tiempo", "35%", "al menos", "se desea que", "porcentaje del tiempo"],
+      "model": "PFCS",
+      "condition": "P0 >= threshold or (1-P0) >= threshold",
+      "formula": "P0(M) from PFCS tables"
+    },
+    {
+      "pattern_id": "find_M_pfhet_p0_condition",
+      "description": "PFHET: Find M (population size) given P0 condition",
+      "trigger_phrases": ["20% de ellos no les corresponda esperar", "10% de ellos no les corresponda"],
+      "model": "PFHET",
+      "condition": "P0(M) >= threshold",
+      "formula": "P0(M) from birth-death process tables"
+    },
+    {
+      "pattern_id": "compare_alternatives_cost",
+      "description": "Compare two or more server alternatives by total cost",
+      "trigger_phrases": ["cual debe contratarse", "cual mecánico", "cual alternativa", "comparar"],
+      "model": "PICS",
+      "condition": "min(cost_total_a, cost_total_b)",
+      "formula": "cost = cost_server + lambda * Lq * cost_idle_per_unit"
+    }
+  ],
+  "exercises": [
+    {
+      "exercise_id": "tienda_alimentacion_mm1",
+      "exercise_number": 1,
+      "title": "Tienda de alimentación",
+      "statement_summary": "Una tienda atendida por una persona. Llegadas Poisson, servicio exponencial. Opera N horas diarias.",
+      "sample_statement": "Una tienda de alimentacion es atendida por una persona. El patron de llegadas sigue un proceso de Poisson con una tasa de 18 clientes por hora. El tiempo medio de atencion se distribuye exponencialmente con una media de 6 minutos. La tienda opera 9 horas diarias. Calcule: a) la probabilidad de que haya linea de espera, b) longitud media de la linea, c) tiempo medio en cola, d) minutos diarios desocupados, e) numero de clientes que esperan al dia, f) cuantas personas si 50% del tiempo estan todas desocupadas.",
+      "sample_statement_variants": [
+        "Una tienda con un empleado. Llegadas Poisson a razon de 12 por hora. Servicio exponencial promedio de 4 minutos. Opera 8 horas.",
+        "Un minimarket atendido por una persona. Proceso Poisson a 20 clientes por hora. Tiempo de servicio distribucion exponencial media 5 minutos."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1",
+      "model_reasoning": "Un solo servidor, llegadas Poisson, servicio exponencial, cola ilimitada (clientes dispuestos a esperar).",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "hours_per_day"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["tienda", "una persona", "proceso de poisson", "tiempo medio", "distribucion exponencial"],
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "probabilidad de que haya linea de espera",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["rho"],
+          "formula_order": ["rho"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "ρ = λ/μ; in M/M/1 P(wait) = ρ"
+        },
+        {
+          "id": "b",
+          "literal_text_pattern": "longitud media de la linea de espera",
+          "objective": "compute_Lq",
+          "formulas_required": ["rho", "Lq"],
+          "formula_order": ["rho", "Lq"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "Lq = ρ²/(1-ρ)"
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "tiempo medio que los clientes permanecen en cola",
+          "objective": "compute_Wq",
+          "formulas_required": ["rho", "Lq", "Wq"],
+          "formula_order": ["rho", "Lq", "Wq"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "Wq = Lq/λ"
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "minutos diarios que permanece desocupada la persona",
+          "objective": "compute_idle_time",
+          "formulas_required": ["rho", "P0", "idle_time"],
+          "formula_order": ["rho", "P0", "idle_time"],
+          "required_variables": ["lambda", "mu", "hours_per_day"],
+          "missing_if_absent": ["hours_per_day"],
+          "notes": "idle_time = P0 × hours_per_day × 60 minutes"
+        },
+        {
+          "id": "e",
+          "literal_text_pattern": "numero diario de clientes que esperan",
+          "objective": "compute_waiting_arrivals",
+          "formulas_required": ["rho", "waiting_arrivals"],
+          "formula_order": ["rho", "waiting_arrivals"],
+          "required_variables": ["lambda", "mu", "hours_per_day"],
+          "missing_if_absent": ["hours_per_day"],
+          "notes": "waiting_arrivals = λ × hours_per_day × ρ (arrivals per day × P(wait))"
+        },
+        {
+          "id": "f",
+          "literal_text_pattern": "numero de personas que deben atender si 50% del tiempo todas esten desocupadas",
+          "objective": "compute_dimensioning_idle_50",
+          "formulas_required": ["P0_multiserver", "find_c"],
+          "formula_order": ["find_c_for_P0_condition"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "Special dimensioning: find c such that P0 ≥ 0.5 (system idle 50% of time)"
+        }
+      ],
+      "notes": "Exercise has literal f which is a dimensioning problem for M/M/c. Requires finding c such that P(all servers idle) ≥ 0.5."
+    },
+    {
+      "exercise_id": "correo_urgente_mm3",
+      "exercise_number": 2,
+      "title": "Compañía de correo urgente",
+      "statement_summary": "3 personas reciben llamadas. Poisson intensity 2/min, exponential media 1 min/llamada. 8 horas diarias.",
+      "sample_statement": "Una compania de correo urgente tiene 3 personas para recibir llamadas. Las llamadas siguen un proceso de Poisson con intensidad de 2 llamadas por minuto. El tiempo de atencion de cada llamada se distribuye exponencialmente con una media de 1 minuto. La empresa opera 8 horas diarias. El costo de cada persona es de 5 dolares por hora y el costo de espera es de 8 dolares por hora. Calcule: a) P(sistema lleno sin espera), b) tiempo ocioso diario, c) Wq, d) P(esperar), e) numero optimo de personas.",
+      "sample_statement_variants": [
+        "Empresa de mensajeria con 3 operadores. Llamadas Poisson 3 por minuto. Servicio exponencial media 0.8 minutos. 7 horas diarias.",
+        "Call center de logistica. 3 empleados atienden llamadas Poisson a 2.5/min. Servicio exponencial 1.2 min por llamada."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/3",
+      "model_reasoning": "Múltiples servidores (3), llegadas Poisson, servicio exponencial, cola única FIFO.",
+      "variables_to_extract": ["lambda", "mu", "c", "hours_per_day", "cost_server_per_hour", "cost_wait_per_hour"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["3 personas", "llamadas", "proceso de poisson", "intensidad", "distribucion exponencial", "media 1 minuto"],
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "probabilidad de que una llamada encuentre todas las lineas ocupadas y ninguna en espera",
+          "objective": "compute_Pk",
+          "formulas_required": ["P0", "Pk"],
+          "formula_order": ["P0", "Pk"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": [],
+          "notes": "Erlang C formula for P(n=c). This is C(c,λ/μ) the Erlang C value."
+        },
+        {
+          "id": "b",
+          "literal_text_pattern": "tiempo al dia que estaran desocupadas todas las personas a la vez",
+          "objective": "compute_idle_time",
+          "formulas_required": ["P0", "idle_time"],
+          "formula_order": ["P0", "idle_time"],
+          "required_variables": ["lambda", "mu", "c", "hours_per_day"],
+          "missing_if_absent": ["hours_per_day"],
+          "notes": "P0 × hours_per_day × 60 = idle minutes for ALL servers simultaneously"
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "tiempo medio de espera en la cola",
+          "objective": "compute_Wq",
+          "formulas_required": ["P0", "Pk", "Lq", "Wq"],
+          "formula_order": ["P0", "Pk", "Lq", "Wq"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": [],
+          "notes": "Wq = Lq/λ using Erlang C result"
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "probabilidad de que haya linea de espera",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["P0", "Pk"],
+          "formula_order": ["P0", "Pk"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": [],
+          "notes": "In M/M/c, P(wait) = Erlang C value = Pk"
+        },
+        {
+          "id": "e",
+          "literal_text_pattern": "cuantas personas debe tener para minimizar costos",
+          "objective": "compute_cost",
+          "formulas_required": ["P0", "Pk", "Lq", "Wq", "cost_total"],
+          "formula_order": ["find_optimal_c_by_cost"],
+          "required_variables": ["lambda", "mu", "cost_server_per_hour", "cost_wait_per_hour"],
+          "missing_if_absent": ["cost_server_per_hour", "cost_wait_per_hour"],
+          "notes": "Find optimal c minimizing: c×cost_server + λ×W×cost_wait"
+        }
+      ]
+    },
+    {
+      "exercise_id": "farmacia_mmc",
+      "exercise_number": 3,
+      "title": "Farmacia con farmacéuticos",
+      "statement_summary": "Farmacia. Llegadas Poisson. Múltiples farmacéuticos, tasa servicio por farmacéutico. 8h diarias.",
+      "sample_statement": "Una farmacia recibe un promedio de 24 clientes por hora siguiendo un proceso Poisson. Cada farmaceutico puede atender en promedio 8 clientes por hora. La farmacia opera 8 horas diarias. El beneficio por cliente es de 2 dolares, el costo por farmaceutico es de 50 dolares diarios y el costo de espera es de 10 dolares por hora. Calcule: a) cuantos farmaceuticos como minimo, b) tiempo medio en farmacia, c) numero esperado de clientes, d) rentabilidad diaria.",
+      "sample_statement_variants": [
+        "Farmacia con llegadas Poisson de 20 clientes por hora. Farmaceuticos atienden 7 por hora. Calcular minimo de farmaceuticos y tiempo de permanencia.",
+        "Drogueria con proceso Poisson de 30 clientes por hora. Cada empleado atiende 10 por hora. 8 horas de operacion."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c",
+      "model_reasoning": "Múltiples servidores (farmacéuticos), llegadas Poisson, distribución de servicio Poisson (≡ exponencial). Se busca mínimo c.",
+      "variables_to_extract": ["lambda", "mu_per_server", "hours_per_day", "benefit_per_customer", "cost_server_per_day", "cost_wait_per_hour"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["farmacia", "farmaceuticos", "proceso poisson", "promedio de clientes por hora"],
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "cuantos farmaceuticos como minimo debe contratar",
+          "objective": "compute_dimensioning_min_c",
+          "formulas_required": ["find_c_stability"],
+          "formula_order": ["find_min_c_stability"],
+          "required_variables": ["lambda", "mu_per_server"],
+          "missing_if_absent": [],
+          "notes": "Minimum c for stability: c > λ/μ"
+        },
+        {
+          "id": "b",
+          "literal_text_pattern": "tiempo medio de permanencia de los clientes en la farmacia",
+          "objective": "compute_W",
+          "formulas_required": ["P0", "Pk", "Lq", "Wq", "W"],
+          "formula_order": ["P0", "Pk", "Lq", "Wq", "W"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": [],
+          "notes": "W = Wq + 1/μ"
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "numero esperado de clientes en la farmacia",
+          "objective": "compute_L",
+          "formulas_required": ["P0", "Pk", "Lq", "L"],
+          "formula_order": ["P0", "Pk", "Lq", "L"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": [],
+          "notes": "L = Lq + λ/μ"
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "rentabilidad diaria de la farmacia con costos",
+          "objective": "compute_cost",
+          "formulas_required": ["L", "Wq", "cost_total", "revenue"],
+          "formula_order": ["P0", "Pk", "Lq", "Wq", "W", "L", "revenue", "cost_total"],
+          "required_variables": ["lambda", "mu", "c", "hours_per_day", "benefit_per_customer", "cost_server_per_day", "cost_wait_per_hour"],
+          "missing_if_absent": ["benefit_per_customer", "cost_server_per_day", "cost_wait_per_hour"],
+          "notes": "Rentabilidad = Ingresos/Gastos. Ingresos = λ×h×benefit. Gastos = c×cost_server + λ×h×Wq×cost_wait"
+        }
+      ]
+    },
+    {
+      "exercise_id": "seguridad_social_mm1",
+      "exercise_number": 4,
+      "title": "Oficina de Seguridad Social – ventanilla única",
+      "statement_summary": "Obreros acuden a ventanilla. Llegadas cada T minutos (exponencial). Servicio exponencial. Un empleado.",
+      "sample_statement": "Los obreros de una fabrica acuden a una ventanilla de seguridad social. Los tiempos entre llegadas siguen distribucion exponencial, llegando en promedio 1 obrero cada 8 minutos. El tiempo de servicio es exponencial con media de 6 minutos por obrero. Un solo empleado atiende. El costo del tiempo de trabajo perdido es de 5 dolares por hora y el costo del empleado es de 4 dolares por hora. Calcule: a) numero medio en cola, b) tiempo medio en cola, c) probabilidad sistema vacio, d) costo de cada alternativa, e) fraccion que espera.",
+      "sample_statement_variants": [
+        "Obrero llega cada 5 minutos exponencial. Servicio exponencial 4 minutos. Un empleado. Calcular metricas de cola.",
+        "Ventanilla unica. Tiempo entre llegadas exponencial media 7 minutos. Tiempo servicio exponencial media 5 minutos."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1",
+      "model_reasoning": "Una sola ventanilla, llegadas con distribución exponencial (≡ Poisson), servicio exponencial.",
+      "variables_to_extract": ["lambda_per_period", "period_minutes", "lambda", "service_time_minutes", "mu", "cost_idle_per_hour", "cost_worker_per_hour"],
+      "unit_conversions_required": ["rate_per_5min_to_per_hour", "service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["ventanilla", "exponencial", "obreros", "numero medio", "tiempo entre llegadas"],
+      "literals": [
+        {
+          "id": "a",
+          "objective": "compute_Lq",
+          "formulas_required": ["rho", "Lq"],
+          "formula_order": ["rho", "Lq"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "b",
+          "objective": "compute_Wq",
+          "formulas_required": ["rho", "Lq", "Wq"],
+          "formula_order": ["rho", "Lq", "Wq"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "c",
+          "objective": "compute_P0",
+          "formulas_required": ["rho", "P0"],
+          "formula_order": ["rho", "P0"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "d",
+          "objective": "compute_cost",
+          "formulas_required": ["rho", "P0", "Lq", "cost_total"],
+          "formula_order": ["rho", "P0", "Lq", "cost_total", "compare_second_window"],
+          "required_variables": ["lambda", "mu", "cost_idle_per_hour", "cost_worker_per_hour"],
+          "missing_if_absent": ["cost_idle_per_hour", "cost_worker_per_hour"],
+          "notes": "Compare single vs. two windows by total cost"
+        },
+        {
+          "id": "e",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["rho"],
+          "formula_order": ["rho"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        }
+      ]
+    },
+    {
+      "exercise_id": "call_center_iess_mm3",
+      "exercise_number": 5,
+      "title": "Call Center IESS",
+      "statement_summary": "3 operadores reciben llamadas. Poisson 2/min, exponencial 1 min. Sin horas de funcionamiento mencionadas.",
+      "sample_statement": "Un call center del IESS tiene 3 operadores para atender llamadas. Las llamadas llegan siguiendo un proceso de Poisson con intensidad de 2 por minuto. El tiempo de atencion sigue distribucion exponencial con media de 1 minuto. El costo por operador es de 6 dolares por hora y el costo de espera del afiliado es de 9 dolares por hora. Calcule: a) P(todas lineas ocupadas sin espera), b) fraccion de afiliados que espera, c) tiempo medio de espera, d) costo horario con 3 operadores.",
+      "sample_statement_variants": [
+        "Centro de llamadas con 3 agentes. Llegadas Poisson 1.5 por minuto. Exponencial media 1.2 min. Calcular Erlang C y Wq.",
+        "Call center 3 operadores. Intensidad Poisson 2.5/min. Distribucion exponencial media 0.9 min por llamada."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/3",
+      "model_reasoning": "3 operadores, llegadas Poisson, servicio exponencial, cola ilimitada.",
+      "variables_to_extract": ["lambda", "mu", "c", "cost_server_per_hour", "cost_wait_per_hour"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["call center", "operadores", "llamadas", "proceso de poisson", "intensidad", "exponencial", "media"],
+      "literals": [
+        {
+          "id": "a",
+          "objective": "compute_Pk",
+          "formulas_required": ["P0", "Pk"],
+          "formula_order": ["P0", "Pk"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "b",
+          "literal_text_pattern": "fraccion de afiliados que debe esperar",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["P0", "Pk"],
+          "formula_order": ["P0", "Pk"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": [],
+          "notes": "In M/M/c, P(wait) = Pk (Erlang C)"
+        },
+        {
+          "id": "c",
+          "objective": "compute_Wq",
+          "formulas_required": ["P0", "Pk", "Lq", "Wq"],
+          "formula_order": ["P0", "Pk", "Lq", "Wq"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "d",
+          "objective": "compute_cost",
+          "formulas_required": ["P0", "Pk", "Lq", "Wq", "W", "L", "cost_total"],
+          "formula_order": ["P0", "Pk", "Lq", "Wq", "W", "L", "cost_total"],
+          "required_variables": ["lambda", "mu", "c", "cost_server_per_hour", "cost_wait_per_hour"],
+          "missing_if_absent": ["cost_server_per_hour", "cost_wait_per_hour"],
+          "notes": "Total cost = c×cost_server + λ×W×cost_wait (per hour)"
+        }
+      ]
+    },
+    {
+      "exercise_id": "copiadora_mm1",
+      "exercise_number": 6,
+      "title": "Copiadora en departamentos",
+      "statement_summary": "Cada departamento tiene una copiadora. Llegadas Poisson. Servicio Poisson. Part e: 5 departamentos en paralelo.",
+      "sample_statement": "Cada departamento de una empresa tiene una copiadora. Los trabajos llegan siguiendo una distribucion Poisson a razon de 12 por hora. La copiadora procesa trabajos con una distribucion Poisson con media de 15 por hora. La empresa tiene 5 departamentos identicos. Calcule: a) P0, b) tiempo total en sistema, c) P(mas de 2 esperando), d) fraccion que espera, e) empleados esperando en toda la empresa.",
+      "sample_statement_variants": [
+        "Departamento con copiadora unica. Llegadas Poisson 8/hora. Servicio Poisson 10/hora. 4 departamentos.",
+        "Fotocopiadora por departamento. Distribucion Poisson llegadas 15/h, servicio 20/h. 6 departamentos en paralelo."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1",
+      "model_reasoning": "Una copiadora por departamento, llegadas Poisson, servicio Poisson (≡ exponencial).",
+      "variables_to_extract": ["lambda", "mu", "n_departments"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["copiadora", "departamento", "distribucion poisson", "trabajos"],
+      "literals": [
+        {
+          "id": "a",
+          "objective": "compute_P0",
+          "formulas_required": ["rho", "P0"],
+          "formula_order": ["rho", "P0"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "b",
+          "objective": "compute_W",
+          "formulas_required": ["rho", "Lq", "Wq", "W"],
+          "formula_order": ["rho", "Lq", "Wq", "W"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "probabilidad de que haya mas de dos empleados esperando",
+          "objective": "compute_probability_q_at_least_r",
+          "formulas_required": ["rho", "P_q_gt_r"],
+          "formula_order": ["rho", "P_q_gt_r"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "P(Q>2) = ρ^3 in M/M/1"
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "fraccion de clientes que debe esperar en cola",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["rho"],
+          "formula_order": ["rho"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "e",
+          "literal_text_pattern": "numero medio de empleados esperando por la copiadora en toda la empresa",
+          "objective": "compute_Lq",
+          "formulas_required": ["rho", "Lq", "Lq_total"],
+          "formula_order": ["rho", "Lq", "Lq_total"],
+          "required_variables": ["lambda", "mu", "n_departments"],
+          "missing_if_absent": ["n_departments"],
+          "notes": "Lq_total = n_departments × Lq_per_department"
+        }
+      ]
+    },
+    {
+      "exercise_id": "mecanico_seleccion_mm1",
+      "exercise_number": 7,
+      "title": "Selección de mecánico – comparación de alternativas",
+      "statement_summary": "Equipos fallan a tasa Poisson. Elegir entre mecánico lento (bajo costo) y rápido (alto costo). Comparar por costo total.",
+      "sample_statement": "Los equipos de produccion fallan siguiendo una distribucion de Poisson con una tasa promedio de 2 equipos por hora. Un mecanico lento cobra 6 dolares por hora y puede reparar en promedio 4 equipos por hora. Un mecanico rapido cobra 9 dolares por hora y puede reparar en promedio 6 equipos por hora. El costo de equipo parado es de 20 dolares por hora. La fabrica opera 10 horas diarias. Determine: a) cual mecanico contratar, b) probabilidad mas de 1 equipo esperando, c) tiempo improductivo diario, d) numero de equipos esperando.",
+      "sample_statement_variants": [
+        "Equipos fallan Poisson 1.5/hora. Mecanico A: 3/hora, 5 dolares/hora. Mecanico B: 5/hora, 8 dolares/hora. Costo equipo parado 15 dolares.",
+        "Maquinas fallan Poisson tasa 2/h. Alternativa barata 4 rep/h. Alternativa cara 7 rep/h. Comparar costo total con costo ocioso 25 dolares/h."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1",
+      "model_reasoning": "Un mecánico (un servidor). M/M/1 para cada alternativa. Comparar costos.",
+      "variables_to_extract": ["lambda", "mu_slow", "mu_fast", "cost_slow_per_hour", "cost_fast_per_hour", "cost_idle_per_hour", "hours_per_day"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["mecanico", "equipos", "tasa promedio", "distribucion poisson", "costo", "lento", "rapido"],
+      "is_comparison_problem": true,
+      "comparison_alternatives": ["slow_mechanic", "fast_mechanic"],
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "cual mecanico debe contratarse",
+          "objective": "compute_cost",
+          "formulas_required": ["rho_a", "Lq_a", "cost_a", "rho_b", "Lq_b", "cost_b", "compare"],
+          "formula_order": ["rho", "Lq", "cost_total", "compare_alternatives"],
+          "required_variables": ["lambda", "mu_slow", "mu_fast", "cost_slow_per_hour", "cost_fast_per_hour", "cost_idle_per_hour"],
+          "missing_if_absent": ["cost_idle_per_hour"],
+          "notes": "For each mechanic: cost = cost_mechanic + λ × Lq × cost_idle. Choose min cost."
+        },
+        {
+          "id": "b",
+          "literal_text_pattern": "probabilidad de que esten esperando mas de un equipo",
+          "objective": "compute_probability_q_at_least_r",
+          "formulas_required": ["rho", "P_q_gt_1"],
+          "formula_order": ["rho", "P_q_gt_1"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "P(Q>1) = ρ^2 in M/M/1 (where ρ = λ/μ)"
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "tiempo improductivo total diario de los equipos",
+          "objective": "compute_idle_time",
+          "formulas_required": ["rho", "Lq", "daily_idle_time"],
+          "formula_order": ["rho", "Lq", "daily_idle_time"],
+          "required_variables": ["lambda", "mu", "hours_per_day"],
+          "missing_if_absent": ["hours_per_day"]
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "numero estimado de equipos esperando",
+          "objective": "compute_Lq",
+          "formulas_required": ["rho", "Lq"],
+          "formula_order": ["rho", "Lq"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        }
+      ]
+    },
+    {
+      "exercise_id": "mecanografa_mm1_pfcs",
+      "exercise_number": 8,
+      "title": "Mecanógrafa – M/M/1 simple y población finita",
+      "statement_summary": "Mecanógrafa escribe páginas. Parte a-c: M/M/1. Parte d-e con 5 empleados/departamento: PFCS. 3 departamentos.",
+      "sample_statement": "Una mecanografa escribe manuscritos que llegan segun proceso Poisson a razon de 2 por hora. Cada manuscrito tiene en promedio 6 paginas y la mecanografa puede escribir 10 paginas por hora. La empresa opera 8 horas diarias y cuenta con 4 empleados que esperan hasta que su manuscrito anterior sea devuelto. Calcule: a) P0, b) numero medio de manuscritos esperando, c) tiempo medio en sistema, d) con 5 empleados en el departamento calcular Lq usando poblacion finita, e) cuantos empleados si P(sin espera)=0.5.",
+      "sample_statement_variants": [
+        "Mecanografa recibe trabajos Poisson 1.5/h. Cada trabajo 8 paginas. Mecanografa 12 paginas/hora. 5 empleados finitos.",
+        "Secretaria mecanografa. Trabajos Poisson 3/h. Paginas por trabajo 5. Velocidad 15 paginas/hora. 6 empleados departamento."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1 → PFCS",
+      "model_reasoning": "Partes a-c: infinita población, M/M/1. Partes d-e: M empleados finitos, PFCS (M=5 por departamento).",
+      "variables_to_extract": ["lambda_manuscripts_per_hour", "pages_per_hour", "pages_per_manuscript", "mu", "M", "n_departments", "hours_per_day"],
+      "unit_conversions_required": ["pages_per_hour_and_pages_per_manuscript_to_mu_manuscripts"],
+      "structural_keywords": ["mecanografa", "manuscritos", "paginas", "empleados", "departamento", "hasta que el anterior sea devuelto"],
+      "model_change_at_literal": "d",
+      "model_after_change": "PFCS",
+      "literals": [
+        {
+          "id": "a",
+          "objective": "compute_rho",
+          "formulas_required": ["rho"],
+          "formula_order": ["rho"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "ρ = λ/μ using effective manuscript rate"
+        },
+        {
+          "id": "b",
+          "objective": "compute_idle_time",
+          "formulas_required": ["rho", "P0", "idle_time"],
+          "formula_order": ["rho", "P0", "idle_time"],
+          "required_variables": ["lambda", "mu", "n_departments", "hours_per_day"],
+          "missing_if_absent": ["hours_per_day"],
+          "notes": "Total idle time for all 3 depts: 3 × P0 × hours × 60 minutes"
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "probabilidad de que haya mas de tres manuscritos esperando",
+          "objective": "compute_probability_q_at_least_r",
+          "formulas_required": ["rho", "P_q_gt_3"],
+          "formula_order": ["rho", "P_q_gt_3"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "P(n>3) = ρ^4 in M/M/1 (includes being served)"
+        },
+        {
+          "id": "d",
+          "objective": "compute_L",
+          "formulas_required": ["PFCS_P0", "PFCS_Pn", "PFCS_L"],
+          "formula_order": ["PFCS_P0", "PFCS_L"],
+          "required_variables": ["M", "lambda", "mu", "n_departments"],
+          "missing_if_absent": ["M"],
+          "model_context": "PFCS",
+          "notes": "With M=5 employees per dept, finite population. L = number in system."
+        },
+        {
+          "id": "e",
+          "literal_text_pattern": "numero esperado de empleados elaborando sus manuscritos",
+          "objective": "compute_server_available_probability",
+          "formulas_required": ["PFCS_P0", "PFCS_Pn", "PFCS_L", "n_working"],
+          "formula_order": ["PFCS_P0", "PFCS_L", "n_working"],
+          "required_variables": ["M", "lambda", "mu", "n_departments"],
+          "missing_if_absent": ["M"],
+          "model_context": "PFCS",
+          "notes": "n_working = M - L (total) per department × n_depts"
+        }
+      ]
+    },
+    {
+      "exercise_id": "refrigeracion_pfcs_pfcm",
+      "exercise_number": 9,
+      "title": "Taller de mantenimiento – equipos de refrigeración (PFCS/PFCM)",
+      "statement_summary": "Equipos de refrigeración. Mantenimiento cada T días. Un taller atiende N equipos en T días. Costo por avería. Buscar número óptimo de talleres.",
+      "sample_statement": "Una empresa tiene 8 equipos de refrigeracion. Cada equipo requiere mantenimiento en promedio cada 10 dias. El taller puede reparar en promedio 1 equipo cada 3 dias. El costo de equipo en espera es de 50 dolares por dia y el costo del taller es de 80 dolares por dia. Calcule: a) P0 con 1 taller, b) numero esperado averiados, c) numero optimo de talleres minimizando costo, d) Lq con numero optimo.",
+      "sample_statement_variants": [
+        "Empresa con 6 maquinas. Fallan cada 15 dias. Taller las repara en 4 dias. Comparar 1 vs 2 talleres por costo.",
+        "10 refrigeradores empresariales. Cada uno falla cada 12 dias. Cada taller atiende uno en promedio en 3 dias. Poblacion finita."
+      ],
+      "detected_model": "PFCS",
+      "model_alias": "PFCS → PFCM (optimization)",
+      "model_reasoning": "Población finita (equipos de la empresa). Un taller inicialmente (PFCS). Luego comparación de k talleres (PFCM).",
+      "variables_to_extract": ["M", "lambda_per_unit_per_day", "mu_per_taller", "cost_broken_per_day", "cost_taller_per_day"],
+      "unit_conversions_required": ["batch_service_to_unit_rate"],
+      "structural_keywords": ["equipos de refrigeracion", "mantenimiento", "dias", "taller", "costo", "poblacion finita"],
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "probabilidad de que no encuentre a ningun otro equipo esperando",
+          "objective": "compute_P0",
+          "formulas_required": ["PFCS_P0"],
+          "formula_order": ["PFCS_P0"],
+          "required_variables": ["M", "lambda_per_unit", "mu"],
+          "missing_if_absent": ["M"]
+        },
+        {
+          "id": "b",
+          "literal_text_pattern": "fraccion de equipos que deben estar funcionando en espera",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["PFCS_P0", "PFCS_Lq", "fraccion_espera"],
+          "formula_order": ["PFCS_P0", "PFCS_Lq"],
+          "required_variables": ["M", "lambda_per_unit", "mu"],
+          "missing_if_absent": ["M"]
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "numero de talleres para mantenimiento mas economico",
+          "objective": "compute_dimensioning_optimal_k",
+          "formulas_required": ["PFCM_P0", "PFCM_Lq", "cost_total"],
+          "formula_order": ["find_k_for_cost_min"],
+          "required_variables": ["M", "lambda_per_unit", "mu", "cost_broken_per_day", "cost_taller_per_day"],
+          "missing_if_absent": ["cost_broken_per_day", "cost_taller_per_day"],
+          "model_context": "PFCM",
+          "notes": "Sweep k=1,2,3,... comparing total cost = k×cost_taller + Lq×cost_broken"
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "probabilidad de encontrar maximo un equipo esperando",
+          "objective": "compute_probability_q_between",
+          "formulas_required": ["PFCM_P0", "PFCM_Pn"],
+          "formula_order": ["PFCM_P0", "PFCM_Pn"],
+          "required_variables": ["M", "lambda_per_unit", "mu", "k"],
+          "missing_if_absent": [],
+          "model_context": "PFCM"
+        }
+      ]
+    },
+    {
+      "exercise_id": "servidor_universitario_mm1",
+      "exercise_number": 10,
+      "title": "Servidor universitario – programas de ordenador",
+      "statement_summary": "Programas llegan a servidor. λ = 10/minuto. Tiempo ejecución media 5 segundos. M/M/1.",
+      "sample_statement": "Un servidor universitario recibe programas para ejecucion. Los programas llegan segun un proceso de Poisson con una tasa de 12 programas por minuto. El tiempo de ejecucion tiene distribucion exponencial con una media de 4 segundos. Calcule: a) probabilidad de servidor libre, b) probabilidad de que haya espera, c) probabilidad de que al menos dos programas esten esperando en cola, d) tiempo medio en el sistema, e) numero medio de programas en espera.",
+      "sample_statement_variants": [
+        "Servidor recibe programas Poisson 8/minuto. Tiempo ejecucion exponencial media 6 segundos. Calcular metricas M/M/1.",
+        "Sistema informatico procesa peticiones Poisson 15/min. Servicio exponencial media 3 segundos. Un procesador."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1",
+      "model_reasoning": "Un servidor, llegadas Poisson, tiempos de servicio exponencial (segundos convertidos a minutos).",
+      "variables_to_extract": ["lambda", "service_time_seconds", "mu"],
+      "unit_conversions_required": ["service_time_seconds_to_mu_per_minute"],
+      "structural_keywords": ["servidor", "programas", "minuto", "segundos", "exponencialmente"],
+      "literals": [
+        {
+          "id": "a",
+          "objective": "compute_P0",
+          "formulas_required": ["rho", "P0"],
+          "formula_order": ["rho", "P0"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "b",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["rho"],
+          "formula_order": ["rho"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "c",
+          "literal_text_pattern": "probabilidad de que al menos dos programas esten esperando",
+          "objective": "compute_probability_q_at_least_r",
+          "formulas_required": ["rho", "P_q_gte_2"],
+          "formula_order": ["rho", "P_q_gte_2"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "P(Q≥2) = P(n≥3) in M/M/1 = ρ^3 (queue ≥ 2 means total n ≥ 3)"
+        },
+        {
+          "id": "d",
+          "objective": "compute_W",
+          "formulas_required": ["rho", "Lq", "Wq", "W"],
+          "formula_order": ["rho", "Lq", "Wq", "W"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "e",
+          "objective": "compute_Lq",
+          "formulas_required": ["rho", "Lq"],
+          "formula_order": ["rho", "Lq"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        }
+      ]
+    },
+    {
+      "exercise_id": "gasolinera_mmc_dimensionamiento",
+      "exercise_number": 11,
+      "title": "Gasolinera – dimensionamiento por condición de probabilidad",
+      "statement_summary": "Vehículos llegan Poisson. Servicio exponencial. 12h diarias. Buscar c surtidores tal que P(n≥c)≤0.2.",
+      "sample_statement": "Una gasolinera recibe vehiculos segun un proceso Poisson con una tasa de 20 vehiculos por hora. Cada surtidor puede atender en promedio 8 vehiculos por hora con distribucion exponencial. La gasolinera opera 10 horas diarias. El costo de cada surtidor es de 30 dolares por dia y el costo de espera es de 0.5 dolares por minuto. Calcule: a) cuantos surtidores para que P(n>=c)<=0.2, b) tiempo diario desocupado, c) costo diario total, d) probabilidad de que haya espera.",
+      "sample_statement_variants": [
+        "Gasolinera con llegadas Poisson 15/h. Cada surtidor atiende 6/h. Condicion P(espera)<=0.25. 12 horas.",
+        "Estacion de servicio. Vehiculos Poisson 25/h. Surtidores exponencial 10/h. Buscar numero de surtidores."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c",
+      "model_reasoning": "Múltiples surtidores, cola única, dimensionamiento por condición de probabilidad.",
+      "variables_to_extract": ["lambda", "mu", "hours_per_day", "cost_server_per_day", "cost_wait_per_minute"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["surtidores", "vehiculos", "gasolinera", "poisson", "exponencial"],
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "cuantos surtidores para que P(n>=c) <= 0.2",
+          "objective": "compute_dimensioning_prob_condition",
+          "formulas_required": ["P0", "Pn", "find_c_for_P_condition"],
+          "formula_order": ["find_c_for_prob_condition"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": [],
+          "notes": "Find c such that P(n ≥ c) = ρ^c ≤ 0.2 (varies by model)"
+        },
+        {
+          "id": "b",
+          "objective": "compute_idle_time",
+          "formulas_required": ["P0", "idle_time"],
+          "formula_order": ["P0", "idle_time"],
+          "required_variables": ["lambda", "mu", "c", "hours_per_day"],
+          "missing_if_absent": ["hours_per_day"]
+        },
+        {
+          "id": "c",
+          "objective": "compute_cost",
+          "formulas_required": ["P0", "Pk", "Lq", "Wq", "cost_total"],
+          "formula_order": ["P0", "Pk", "Lq", "Wq", "cost_total"],
+          "required_variables": ["lambda", "mu", "c", "cost_server_per_day", "cost_wait_per_minute"],
+          "missing_if_absent": ["cost_server_per_day", "cost_wait_per_minute"]
+        },
+        {
+          "id": "d",
+          "objective": "compute_wait_probability",
+          "formulas_required": ["P0", "Pk"],
+          "formula_order": ["P0", "Pk"],
+          "required_variables": ["lambda", "mu", "c"],
+          "missing_if_absent": []
+        }
+      ]
+    },
+    {
+      "exercise_id": "terminal_facturacion_mm2",
+      "exercise_number": 12,
+      "title": "Terminal de facturación – 2 operarios",
+      "statement_summary": "2 operarios. Llegadas Poisson 80/hora. Servicio exponencial 1.2 min. 8h diarias.",
+      "sample_statement": "Una terminal de facturacion tiene 2 operarios. Los clientes llegan segun un proceso Poisson con una tasa de 60 por hora. El tiempo de atencion por operario sigue distribucion exponencial con media de 1.5 minutos. La terminal opera 8 horas diarias. El costo de cada operario es de 40 dolares diarios y el costo de espera es de 15 dolares por hora. Calcule: a) numero esperado en el sistema, b) tiempo medio en sistema, c) tiempo diario desocupado, d) probabilidad de esperar, e) costo total diario.",
+      "sample_statement_variants": [
+        "Terminal de facturacion 2 cajeros. Llegadas Poisson 50/h. Servicio exponencial 1 minuto. 9 horas.",
+        "Dos operarios en punto de venta. Clientes Poisson 70/h. Exponencial media 1.2 min. Calcular L y W."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/2",
+      "model_reasoning": "Dos operarios, cola única, llegadas Poisson, servicio exponencial.",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "c", "hours_per_day", "cost_server_per_day", "cost_wait_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["terminal", "operarios", "poisson", "exponencial", "minutos"],
+      "literals": [
+        { "id": "a", "objective": "compute_L", "formulas_required": ["P0", "Pk", "Lq", "L"], "formula_order": ["P0", "Pk", "Lq", "L"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_W", "formulas_required": ["P0", "Pk", "Lq", "Wq", "W"], "formula_order": ["P0", "Pk", "Lq", "Wq", "W"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_idle_time", "formulas_required": ["P0", "idle_time"], "formula_order": ["P0", "idle_time"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "d", "objective": "compute_wait_probability", "formulas_required": ["P0", "Pk"], "formula_order": ["P0", "Pk"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["P0", "Pk", "Lq", "Wq", "cost_total"], "formula_order": ["P0", "Pk", "Lq", "Wq", "W", "cost_total"], "required_variables": ["lambda", "mu", "c", "cost_server_per_day", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_day", "cost_wait_per_hour"] }
+      ]
+    },
+    {
+      "exercise_id": "base_aerea_alternativas_mm1",
+      "exercise_number": 13,
+      "title": "Base aérea – comparación de políticas de revisión",
+      "statement_summary": "Aviones llegan Poisson. Alternativa A: revisar 1 motor/visita. Alternativa B: revisar 4 motores/visita (λ/4, μ/4). Parte d: 5 aviones (PFCS).",
+      "sample_statement": "Los aviones de una base aerea llegan al taller para revision. Alternativa A: revisar solo 1 motor por visita, llegadas Poisson 3 aviones/dia, servicio exponencial media 2 dias. Alternativa B: revisar los 4 motores por visita, llegadas Poisson 0.75 aviones/dia, servicio exponencial media 8 dias. El costo de avion en taller es 200 dolares/dia. Calcule: a) tiempo en taller por alternativa en una semana, b) tiempo desocupado semanal, c) P(haya espera), d) con solo 4 aviones en la base calcular aviones operando.",
+      "sample_statement_variants": [
+        "Base aerea, aviones revisan motores. Alternativa A 1 motor, alternativa B todos los motores. Con 5 aviones PFCS.",
+        "Taller de base aerea. Dos politicas de mantenimiento. Comprar por tiempo en cola y tiempo desocupado."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1 (comparison) + PFCS (literal d)",
+      "model_reasoning": "Dos alternativas M/M/1. Parte d agrega restricción de población finita con M=5 aviones.",
+      "variables_to_extract": ["lambda_A", "mu_A", "lambda_B", "mu_B", "M", "days_per_year"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["base aerea", "aviones", "motor", "taller", "poisson", "exponencial", "dias"],
+      "is_comparison_problem": true,
+      "literals": [
+        {
+          "id": "a",
+          "literal_text_pattern": "tiempo total en taller por aviones en una semana, cada alternativa",
+          "objective": "compute_W",
+          "formulas_required": ["rho_A", "W_A", "weekly_total_A", "rho_B", "W_B", "weekly_total_B"],
+          "formula_order": ["rho", "Lq", "Wq", "W", "weekly_total", "compare"],
+          "required_variables": ["lambda_A", "mu_A", "lambda_B", "mu_B"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "b", "objective": "compute_idle_time",
+          "formulas_required": ["rho", "P0", "weekly_idle"],
+          "formula_order": ["rho", "P0", "weekly_idle"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "c", "objective": "compute_wait_probability",
+          "formulas_required": ["rho"],
+          "formula_order": ["rho"],
+          "required_variables": ["lambda", "mu"],
+          "missing_if_absent": []
+        },
+        {
+          "id": "d",
+          "literal_text_pattern": "con 5 aviones, numero medio de aviones operando",
+          "objective": "compute_L",
+          "formulas_required": ["PFCS_P0", "PFCS_Pn", "PFCS_L", "n_operating"],
+          "formula_order": ["PFCS_P0", "PFCS_L", "n_operating"],
+          "required_variables": ["M", "lambda_per_unit", "mu"],
+          "missing_if_absent": [],
+          "model_context": "PFCS",
+          "notes": "n_operating = M - L_system"
+        }
+      ]
+    },
+    {
+      "exercise_id": "base_aerea_pfcs_p0_condition",
+      "exercise_number": 14,
+      "title": "Base aérea – PFCS con condición de P0 (20% libre)",
+      "statement_summary": "PFCS: taller revisa un motor. λ=0.5/día, μ=1/día. Buscar M tal que taller libre 20% del tiempo.",
+      "sample_statement": "Los aviones de una base aerea necesitan mantenimiento de manera exponencial con una tasa de 0.4 aviones por dia. El taller puede reparar en promedio 1 avion por dia (exponencial). La empresa opera 5 dias semanales. El costo del taller es 150 dolares diarios y el costo de espera es 100 dolares por dia. Determine: a) cuantos aviones puede tener la base para que el taller este libre el 20% del tiempo, b) horas semanales de trabajo del taller, c) probabilidad de que algun avion espere, d) numero medio de aviones en sistema, e) costo semanal total.",
+      "sample_statement_variants": [
+        "Flota de aviones, un taller de mantenimiento. Condicion: P(taller libre) >= 0.15. Pobacion finita M a determinar.",
+        "Base aerea PFCS. Lambda por unidad 0.3/dia. Mu 1.2/dia. Cuantos aviones para P0 >= 0.25."
+      ],
+      "detected_model": "PFCS",
+      "model_alias": "PFCS",
+      "model_reasoning": "Población finita de aviones (M a determinar). Un taller. Condición sobre P0.",
+      "variables_to_extract": ["lambda_per_unit", "mu", "hours_per_day", "cost_taller_per_day", "cost_wait_per_day"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["base aerea", "aviones", "taller", "mantenimiento", "exponencial", "dias"],
+      "literals": [
+        { "id": "a", "literal_text_pattern": "cuantos aviones si taller libre 20% del tiempo", "objective": "compute_dimensioning_M_p0_condition", "formulas_required": ["PFCS_P0_function_of_M"], "formula_order": ["find_M_for_P0_condition"], "required_variables": ["lambda_per_unit", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_idle_time", "formulas_required": ["PFCS_P0", "busy_time_weekly"], "formula_order": ["PFCS_P0", "busy_time"], "required_variables": ["M", "lambda_per_unit", "mu", "hours_per_day"], "missing_if_absent": ["M"] },
+        { "id": "c", "objective": "compute_wait_probability", "formulas_required": ["PFCS_P0", "Lq"], "formula_order": ["PFCS_P0", "Lq"], "required_variables": ["M", "lambda_per_unit", "mu"], "missing_if_absent": ["M"] },
+        { "id": "d", "objective": "compute_L", "formulas_required": ["PFCS_P0", "PFCS_L"], "formula_order": ["PFCS_P0", "PFCS_L"], "required_variables": ["M", "lambda_per_unit", "mu"], "missing_if_absent": ["M"] },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["PFCS_P0", "PFCS_Lq", "cost_total"], "formula_order": ["PFCS_P0", "PFCS_Lq", "cost_total"], "required_variables": ["M", "lambda_per_unit", "mu", "cost_taller_per_day", "cost_wait_per_day"], "missing_if_absent": ["cost_taller_per_day", "cost_wait_per_day"] }
+      ]
+    },
+    {
+      "exercise_id": "base_aerea_pfcs_35pct_operating",
+      "exercise_number": 15,
+      "title": "Base aérea – PFCS con condición de 35% operando",
+      "statement_summary": "Similar al ejercicio 14. Condición: al menos 35% de aviones en operación.",
+      "sample_statement": "Los aviones de una base aerea requieren mantenimiento exponencial a razon de 0.4 por dia. El taller atiende a razon de 1 por dia (exponencial). El costo del taller es 150 dolares diarios y el de espera 100 dolares diarios. Determine: a) cuantos aviones si el 35% debe estar operativo siempre, b) horas semanales de trabajo del taller, c) probabilidad de que alguno espere, d) numero medio en sistema, e) costo semanal total.",
+      "sample_statement_variants": [
+        "Base aerea poblacion finita. Condicion: n_operating >= 0.35 * M. Exponencial lambda 0.5/dia, mu 1/dia.",
+        "PFCS aviones. Condicion operacion 30%. Lambda unitario 0.3/dia. Mu 1.1/dia. Determinar M optimo."
+      ],
+      "detected_model": "PFCS",
+      "model_alias": "PFCS",
+      "model_reasoning": "Misma estructura que ej.14. Condición diferente: n_operating ≥ 0.35×M.",
+      "variables_to_extract": ["lambda_per_unit", "mu", "hours_per_day", "cost_taller_per_day", "cost_wait_per_day"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["base aerea", "aviones", "taller", "mantenimiento", "35%", "operacion"],
+      "literals": [
+        { "id": "a", "objective": "compute_dimensioning_M_operating_condition", "formulas_required": ["PFCS_L", "n_operating"], "formula_order": ["find_M_for_operating_condition"], "required_variables": ["lambda_per_unit", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_idle_time", "formulas_required": ["PFCS_P0", "busy_hours_weekly"], "formula_order": ["PFCS_P0", "busy_hours"], "required_variables": ["M", "lambda_per_unit", "mu", "hours_per_day"], "missing_if_absent": ["M"] },
+        { "id": "c", "objective": "compute_wait_probability", "formulas_required": ["PFCS_P0", "PFCS_Lq"], "formula_order": ["PFCS_P0", "PFCS_Lq"], "required_variables": ["M", "lambda_per_unit", "mu"], "missing_if_absent": ["M"] },
+        { "id": "d", "objective": "compute_L", "formulas_required": ["PFCS_P0", "PFCS_L"], "formula_order": ["PFCS_P0", "PFCS_L"], "required_variables": ["M", "lambda_per_unit", "mu"], "missing_if_absent": ["M"] },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["PFCS_P0", "PFCS_Lq", "cost_total"], "formula_order": ["PFCS_P0", "PFCS_Lq", "cost_total"], "required_variables": ["M", "lambda_per_unit", "mu", "cost_taller_per_day", "cost_wait_per_day"], "missing_if_absent": ["cost_taller_per_day", "cost_wait_per_day"] }
+      ]
+    },
+    {
+      "exercise_id": "terminal_carga_mmc_opt",
+      "exercise_number": 16,
+      "title": "Terminal de carga/descarga – plataformas M/M/c con costos",
+      "statement_summary": "Camiones llegan Poisson. Plataformas = servidores (cada una 2 empleados). Buscar óptimo por costo. Literal f: demanda +50%.",
+      "sample_statement": "Los camiones de una terminal de carga llegan segun proceso Poisson a razon de 10 por hora. Cada plataforma de descarga con 2 empleados puede atender en promedio 4 camiones por hora (exponencial). La terminal opera 10 horas. Cada empleado cobra 5 dolares por hora y el costo de camion esperando es de 20 dolares por hora. Calcule: a) numero optimo de plataformas, b) tiempo diario desocupado, c) probabilidad de plataforma disponible, d) Lq, e) Wq, f) si la demanda aumenta 50% cuantas plataformas adicionales para Pw <= 0.5.",
+      "sample_statement_variants": [
+        "Terminal con plataformas de descarga. Camiones Poisson 8/h. Cada plataforma 3 camiones/h. Minimizar costos.",
+        "Terminal de carga. Llegadas Poisson 12/h. Plataformas con 2 operarios, 5 camiones/h. Optimizar numero de plataformas."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c",
+      "model_reasoning": "Múltiples plataformas como servidores. Cola única. Optimizar costos.",
+      "variables_to_extract": ["lambda", "mu", "hours_per_day", "cost_employee_per_hour", "cost_truck_idle_per_hour"],
+      "unit_conversions_required": [],
+      "structural_keywords": ["plataformas", "camiones", "descarga", "poisson", "exponencial", "empleados", "costo"],
+      "literals": [
+        { "id": "a", "objective": "compute_dimensioning_optimal_k", "formulas_required": ["P0", "Pk", "Lq", "Wq", "cost_total"], "formula_order": ["find_k_for_cost_min"], "required_variables": ["lambda", "mu", "cost_employee_per_hour", "cost_truck_idle_per_hour"], "missing_if_absent": ["cost_employee_per_hour", "cost_truck_idle_per_hour"] },
+        { "id": "b", "objective": "compute_idle_time", "formulas_required": ["P0", "idle_time"], "formula_order": ["P0", "idle_time"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "c", "objective": "compute_server_available_probability", "formulas_required": ["P0"], "formula_order": ["P0"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_Lq", "formulas_required": ["P0", "Pk", "Lq"], "formula_order": ["P0", "Pk", "Lq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "e", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "f", "literal_text_pattern": "demanda 50% adicional, cuantas plataformas adicionales para Pw <= 0.5", "objective": "compute_dimensioning_increased_demand", "formulas_required": ["P0", "Pk", "find_c_for_Pw_condition"], "formula_order": ["scale_lambda", "find_c_for_Pw_condition"], "required_variables": ["lambda", "mu"], "missing_if_absent": [], "notes": "Lambda increases 50%, find new c for Pw ≤ 0.5" }
+      ]
+    },
+    {
+      "exercise_id": "cajero_vehicular_mm1",
+      "exercise_number": 17,
+      "title": "Cajero vehicular – M/M/1 con costos y dimensionamiento M/M/c",
+      "statement_summary": "Un cajero vehicular. Llegadas Poisson, servicio exponencial. 12h diarias. Literal f: dimensionar M/M/c para minimizar costos.",
+      "sample_statement": "Un banco tiene un cajero vehicular. Los automoviles llegan segun un proceso Poisson con una tasa de 20 vehiculos por hora. El tiempo de atencion sigue distribucion exponencial con media de 2 minutos por vehiculo. El banco opera 10 horas diarias. El costo del cajero es de 80 dolares diarios y el costo de espera es de 15 dolares por hora. Calcule: a) P0, b) Lq, c) W, d) cuantos autos esperan en el dia, e) costo diario con 1 cajero, f) numero optimo de cajeros para minimizar costos.",
+      "sample_statement_variants": [
+        "Cajero vehicular banco. Llegadas Poisson 15/h. Servicio exponencial 3 min. 12 horas operacion. Calcular metricas.",
+        "Banco con automoviles llegando Poisson 25/h. Cajero atiende 30/h (exponencial). 8 horas. Optimizar cajeros."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1 → M/M/c (literal f)",
+      "model_reasoning": "Inicialmente un servidor. Literal f evalúa configuraciones multiservidor.",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "hours_per_day", "cost_server_per_day", "cost_wait_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["cajero", "vehicular", "automoviles", "poisson", "exponencial", "minutos"],
+      "literals": [
+        { "id": "a", "objective": "compute_P0", "formulas_required": ["rho", "P0"], "formula_order": ["rho", "P0"], "required_variables": ["lambda", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_Lq", "formulas_required": ["rho", "Lq"], "formula_order": ["rho", "Lq"], "required_variables": ["lambda", "mu"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_W", "formulas_required": ["rho", "Lq", "Wq", "W"], "formula_order": ["rho", "Lq", "Wq", "W"], "required_variables": ["lambda", "mu"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_waiting_arrivals", "formulas_required": ["rho", "waiting_arrivals"], "formula_order": ["rho", "waiting_arrivals"], "required_variables": ["lambda", "mu", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["rho", "Lq", "Wq", "cost_total"], "formula_order": ["rho", "Lq", "Wq", "cost_total"], "required_variables": ["lambda", "mu", "hours_per_day", "cost_server_per_day", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_day", "cost_wait_per_hour"] },
+        { "id": "f", "objective": "compute_dimensioning_optimal_k", "formulas_required": ["P0_mmc", "Pk_mmc", "Lq_mmc", "cost_mmc"], "formula_order": ["find_k_for_cost_min"], "required_variables": ["lambda", "mu", "cost_server_per_day", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_day", "cost_wait_per_hour"], "model_context": "PICM" }
+      ]
+    },
+    {
+      "exercise_id": "supermercado_2colas_independientes",
+      "exercise_number": 18,
+      "title": "Supermercado – 2 cajas independientes (2 × M/M/1)",
+      "statement_summary": "2 cajas independientes. Cada caja tiene su propia cola Poisson. Servicio exponencial (productos × tiempo/producto). 10h diarias.",
+      "sample_statement": "Un supermercado tiene 2 cajas con colas independientes. Los clientes llegan a cada caja segun un proceso Poisson con una tasa de 15 clientes por hora. Cada cliente tiene en promedio 20 productos y cada producto requiere 2 segundos para registrarse. El supermercado opera 9 horas diarias. El costo de cada cajera es de 8 dolares por hora y el costo de espera es de 10 dolares por hora. Determine: a) Wq por caja, b) P(cola >= 1) por caja, c) Lq total en el supermercado, d) tiempo diario cajeras desocupadas, e) costo diario total.",
+      "sample_statement_variants": [
+        "Supermercado 2 cajeros colas independientes. Poisson 12/h por caja. 25 productos, 2.5 segundos por producto. 10 horas.",
+        "Dos cajas separadas supermercado. Lambda 18/h cada una. 15 productos por cliente, 3 segundos por producto."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1 × 2 (independent queues)",
+      "model_reasoning": "Dos colas independientes, cada una M/M/1. NO cola única. Resultados multiplicados por 2 para totales.",
+      "variables_to_extract": ["lambda_per_queue", "products_per_customer_mean", "time_per_product_seconds", "mu", "n_queues", "hours_per_day", "cost_server_per_hour", "cost_wait_per_hour"],
+      "unit_conversions_required": ["products_and_seconds_to_mu_per_minute"],
+      "structural_keywords": ["supermercado", "cajas", "colas independientes", "poisson", "exponencial", "productos"],
+      "is_multi_queue_independent": true,
+      "literals": [
+        { "id": "a", "objective": "compute_Wq", "formulas_required": ["rho", "Lq", "Wq"], "formula_order": ["rho", "Lq", "Wq"], "required_variables": ["lambda", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_probability_q_at_least_r", "formulas_required": ["rho", "P_q_gte_1"], "formula_order": ["rho", "P_q_gte_1"], "required_variables": ["lambda", "mu"], "missing_if_absent": [], "notes": "P(Q≥1) = ρ² per queue" },
+        { "id": "c", "objective": "compute_Lq", "formulas_required": ["rho", "Lq", "Lq_total"], "formula_order": ["rho", "Lq", "Lq_total"], "required_variables": ["lambda", "mu", "n_queues"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_idle_time", "formulas_required": ["rho", "P0", "idle_total"], "formula_order": ["rho", "P0", "idle_total"], "required_variables": ["lambda", "mu", "n_queues", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["rho", "Lq", "Wq", "cost_total"], "formula_order": ["rho", "Lq", "Wq", "cost_total"], "required_variables": ["lambda", "mu", "n_queues", "cost_server_per_hour", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_hour", "cost_wait_per_hour"] }
+      ]
+    },
+    {
+      "exercise_id": "supermercado_cola_unica_mm2",
+      "exercise_number": 19,
+      "title": "Supermercado – cola única M/M/2",
+      "statement_summary": "2 cajas, cola única. λ total Poisson. Servicio exponencial. 10h diarias.",
+      "sample_statement": "Un supermercado tiene 2 cajas con una cola unica. Los clientes llegan segun un proceso Poisson con una tasa total de 30 clientes por hora. Cada cliente tiene en promedio 20 productos y cada producto requiere 2 segundos. El supermercado opera 9 horas. El costo por cajera es de 8 dolares/hora y el costo de espera es 10 dolares/hora. Determine: a) minutos diarios con ambas cajeras desocupadas, b) P(cola >= 1), c) Wq, d) tiempo total cajeras desocupadas, e) costo diario total.",
+      "sample_statement_variants": [
+        "Supermercado cola unica dos cajas. Llegadas Poisson 25/h. 20 productos por cliente, 2 segundos por producto.",
+        "2 cajas con fila unica. Clientes Poisson 35/h. Exponencial media 3 minutos. 10 horas. Calcular P0 y Wq."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/2",
+      "model_reasoning": "Cola única para 2 servidores = M/M/2. Diferente al ejercicio 18.",
+      "variables_to_extract": ["lambda", "products_per_customer_mean", "time_per_product_seconds", "mu", "c", "hours_per_day", "cost_server_per_hour", "cost_wait_per_hour"],
+      "unit_conversions_required": ["products_and_seconds_to_mu_per_minute"],
+      "structural_keywords": ["supermercado", "unica cola", "cajas", "poisson", "exponencial", "productos"],
+      "literals": [
+        { "id": "a", "objective": "compute_idle_time", "formulas_required": ["P0", "idle_concurrent"], "formula_order": ["P0", "idle_concurrent"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "notes": "Time when both cashiers idle simultaneously = P0 × hours × 60" },
+        { "id": "b", "objective": "compute_probability_q_at_least_r", "formulas_required": ["P0", "Pk", "P_q_gte_1"], "formula_order": ["P0", "Pk", "P_q_gte_1"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_idle_time", "formulas_required": ["P0", "P1", "idle_total"], "formula_order": ["P0", "P1", "idle_total"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "notes": "Total idle = time with 0 or 1 customer (server not fully occupied)" },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["P0", "Pk", "Lq", "Wq", "W", "cost_total"], "formula_order": ["P0", "Pk", "Lq", "Wq", "W", "cost_total"], "required_variables": ["lambda", "mu", "c", "cost_server_per_hour", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_hour", "cost_wait_per_hour"] }
+      ]
+    },
+    {
+      "exercise_id": "montacargas_pfhet",
+      "exercise_number": 20,
+      "title": "Montacargas – PFHET (2 técnicos heterogéneos)",
+      "statement_summary": "Montacargas son atendidos por 2 técnicos con tasas distintas (μ1≠μ2). Población finita M (a determinar). λ exponencial. Condición: P0 ≥ 20%.",
+      "sample_statement": "Una empresa tiene montacargas que se averian exponencialmente. Dos tecnicos heterogeneos los atienden: el tecnico A demora en promedio 4 horas en cada reparacion y el tecnico B demora en promedio 8 horas respectivamente. El tiempo entre averias de cada montacargas es exponencial con media de 1 dia. La empresa opera 10 horas diarias 7 dias a la semana. El costo del sistema es de 100 dolares diarios y el costo de montacargas parado es de 15 dolares por hora. Determine: a) cuantos montacargas para que 20% del tiempo no haya espera, b) horas con ambos tecnicos ocupados, c) probabilidad de que algun tecnico este disponible, d) montacargas operando, e) montacargas que esperan por semana, f) costo semanal total.",
+      "sample_statement_variants": [
+        "Dos tecnicos con distinta velocidad atienden montacargas de empresa. Poblacion finita. Tecnico A 3h, tecnico B 6h por averia.",
+        "PFHET montacargas. Mu1 = 3/dia, mu2 = 1.5/dia. Lambda por unidad 0.5/dia. Condicion P0 >= 0.15."
+      ],
+      "detected_model": "PFHET",
+      "model_alias": "PFHET",
+      "model_reasoning": "Dos técnicos con tasas de servicio diferentes. Población finita. Proceso de nacimiento-muerte.",
+      "variables_to_extract": ["service_time_tech1_minutes", "service_time_tech2_minutes", "mu1", "mu2", "lambda_per_unit", "interarrival_hours", "hours_per_day", "days_per_week", "cost_system_per_day", "cost_idle_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour", "interarrival_days_to_lambda_per_hour"],
+      "structural_keywords": ["montacargas", "dos tecnicos", "demoran en promedio", "respectivamente", "exponencial", "medio dia", "10 horas", "7 dias"],
+      "literals": [
+        { "id": "a", "literal_text_pattern": "cuantos montacargas para que 20% no espere", "objective": "compute_dimensioning_M_p0_condition", "formulas_required": ["PFHET_Pn", "P0_function_of_M"], "formula_order": ["find_M_for_P0_gte_20pct"], "required_variables": ["mu1", "mu2", "lambda_per_unit"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_idle_time", "formulas_required": ["PFHET_Pn", "both_busy_probability", "daily_hours_both_busy"], "formula_order": ["PFHET_Pn", "both_busy", "daily_hours"], "required_variables": ["M", "mu1", "mu2", "lambda_per_unit", "hours_per_day"], "missing_if_absent": ["M"] },
+        { "id": "c", "objective": "compute_server_available_probability", "formulas_required": ["PFHET_Pn", "P_some_tech_available"], "formula_order": ["PFHET_Pn", "P_tech_available"], "required_variables": ["M", "mu1", "mu2", "lambda_per_unit"], "missing_if_absent": ["M"] },
+        { "id": "d", "objective": "compute_L", "formulas_required": ["PFHET_Pn", "n_operating"], "formula_order": ["PFHET_Pn", "n_operating"], "required_variables": ["M", "mu1", "mu2", "lambda_per_unit"], "missing_if_absent": ["M"], "notes": "n_operating = M - L_system" },
+        { "id": "e", "objective": "compute_waiting_arrivals", "formulas_required": ["PFHET_Lq", "weekly_waiting"], "formula_order": ["PFHET_Pn", "PFHET_Lq", "weekly_waiting"], "required_variables": ["M", "mu1", "mu2", "lambda_per_unit", "hours_per_day", "days_per_week"], "missing_if_absent": ["days_per_week"] },
+        { "id": "f", "objective": "compute_cost", "formulas_required": ["PFHET_Pn", "PFHET_Lq", "cost_total_weekly"], "formula_order": ["PFHET_Pn", "PFHET_Lq", "cost_total"], "required_variables": ["M", "mu1", "mu2", "lambda_per_unit", "cost_system_per_day", "cost_idle_per_hour", "days_per_week"], "missing_if_absent": ["cost_system_per_day", "cost_idle_per_hour"] }
+      ]
+    },
+    {
+      "exercise_id": "control_calidad_mmc_L_condition",
+      "exercise_number": 21,
+      "title": "Control de calidad – dimensionamiento M/M/c por condición L",
+      "statement_summary": "Empleados llevan piezas a control de calidad. Poisson. Servicio exponencial. Condición: L ≤ 2. Parte g: recorte personal → PFCS.",
+      "sample_statement": "Empleados de una planta llevan piezas para inspeccion de calidad. Las piezas llegan al area de inspeccion segun un proceso Poisson con una tasa de 5 por hora. Cada inspector puede revisar en promedio 3 piezas por hora (exponencial). La planta opera 8 horas diarias 5 dias a la semana. El costo del sistema es 20 dolares diarios y el costo de piezas esperando es 5 dolares por hora. Determine: a) cuantos inspectores para L promedio no mayor a 2, b) probabilidad de inspector disponible, c) Wq, d) minutos diarios con todos ocupados, e) piezas por semana que esperan, f) costo semanal total, g) con recorte de personal a 12 empleados (PFCS), calcular Lq.",
+      "sample_statement_variants": [
+        "Control calidad. Piezas Poisson 4/h. Inspector revisa 2.5/h. Condicion: L <= 3. Calcular numero inspectores.",
+        "Planta con inspectores de calidad. Llegadas Poisson 6/h. Servicio exponencial 4/h. Condicion L <= 2."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c (→ PFCS en literal g)",
+      "model_reasoning": "Múltiples inspectores, cola única, condición sobre L. Parte g restringe población a 15 empleados (PFCS).",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "L_threshold", "hours_per_day", "days_per_week", "cost_system_per_day", "cost_idle_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["control de calidad", "inspectores", "empleados", "poisson", "exponencial", "promedio no mas de"],
+      "literals": [
+        { "id": "a", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_L_condition"], "formula_order": ["find_c_for_L_lte_threshold"], "required_variables": ["lambda", "mu", "L_threshold"], "missing_if_absent": ["L_threshold"] },
+        { "id": "b", "objective": "compute_server_available_probability", "formulas_required": ["P0"], "formula_order": ["P0"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_idle_time", "formulas_required": ["Pk", "all_busy_hours"], "formula_order": ["Pk", "all_busy_hours"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "notes": "Hours all busy = Pk × hours_per_day" },
+        { "id": "e", "objective": "compute_waiting_arrivals", "formulas_required": ["Pk", "weekly_waiting"], "formula_order": ["Pk", "weekly_waiting"], "required_variables": ["lambda", "mu", "c", "hours_per_day", "days_per_week"], "missing_if_absent": ["days_per_week"] },
+        { "id": "f", "objective": "compute_cost", "formulas_required": ["Pk", "Lq", "Wq", "cost_total_weekly"], "formula_order": ["P0", "Pk", "Lq", "Wq", "cost_total"], "required_variables": ["lambda", "mu", "c", "cost_system_per_day", "cost_idle_per_hour", "days_per_week"], "missing_if_absent": ["cost_system_per_day", "cost_idle_per_hour"] },
+        { "id": "g", "literal_text_pattern": "recorte de personal, 15 empleados, mismos inspectores, 75% menos solicitudes", "objective": "compute_Lq", "formulas_required": ["PFCS_P0", "PFCS_Lq"], "formula_order": ["PFCS_P0", "PFCS_Lq"], "required_variables": ["M", "lambda_reduced", "mu", "c"], "missing_if_absent": [], "model_context": "PFCS", "notes": "Finite population M=15. Lambda reduced. Same c inspectors." }
+      ]
+    },
+    {
+      "exercise_id": "licencias_conducir_mmc_reproceso",
+      "exercise_number": 22,
+      "title": "Licencias de conducir – M/M/c con tasa efectiva (reproceso/fracaso)",
+      "statement_summary": "5 examinadores. 13% fallan y no obtienen licencia. Llegadas Poisson. Servicio exponencial. Literal d: buscar c para 80% inmediatos. Literal e: costos e ingresos.",
+      "sample_statement": "El departamento de licencias de conducir tiene 4 examinadores. Los aspirantes llegan segun un proceso Poisson con una tasa de 30 por hora. Cada examinador puede atender en promedio 8 aspirantes por hora (exponencial). El 15% de los aspirantes reprueba y no obtiene licencia. La oficina opera 8 horas diarias. El costo por examinador es 50 dolares diarios, el ingreso por licencia es 20 dolares y el costo de espera 12 dolares por hora. Determine: a) P(aspirante espera), b) aspirantes diarios que esperan, c) Wq, d) cuantos examinadores para que 80% no espere, e) balance economico diario.",
+      "sample_statement_variants": [
+        "Oficina de licencias con examinadores. Llegadas Poisson 25/h. Exponencial 7/h. 15% reprueba. Buscar c para P_atendido_inmediato >= 0.8.",
+        "Centro de licencias. 5 examinadores. Aspirantes Poisson 35/h. Servicio exponencial 10/h. 12% fracasa."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/5 (effective lambda)",
+      "model_reasoning": "5 examinadores. El 13% fracasa pero NO reprocesa el mismo sistema (se va). La tasa efectiva puede considerarse igual a λ nominal para el sistema de colas (no hay reproceso al mismo subsistema).",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "c", "failure_probability", "hours_per_day", "cost_server_per_day", "income_per_license", "cost_wait_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["licencias", "examinadores", "poisson", "exponencial", "fallan", "13%"],
+      "has_effective_lambda": false,
+      "literals": [
+        { "id": "a", "objective": "compute_wait_probability", "formulas_required": ["P0", "Pk"], "formula_order": ["P0", "Pk"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_waiting_arrivals", "formulas_required": ["Pk", "daily_waiting"], "formula_order": ["Pk", "daily_waiting"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_Pw_condition"], "formula_order": ["find_c_for_Pw_lte_20pct"], "required_variables": ["lambda", "mu"], "missing_if_absent": [], "notes": "P(wait) ≤ 0.20, i.e., 80% attended immediately" },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["P0", "Pk", "Lq", "Wq", "revenue", "cost_total"], "formula_order": ["P0", "Pk", "Lq", "Wq", "revenue", "cost_total"], "required_variables": ["lambda", "mu", "c", "hours_per_day", "cost_server_per_day", "income_per_license", "cost_wait_per_hour"], "missing_if_absent": ["income_per_license", "cost_server_per_day", "cost_wait_per_hour"] }
+      ]
+    },
+    {
+      "exercise_id": "montacargas_pfhet_2techs_independent",
+      "exercise_number": 23,
+      "title": "Montacargas – 2 técnicos independientes (PFCS×2) → unificado (PFHET)",
+      "statement_summary": "Técnico A y B con tasas diferentes. Cada uno atiende su propio grupo (2 PFCS independientes). Literal f: sistema unificado (PFHET).",
+      "sample_statement": "Una empresa tiene dos grupos de montacargas. El tecnico A atiende exclusivamente su grupo y el tecnico B el suyo con tasas de reparacion distintas. El tecnico A demora 2 dias en promedio y el tecnico B demora 4 dias. Cada montacargas se averia en promedio cada 10 dias. La empresa opera 9 horas diarias 5 dias a la semana. El costo del sistema es 90 dolares diarios y el costo de parado es 12 dolares por hora. Determine: a) cuantos por tecnico con P(no espera)>=0.10, b) tiempo diario desocupado por tecnico, c) montacargas esperando, d) montacargas en espera semanalmente, e) costo semanal por tecnico, f) al unificar talleres calcular horas con algun tecnico libre.",
+      "sample_statement_variants": [
+        "Dos tecnicos independientes PFCS. Tecnico A 1.5 dias, tecnico B 3 dias. Lambda 0.08/dia. 10% P0 condicion.",
+        "Montacargas dos grupos independientes. Mu1=0.5/dia, mu2=0.25/dia. Lambda=0.1/dia. Unificar como PFHET."
+      ],
+      "detected_model": "PFCS",
+      "model_alias": "PFCS × 2 → PFHET (literal f)",
+      "model_reasoning": "Cada técnico tiene su propio grupo finito de montacargas = 2 sistemas PFCS independientes. Literal f unifica → PFHET.",
+      "variables_to_extract": ["mu1", "mu2", "lambda_per_unit", "hours_per_day", "days_per_week", "cost_system_per_day", "cost_idle_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_day"],
+      "structural_keywords": ["montacargas", "tecnico a", "tecnico b", "exclusivamente", "grupo", "pfcs", "exponencial"],
+      "literals": [
+        { "id": "a", "literal_text_pattern": "cuantos montacargas para cada tecnico si 10% no espera", "objective": "compute_dimensioning_M_p0_condition", "formulas_required": ["PFCS_P0_function_of_M"], "formula_order": ["find_M_for_P0_gte_10pct_each"], "required_variables": ["mu1", "mu2", "lambda_per_unit"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_idle_time", "formulas_required": ["PFCS_P0", "idle_minutes_daily"], "formula_order": ["PFCS_P0", "idle_daily"], "required_variables": ["M", "mu", "lambda_per_unit", "hours_per_day"], "missing_if_absent": ["M"] },
+        { "id": "c", "objective": "compute_L", "formulas_required": ["PFCS_P0", "PFCS_L"], "formula_order": ["PFCS_P0", "PFCS_L"], "required_variables": ["M", "mu", "lambda_per_unit"], "missing_if_absent": ["M"] },
+        { "id": "d", "objective": "compute_waiting_arrivals", "formulas_required": ["PFCS_Lq", "weekly_waiting"], "formula_order": ["PFCS_P0", "PFCS_Lq", "weekly_waiting"], "required_variables": ["M", "mu", "lambda_per_unit", "hours_per_day", "days_per_week"], "missing_if_absent": ["days_per_week"] },
+        { "id": "e", "objective": "compute_cost", "formulas_required": ["PFCS_P0", "PFCS_Lq", "cost_total_weekly"], "formula_order": ["PFCS_P0", "PFCS_Lq", "cost_total"], "required_variables": ["M", "mu", "lambda_per_unit", "cost_system_per_day", "cost_idle_per_hour", "days_per_week"], "missing_if_absent": ["cost_system_per_day", "cost_idle_per_hour"] },
+        { "id": "f", "literal_text_pattern": "taller unifica atencion de ambos tecnicos, horas con tecnico desocupado", "objective": "compute_idle_time", "formulas_required": ["PFHET_Pn", "P_some_tech_free", "idle_hours"], "formula_order": ["PFHET_Pn", "P_some_tech_free", "idle_hours_daily"], "required_variables": ["M_total", "mu1", "mu2", "lambda_per_unit"], "missing_if_absent": [], "model_context": "PFHET" }
+      ]
+    },
+    {
+      "exercise_id": "supermercado_complejo_subsistema_mm1",
+      "exercise_number": 24,
+      "title": "Supermercado complejo – subsistema atención al cliente M/M/1",
+      "statement_summary": "Supermercado complejo con múltiples subsistemas. Solo se analiza subsistema atención al cliente con teoría de colas. 20% clientes van a ese subsistema. λ_sub = 0.2 × λ_total.",
+      "sample_statement": "Un supermercado recibe 80 clientes por hora segun proceso Poisson. El 20% de los clientes solicita atencion personalizada. El empleado de atencion puede atender en promedio 20 clientes por hora (exponencial). Opera 8 horas diarias. El costo del empleado es 30 dolares diarios. Determine: a) probabilidad de espera en atencion, b) clientes diarios que esperan, c) Wq, d) cuantos empleados para que el 50% sea atendido inmediatamente, e) horas desocupadas con ese numero de empleados.",
+      "sample_statement_variants": [
+        "Supermercado con subsistema atencion cliente. 100 clientes/h total, 15% van al subsistema. Un empleado. Calcular metricas.",
+        "Tienda con departamento de reclamos. Llegadas totales 60/h. 25% pasan a reclamos. Servicio exponencial 20/h."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1 (→ M/M/c para literal d)",
+      "model_reasoning": "Subsistema atención al cliente: un empleado inicialmente. La fracción de λ que llega al subsistema debe calcularse.",
+      "variables_to_extract": ["lambda_total", "fraction_to_subsystem", "lambda_subsystem", "service_time_minutes", "mu", "hours_per_day", "cost_server_per_day"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["supermercado", "atencion al cliente", "20%", "subsistema", "poisson", "exponencial"],
+      "has_derived_lambda": true,
+      "literals": [
+        { "id": "a", "objective": "compute_wait_probability", "formulas_required": ["rho"], "formula_order": ["rho"], "required_variables": ["lambda_subsystem", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_waiting_arrivals", "formulas_required": ["rho", "daily_waiting"], "formula_order": ["rho", "daily_waiting"], "required_variables": ["lambda_subsystem", "mu", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["rho", "Lq", "Wq"], "formula_order": ["rho", "Lq", "Wq"], "required_variables": ["lambda_subsystem", "mu"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_Pw_condition"], "formula_order": ["find_c_for_50pct_immediate"], "required_variables": ["lambda_subsystem", "mu"], "missing_if_absent": [], "model_context": "PICM", "notes": "Find c such that P(wait) ≤ 0.5" },
+        { "id": "e", "objective": "compute_idle_time", "formulas_required": ["P0", "idle_hours"], "formula_order": ["P0", "idle_hours"], "required_variables": ["lambda_subsystem", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "model_context": "PICM" }
+      ]
+    },
+    {
+      "exercise_id": "ensamblaje_reproceso_subsistema_mm1",
+      "exercise_number": 25,
+      "title": "Ensamblaje con reproceso – subsistema estación de ensamblaje",
+      "statement_summary": "Ventiladores con reproceso desde estación 2 a estación 1. Estación 1 recibe λ original + flujo de reproceso. Analizar subsistema ensamblaje con tasa efectiva.",
+      "sample_statement": "Una linea de ensamblaje de ventiladores tiene dos estaciones. Los productos llegan a la estacion 1 a razon de 30 por hora. La estacion 1 termina su operacion en 1.5 minutos promedio (exponencial). El 10% que resulta defectuoso en la estacion 2 vuelve a la estacion 1 (reproceso). La empresa opera 8 horas. Determine: a) P0 en estacion 1, b) unidades procesadas inmediatamente por dia, c) W en estacion 1, d) cuantos operarios para Lq <= 1, e) unidades que esperan por semana con ese numero.",
+      "sample_statement_variants": [
+        "Linea ensamblaje con reproceso. Lambda nominal 25/h. 12% defectuosos regresan. Servicio exponencial 2 min.",
+        "Estacion ensamblaje recibe productos Poisson 20/h mas 8% reprocesos. Un tecnico, 1.8 minutos por unidad."
+      ],
+      "detected_model": "PICS",
+      "model_alias": "M/M/1 (effective lambda with reproceso)",
+      "model_reasoning": "Un técnico en la estación de ensamblaje. La tasa efectiva incluye llegadas normales + retrabajos desde estación 2.",
+      "variables_to_extract": ["lambda_nominal", "p_defective_1", "p_defective_2", "service_time_minutes_1", "service_time_minutes_2", "p_rework_multiplier", "lambda_effective"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "has_effective_lambda": true,
+      "effective_lambda_formula": "lambda_eff = lambda_nominal / (1 - p_defective_2_returns)",
+      "structural_keywords": ["ensamblaje", "reproceso", "defectuoso", "estacion", "vuelven", "prioridad"],
+      "literals": [
+        { "id": "a", "objective": "compute_P0", "formulas_required": ["rho", "P0"], "formula_order": ["rho", "P0"], "required_variables": ["lambda_effective", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_waiting_arrivals", "formulas_required": ["rho", "P0", "daily_immediate"], "formula_order": ["rho", "P0", "daily_immediate"], "required_variables": ["lambda_effective", "mu", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "notes": "Daily immediate = P0 × λ × hours" },
+        { "id": "c", "objective": "compute_W", "formulas_required": ["rho", "Lq", "Wq", "W"], "formula_order": ["rho", "Lq", "Wq", "W"], "required_variables": ["lambda_effective", "mu"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_Lq_condition"], "formula_order": ["find_c_for_Lq_lte_1"], "required_variables": ["lambda_effective", "mu"], "missing_if_absent": [], "model_context": "PICM", "notes": "Find c such that Lq ≤ 1" },
+        { "id": "e", "objective": "compute_waiting_arrivals", "formulas_required": ["Pk", "weekly_waiting"], "formula_order": ["P0", "Pk", "weekly_waiting"], "required_variables": ["lambda_effective", "mu", "c", "hours_per_day", "days_per_week"], "missing_if_absent": ["days_per_week"], "model_context": "PICM" }
+      ]
+    },
+    {
+      "exercise_id": "control_calidad_mmc_W_condition",
+      "exercise_number": 26,
+      "title": "Control de calidad – dimensionamiento M/M/c por condición W",
+      "statement_summary": "Empleados llevan piezas. Poisson. Servicio exponencial. Condición: W ≤ 10 min. Parte g: M=15 empleados finitos.",
+      "sample_statement": "Los empleados de una empresa llevan piezas al area de control de calidad. Las piezas llegan segun un proceso Poisson a razon de 4 piezas por hora. Cada inspector puede revisar en promedio 3 piezas por hora (exponencial). La condicion es que las piezas no permanezcan mas de 10 minutos en el sistema. La empresa opera 8 horas diarias 5 dias semanales. El costo del sistema es 25 dolares diarios y el costo de espera es 6 dolares por hora. Determine: a) cuantos inspectores para W <= 10 min, b) probabilidad de inspector disponible, c) Wq, d) minutos con todos ocupados, e) piezas por semana atendidas inmediatamente, f) costo semanal, g) con M=12 empleados (PFCS) calcular Lq.",
+      "sample_statement_variants": [
+        "Control calidad. Piezas Poisson 5/h. Inspector 3.5/h. Condicion: W <= 8 minutos. Calcular c minimo.",
+        "Area inspeccion. Llegadas Poisson 6/h. Servicio exponencial 4/h. Condicion: permanencia no mayor 12 minutos."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c (→ PFCS literal g)",
+      "model_reasoning": "Similar a ej.21 pero condición sobre W (tiempo total en sistema) en lugar de L.",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "W_threshold_minutes", "hours_per_day", "days_per_week", "cost_system_per_day", "cost_idle_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["control de calidad", "inspectores", "empleados", "no permanezcan mas de", "10 minutos", "poisson"],
+      "literals": [
+        { "id": "a", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_W_condition"], "formula_order": ["find_c_for_W_lte_threshold"], "required_variables": ["lambda", "mu", "W_threshold_minutes"], "missing_if_absent": ["W_threshold_minutes"] },
+        { "id": "b", "objective": "compute_server_available_probability", "formulas_required": ["P0", "Pk"], "formula_order": ["P0", "Pk"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_idle_time", "formulas_required": ["Pk", "all_busy_minutes"], "formula_order": ["Pk", "all_busy_minutes"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "e", "objective": "compute_waiting_arrivals", "formulas_required": ["P0", "Pk", "n_not_waiting_weekly"], "formula_order": ["P0", "Pk", "n_not_waiting_weekly"], "required_variables": ["lambda", "mu", "c", "hours_per_day", "days_per_week"], "missing_if_absent": ["days_per_week"] },
+        { "id": "f", "objective": "compute_cost", "formulas_required": ["Pk", "Lq", "Wq", "cost_total_weekly"], "formula_order": ["P0", "Pk", "Lq", "Wq", "cost_total"], "required_variables": ["lambda", "mu", "c", "cost_system_per_day", "cost_idle_per_hour", "days_per_week"], "missing_if_absent": ["cost_system_per_day", "cost_idle_per_hour"] },
+        { "id": "g", "objective": "compute_Lq", "formulas_required": ["PFCS_P0", "PFCS_Lq"], "formula_order": ["PFCS_P0", "PFCS_Lq"], "required_variables": ["M", "lambda_reduced", "mu", "c"], "missing_if_absent": [], "model_context": "PFCS", "notes": "M=15 finite, lambda reduced 50%, same c inspectors" }
+      ]
+    },
+    {
+      "exercise_id": "registro_civil_mmc_Pw_condition",
+      "exercise_number": 27,
+      "title": "Registro Civil – M/M/c con condición Pw ≤ 0.5",
+      "statement_summary": "Clientes llegan Poisson. Cada ventanilla servicio exponencial. Condición: P(espera) ≤ 0.5. Buscar c ventanillas.",
+      "sample_statement": "El Registro Civil atiende a ciudadanos que llegan segun un proceso Poisson con una tasa de 20 clientes por hora. Cada ventanilla puede atender en promedio 8 clientes por hora (exponencial). Se requiere que no mas de la mitad de los ciudadanos tenga que esperar. Determine: a) cuantas ventanillas necesarias, b) probabilidad de ventanilla disponible, c) Wq, d) L, e) probabilidad de que haya uno o dos clientes esperando.",
+      "sample_statement_variants": [
+        "Registro civil. Clientes Poisson 15/h. Ventanilla exponencial 6/h. Condicion: Pw <= 0.5.",
+        "Oficina publica. Llegadas Poisson 25/h. Cada ventanilla 10/h. Buscar c con P(espera) no mayor al 50%."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c",
+      "model_reasoning": "Múltiples ventanillas, llegadas Poisson, servicio exponencial. Condición clásica de Pw.",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "Pw_threshold"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["registro civil", "ventanillas", "poisson", "exponencial", "minutos", "no mas de la mitad"],
+      "literals": [
+        { "id": "a", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_Pw_condition"], "formula_order": ["find_c_for_Pw_lte_0.5"], "required_variables": ["lambda", "mu"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_server_available_probability", "formulas_required": ["P0", "Pk"], "formula_order": ["P0", "Pk"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_L", "formulas_required": ["P0", "Pk", "Lq", "L"], "formula_order": ["P0", "Pk", "Lq", "L"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "e", "literal_text_pattern": "probabilidad de que se encuentren uno o dos clientes esperando", "objective": "compute_probability_q_between", "formulas_required": ["P0", "P1", "P2"], "formula_order": ["P0", "Pn", "P_q_between_1_2"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] }
+      ]
+    },
+    {
+      "exercise_id": "ordenadores_reparacion_mmc_cost",
+      "exercise_number": 28,
+      "title": "Reparación de ordenadores – subsistema técnico especialista M/M/c con costos",
+      "statement_summary": "Ordenadores llegan con distribución exponencial. Técnico especialista los atiende. Otros subsistemas (control calidad, ajuste). Analizar solo subsistema técnico. Minimizar costos.",
+      "sample_statement": "Un servicio tecnico de ordenadores tiene un subsistema de reparacion especializada. Los ordenadores llegan al subsistema con una distribucion exponencial a razon de uno cada 15 minutos. Cada tecnico especialista tarda en promedio 45 minutos en reparar cada ordenador (exponencial). El costo de cada tecnico es de 50 dolares diarios y el costo de ordenador esperando es de 20 dolares por hora. Determine: a) identificar modelo y condicion de estabilidad, b) numero optimo de tecnicos, c) ordenadores diarios que esperan, d) P0, e) clientes fuera del subsistema (atendidos en otros subsistemas).",
+      "sample_statement_variants": [
+        "Taller reparacion ordenadores. Llegadas exponencial 1 cada 12 minutos. Tecnico 40 minutos por reparacion. Minimizar costo.",
+        "Subsistema tecnico especialista. Interarrival exponencial 18 minutos. Reparacion exponencial 50 minutos. Costo optimizar."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c",
+      "model_reasoning": "Múltiples técnicos posibles. Se analiza solo subsistema. Minimizar costo total.",
+      "variables_to_extract": ["lambda", "service_time_hours", "mu", "cost_server_per_day", "cost_wait_per_hour"],
+      "unit_conversions_required": ["lambda_interarrival_minutes_to_per_hour"],
+      "structural_keywords": ["ordenadores", "tecnico especialista", "exponencial", "costo", "minimizar"],
+      "literals": [
+        { "id": "a", "objective": "identify_model", "notes": "Explicitly asks to identify type of problem, parameters, stability condition" },
+        { "id": "b", "objective": "compute_dimensioning_optimal_k", "formulas_required": ["P0", "Pk", "Lq", "Wq", "cost_total"], "formula_order": ["find_c_for_cost_min"], "required_variables": ["lambda", "mu", "cost_server_per_day", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_day", "cost_wait_per_hour"] },
+        { "id": "c", "objective": "compute_waiting_arrivals", "formulas_required": ["Pk", "daily_waiting"], "formula_order": ["Pk", "daily_waiting"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "d", "objective": "compute_P0", "formulas_required": ["P0"], "formula_order": ["P0"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "e", "objective": "compute_L", "formulas_required": ["P0", "Pk", "Lq", "L"], "formula_order": ["P0", "Pk", "Lq", "L"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [], "notes": "Clientes OUTSIDE subsystem = total customers - L" }
+      ]
+    },
+    {
+      "exercise_id": "control_calidad_mmc_Wq_cond",
+      "exercise_number": 29,
+      "title": "Control de calidad – dimensionamiento M/M/c por Wq condicional",
+      "statement_summary": "Piezas llegan Poisson. Servicio exponencial. Condición: Wq_condicional ≤ 4 min (solo para los que esperan). Literal g: condición Pw ≤ 0.5.",
+      "sample_statement": "Las piezas llegan al area de control de calidad de una planta segun proceso Poisson con una tasa de 4 piezas por hora. Cada inspector puede revisar en promedio 3 piezas por hora (exponencial). La condicion es que los que si deban esperar no superen 5 minutos de espera (Wq condicional). La planta opera 8 horas diarias 5 dias. El costo del sistema es 20 dolares diarios y el costo de espera 5 dolares por hora. Determine: a) cuantos inspectores, b) P(inspector disponible), c) Wq, d) minutos con todos ocupados, e) piezas que esperan por semana, f) costo semanal, g) alternativa: cuantos para P(espera)<=0.5.",
+      "sample_statement_variants": [
+        "Control calidad. Piezas Poisson 5/h. Inspector 4/h. Condicion Wq condicional <= 4 minutos para los que esperan.",
+        "Area inspeccion. Llegadas Poisson 6/h. Servicio exponencial 4.5/h. Wq dado espera no mas de 3 minutos."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/c",
+      "model_reasoning": "Múltiples inspectores. Condición sobre Wq condicional (Wq dado que espera = Wq/Pw).",
+      "variables_to_extract": ["lambda", "service_time_minutes", "mu", "Wq_cond_threshold_minutes", "hours_per_day", "days_per_week", "cost_system_per_day", "cost_idle_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["control de calidad", "inspectores", "que si deban esperar", "no supere", "4 minutos", "poisson"],
+      "has_conditional_wait": true,
+      "literals": [
+        { "id": "a", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_Wq_cond_condition"], "formula_order": ["find_c_for_Wq_over_Pk_lte_threshold"], "required_variables": ["lambda", "mu", "Wq_cond_threshold_minutes"], "missing_if_absent": ["Wq_cond_threshold_minutes"], "notes": "Wq_cond = Wq/Pw = Wq/Pk. Find c such that Wq/Pk ≤ threshold." },
+        { "id": "b", "objective": "compute_server_available_probability", "formulas_required": ["P0"], "formula_order": ["P0"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "d", "objective": "compute_idle_time", "formulas_required": ["Pk", "all_busy_minutes_daily"], "formula_order": ["Pk", "all_busy_minutes"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"] },
+        { "id": "e", "objective": "compute_waiting_arrivals", "formulas_required": ["Pk", "weekly_waiting"], "formula_order": ["Pk", "weekly_waiting"], "required_variables": ["lambda", "mu", "c", "hours_per_day", "days_per_week"], "missing_if_absent": ["days_per_week"] },
+        { "id": "f", "objective": "compute_cost", "formulas_required": ["Pk", "Lq", "Wq", "cost_total_weekly"], "formula_order": ["P0", "Pk", "Lq", "Wq", "cost_total"], "required_variables": ["lambda", "mu", "c", "cost_system_per_day", "cost_idle_per_hour", "days_per_week"], "missing_if_absent": ["cost_system_per_day", "cost_idle_per_hour"] },
+        { "id": "g", "objective": "compute_dimensioning_min_c", "formulas_required": ["find_c_for_Pw_condition"], "formula_order": ["find_c_for_Pw_lte_0.5"], "required_variables": ["lambda", "mu"], "missing_if_absent": [], "notes": "Alternative condition: Pw ≤ 0.5" }
+      ]
+    },
+    {
+      "exercise_id": "telefonia_celular_asesoras_mmc",
+      "exercise_number": 30,
+      "title": "Telefonía celular – subsistema asesoras de reclamos M/M/c con costos",
+      "statement_summary": "28 clientes/hora al subsistema asesoras. 3 asesoras. Servicio exponencial. Literal d: optimizar costos. Literal e: tiempo asesoras desocupadas.",
+      "sample_statement": "Una empresa de telefonia celular tiene 3 asesoras que atienden reclamos. Los clientes con reclamos llegan segun un proceso Poisson con una tasa de 20 clientes por hora. Cada asesora puede resolver en promedio 8 reclamos por hora (exponencial). La empresa opera 8 horas diarias. El costo de cada asesora es 40 dolares diarios y el costo de espera del cliente es 10 dolares por hora. Determine: a) P(esperar), b) Wq, c) minutos diarios con clientes esperando, d) numero optimo de asesoras, e) minutos diarios con todas desocupadas.",
+      "sample_statement_variants": [
+        "Empresa telefonica. Reclamos Poisson 15/h. Asesoras exponencial 6/h. 3 asesoras. Optimizar numero.",
+        "Call center reclamos. Llegadas Poisson 25/h. 4 asesoras, 9 por hora. Calcular Pw y Wq. Minimizar costo."
+      ],
+      "detected_model": "PICM",
+      "model_alias": "M/M/3 (→ M/M/c optimal)",
+      "model_reasoning": "3 asesoras inicialmente. Cola única. Optimización por costos. Subsistema del sistema mayor.",
+      "variables_to_extract": ["lambda_subsystem", "service_time_minutes", "mu", "c", "cost_server_per_day", "cost_wait_per_hour"],
+      "unit_conversions_required": ["service_time_minutes_to_mu_per_hour"],
+      "structural_keywords": ["asesoras", "reclamos", "poisson", "exponencial", "minutos", "costo"],
+      "literals": [
+        { "id": "a", "objective": "compute_Pk", "formulas_required": ["P0", "Pk"], "formula_order": ["P0", "Pk"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "b", "objective": "compute_Wq", "formulas_required": ["P0", "Pk", "Lq", "Wq"], "formula_order": ["P0", "Pk", "Lq", "Wq"], "required_variables": ["lambda", "mu", "c"], "missing_if_absent": [] },
+        { "id": "c", "literal_text_pattern": "minutos diarios con usuarios esperando", "objective": "compute_idle_time", "formulas_required": ["Pk", "daily_wait_minutes"], "formula_order": ["Pk", "daily_wait_minutes"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "notes": "Minutes with users waiting = Pk × hours × 60" },
+        { "id": "d", "objective": "compute_dimensioning_optimal_k", "formulas_required": ["P0", "Pk", "Lq", "Wq", "cost_total"], "formula_order": ["find_c_for_cost_min"], "required_variables": ["lambda", "mu", "cost_server_per_day", "cost_wait_per_hour"], "missing_if_absent": ["cost_server_per_day", "cost_wait_per_hour"] },
+        { "id": "e", "objective": "compute_idle_time", "formulas_required": ["P0", "idle_concurrent_minutes"], "formula_order": ["P0", "idle_concurrent_minutes"], "required_variables": ["lambda", "mu", "c", "hours_per_day"], "missing_if_absent": ["hours_per_day"], "notes": "Minutes ALL advisors idle simultaneously = P0 × hours × 60" }
+      ]
+    }
+  ]
+}
