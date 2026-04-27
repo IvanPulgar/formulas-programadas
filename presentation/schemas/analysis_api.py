@@ -97,6 +97,29 @@ class FormulaPlanStepInfo(BaseModel):
     produces: str
 
 
+# Phase 15 — per-literal calculation result
+class CalculationStepInfo(BaseModel):
+    """One algebraic step inside a literal's numeric calculation."""
+
+    formula_key: str
+    expression: str
+    substitution: str
+    result: str
+
+
+class LiteralCalculationResultInfo(BaseModel):
+    """Numeric result computed for a single literal (Phase 15)."""
+
+    literal_id: str
+    objective: Optional[str]
+    calculated: bool
+    value: Optional[float] = None
+    unit: str = ""
+    display_value: str = ""
+    calculation_steps: list[CalculationStepInfo] = Field(default_factory=list)
+    issues: list[str] = Field(default_factory=list)
+
+
 class LiteralInfo(BaseModel):
     """A single detected sub-question (literal/inciso) from a problem statement."""
 
@@ -112,6 +135,8 @@ class LiteralInfo(BaseModel):
     # Phase 11 — structured formula plan
     formula_plan: list[FormulaPlanStepInfo] = Field(default_factory=list)
     missing_variables: list[str] = Field(default_factory=list)
+    # Phase 15 — numeric calculation result
+    calculation_result: Optional[LiteralCalculationResultInfo] = None
 
 
 # ---------------------------------------------------------------------------

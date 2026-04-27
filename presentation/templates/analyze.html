@@ -258,6 +258,29 @@
       font-weight: 700;
       margin: 0 2px;
     }
+    /* Calculation result block (Phase 15) */
+    .calc-result-block {
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-left: 4px solid #27ae60;
+      background: #f0faf4;
+      border-radius: 0 4px 4px 0;
+    }
+    .calc-result-block.calc-not-calculated {
+      border-left-color: #e67e22;
+      background: #fef9f0;
+      color: #856404;
+    }
+    .calc-result-header {
+      font-size: 1.0em;
+      color: #1a7a3c;
+    }
+    .calc-unit {
+      font-size: 0.82em;
+      color: #6c757d;
+      margin-left: 6px;
+    }
+    .mono { font-family: 'Courier New', monospace; }
   </style>
 </head>
 <body>
@@ -601,6 +624,9 @@
       // Formula plan table (Phase 11)
       const fpHtml = buildFormulaPlanTable(lit.formula_plan, lit.missing_variables);
 
+      // Calculation result (Phase 15)
+      const calcHtml = buildCalculationResult(lit.calculation_result);
+
       return `
         <div class="literal-card">
           <div class="literal-header">
@@ -609,6 +635,7 @@
             ${objBadge}
           </div>
           ${stepsHtml}
+          ${calcHtml}
           ${fpHtml}
           ${issuesHtml}
         </div>`;
@@ -620,6 +647,40 @@
         ${ctxHtml}
         ${cards}
       </div>`;
+  }
+
+  function buildCalculationResult(calc) {
+    if (!calc) return '';
+    if (!calc.calculated) {
+      const issues = (calc.issues || []).join('; ');
+      return `<div class="calc-result-block calc-not-calculated">
+        <span>⚠ No calculado: <em>${escHtml(issues)}</em></span>
+      </div>`;
+    }
+    const stepsHtml = (calc.calculation_steps || []).map(s => `
+      <tr>
+        <td><code>${escHtml(s.formula_key)}</code></td>
+        <td class="fp-expr">${escHtml(s.expression)}</td>
+        <td>${escHtml(s.substitution)}</td>
+        <td class="mono"><strong>${escHtml(s.result)}</strong></td>
+      </tr>`).join('');
+    const tableHtml = stepsHtml ? `
+      <details style="margin-top:6px">
+        <summary style="cursor:pointer;font-size:0.85em;color:#27ae60;font-weight:600">
+          Pasos de cálculo (${calc.calculation_steps.length})
+        </summary>
+        <table class="fp-table" style="margin-top:6px">
+          <thead><tr><th>Clave</th><th>Expresión</th><th>Sustitución</th><th>Resultado</th></tr></thead>
+          <tbody>${stepsHtml}</tbody>
+        </table>
+      </details>` : '';
+    return `<div class="calc-result-block">
+      <div class="calc-result-header">
+        ✓ <strong>${escHtml(calc.display_value || String(calc.value))}</strong>
+        ${calc.unit ? `<span class="calc-unit">[${escHtml(calc.unit)}]</span>` : ''}
+      </div>
+      ${tableHtml}
+    </div>`;
   }
 
   function buildFormulaPlanTable(plan, missingVars) {

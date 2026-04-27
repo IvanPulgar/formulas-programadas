@@ -14,6 +14,7 @@ Restrictions:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
@@ -31,8 +32,10 @@ from domain.services.statement_analyzer import make_analyzer
 from presentation.schemas.analysis_api import (
     AnalyzeRequest,
     AnalyzeResponse,
+    CalculationStepInfo,
     ExtractedVariableInfo,
     FormulaPlanStepInfo,
+    LiteralCalculationResultInfo,
     LiteralInfo,
     StepInfo,
     StepResultInfo,
@@ -118,33 +121,57 @@ async def analyze(body: AnalyzeRequest) -> AnalyzeResponse:
             for sr in exec_result.step_results
         ]
 
-        # ── Stage 4: populate literal segmentation results (Phase 8 / Phase 11) ──
-        literal_info_list = [
-            LiteralInfo(
-                literal_id=lit.literal_id,
-                literal_text=lit.raw_text,
-                inferred_objective=lit.inferred_objective,
-                planned_step_ids=list(lit.planned_step_ids),
-                issues=[
-                    f"[{issue.severity.value}] {issue.message}"
-                    for issue in lit.issues
-                ],
-                formula_plan=[
-                    FormulaPlanStepInfo(
-                        order=step.order,
-                        formula_key=step.formula_key,
-                        formula_name=step.formula_name,
-                        formula_expression=step.formula_expression,
-                        why_needed=step.why_needed,
-                        required_variables=list(step.required_variables),
-                        produces=step.produces,
-                    )
-                    for step in lit.formula_plan
-                ],
-                missing_variables=list(lit.missing_variables),
+        # ── Stage 4: populate literal segmentation results (Phase 8 / Phase 11 / Phase 15) ──
+        literal_info_list = []
+        for lit in analysis.literals:
+            # Phase 15 — calculation result
+            calc_res: Optional[LiteralCalculationResultInfo] = None
+            if lit.calculation_result is not None:
+                cr = lit.calculation_result
+                calc_res = LiteralCalculationResultInfo(
+                    literal_id=cr.literal_id,
+                    objective=cr.objective,
+                    calculated=cr.calculated,
+                    value=cr.value,
+                    unit=cr.unit,
+                    display_value=cr.display_value,
+                    calculation_steps=[
+                        CalculationStepInfo(
+                            formula_key=s.formula_key,
+                            expression=s.expression,
+                            substitution=s.substitution,
+                            result=s.result,
+                        )
+                        for s in cr.calculation_steps
+                    ],
+                    issues=list(cr.issues),
+                )
+            literal_info_list.append(
+                LiteralInfo(
+                    literal_id=lit.literal_id,
+                    literal_text=lit.raw_text,
+                    inferred_objective=lit.inferred_objective,
+                    planned_step_ids=list(lit.planned_step_ids),
+                    issues=[
+                        f"[{issue.severity.value}] {issue.message}"
+                        for issue in lit.issues
+                    ],
+                    formula_plan=[
+                        FormulaPlanStepInfo(
+                            order=step.order,
+                            formula_key=step.formula_key,
+                            formula_name=step.formula_name,
+                            formula_expression=step.formula_expression,
+                            why_needed=step.why_needed,
+                            required_variables=list(step.required_variables),
+                            produces=step.produces,
+                        )
+                        for step in lit.formula_plan
+                    ],
+                    missing_variables=list(lit.missing_variables),
+                    calculation_result=calc_res,
+                )
             )
-            for lit in analysis.literals
-        ]
 
         return AnalyzeResponse(
             ok=True,

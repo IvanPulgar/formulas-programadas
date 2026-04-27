@@ -42,7 +42,8 @@ from typing import NamedTuple
 # ---------------------------------------------------------------------------
 _HERE = Path(__file__).resolve().parent          # domain/services/
 _ROOT = _HERE.parent.parent                       # project root
-_KB_PATH = _ROOT / "infrastructure" / "data" / "analysis" / "queue_exercise_patterns.json"
+_KB_PATH  = _ROOT / "infrastructure" / "data" / "analysis" / "queue_exercise_patterns.json"
+_SOL_PATH = _ROOT / "infrastructure" / "data" / "analysis" / "analysis_exercise_solutions.json"
 
 
 # ---------------------------------------------------------------------------
@@ -264,3 +265,43 @@ def get_exercises_for_model(model_id: str) -> list[dict]:
 def knowledge_base_loaded() -> bool:
     """Return True if the knowledge base JSON was found and loaded."""
     return bool(load_patterns())
+
+
+# ---------------------------------------------------------------------------
+# Structural solutions — analysis_exercise_solutions.json
+# ---------------------------------------------------------------------------
+
+@lru_cache(maxsize=1)
+def load_solutions() -> dict:
+    """Load and cache the rich structural exercise solutions (exercises 1-10+).
+
+    Returns the root dict with keys ``_metadata`` and ``exercises``.
+    Returns an empty dict if the file is not found.
+    """
+    if not _SOL_PATH.exists():
+        return {}
+    with _SOL_PATH.open(encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def get_solutions_exercises() -> list[dict]:
+    """Return the list of exercise solution objects."""
+    return load_solutions().get("exercises", [])
+
+
+def get_solution_by_number(source_number: int) -> dict | None:
+    """Return the solution for exercise *source_number* (1-indexed), or None."""
+    for ex in get_solutions_exercises():
+        if ex.get("source_number") == source_number:
+            return ex
+    return None
+
+
+def get_solutions_for_model(model: str) -> list[dict]:
+    """Return all solution exercises with the given primary model."""
+    return [e for e in get_solutions_exercises() if e.get("model") == model]
+
+
+def solutions_loaded() -> bool:
+    """Return True if the structural solutions JSON was found and loaded."""
+    return bool(load_solutions())
