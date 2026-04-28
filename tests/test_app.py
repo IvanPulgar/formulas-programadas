@@ -229,12 +229,12 @@ def test_solve_intro_little_system():
 
 
 def test_solve_picm_ct_simplified():
-    """POST /api/solve/picm_ct_simplified computes CT = λ·8·W·CTS + k·CS."""
+    """POST /api/solve/picm_ct_simplified computes CT = λ·H·W·CTS + k·CS."""
     transport = ASGITransport(app=app)
     client = httpx.AsyncClient(transport=transport, base_url="http://test")
     response = asyncio.run(client.post(
         "/api/solve/picm_ct_simplified",
-        json={"inputs": {"lambda_": 10.0, "W": 0.5, "CTS": 2.0, "k": 3, "CS": 50.0}},
+        json={"inputs": {"lambda_": 10.0, "W": 0.5, "CTS": 2.0, "k": 3, "CS": 50.0, "H": 8.0}},
     ))
     asyncio.run(client.aclose())
     assert response.status_code == 200

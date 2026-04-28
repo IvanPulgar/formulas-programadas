@@ -226,7 +226,7 @@ def test_picm_costs_and_tt():
     values = {"CT_TE": 4.0, "CT_TS": 3.0, "CT_TSE": 2.0, "CT_S": 6.0}
     assert pytest.approx(ct_formula.calculate(values), rel=1e-9) == 15.0
 
-    tt = tt_formula.calculate({"lambda_": 4.0, "Wq": 0.1})
+    tt = tt_formula.calculate({"lambda_": 4.0, "Wq": 0.1, "H": 8.0})
     assert pytest.approx(tt, rel=1e-9) == 0.96
 
 
@@ -552,22 +552,22 @@ def test_intro_little_queue_consistency():
 # ── Alternative TT / CT simplified tests ────────────────────────────
 
 def test_pics_tt_alt_equivalence():
-    """TT = λ·8·0.30·ρ·Wn should equal TT = λ·8·0.30·Wq (since Wq = ρ·Wn)."""
+    """TT = λ·H·0.30·ρ·Wn should equal TT = λ·H·0.30·Wq (since Wq = ρ·Wn)."""
     pics_tt = get_formula_by_id("pics_tt")
     pics_tt_alt = get_formula_by_id("pics_tt_alt")
     lambda_, mu = 3.0, 5.0
     rho = lambda_ / mu
     wq = lambda_ / (mu * (mu - lambda_))
     wn = wq / rho
-    tt_direct = pics_tt.calculate({"lambda_": lambda_, "Wq": wq})
-    tt_alt = pics_tt_alt.calculate({"lambda_": lambda_, "rho": rho, "Wn": wn})
+    tt_direct = pics_tt.calculate({"lambda_": lambda_, "Wq": wq, "H": 8.0})
+    tt_alt = pics_tt_alt.calculate({"lambda_": lambda_, "rho": rho, "Wn": wn, "H": 8.0})
     assert pytest.approx(tt_direct, rel=1e-9) == tt_alt
 
 
 def test_picm_ct_simplified():
     formula = get_formula_by_id("picm_ct_simplified")
     assert formula is not None
-    result = formula.calculate({"lambda_": 10.0, "W": 0.5, "CTS": 2.0, "k": 3, "CS": 50.0})
+    result = formula.calculate({"lambda_": 10.0, "W": 0.5, "CTS": 2.0, "k": 3, "CS": 50.0, "H": 8.0})
     expected = 10.0 * 8.0 * 0.5 * 2.0 + 3 * 50.0
     assert pytest.approx(result, rel=1e-9) == expected
 
@@ -575,7 +575,7 @@ def test_picm_ct_simplified():
 def test_picm_tt_alt():
     formula = get_formula_by_id("picm_tt_alt")
     assert formula is not None
-    result = formula.calculate({"lambda_": 10.0, "Pk": 0.4, "Wn": 0.25})
+    result = formula.calculate({"lambda_": 10.0, "Pk": 0.4, "Wn": 0.25, "H": 8.0})
     expected = 10.0 * 8.0 * 0.30 * 0.4 * 0.25
     assert pytest.approx(result, rel=1e-9) == expected
 

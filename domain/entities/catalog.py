@@ -463,6 +463,17 @@ VARIABLE_CATALOG: dict[str, VariableDefinition] = {
         allowed_categories=[FormulaCategory.PFHET],
         constraints={"min": 0, "max": 1},
     ),
+    "H": VariableDefinition(
+        id="H",
+        symbol="H",
+        display_name="Horas de operación del período",
+        description="Número de horas del período de análisis (día, semana u horizonte de cálculo).",
+        scope=VariableScope.GLOBAL,
+        variable_type=VariableType.FLOAT,
+        unit="horas",
+        allowed_categories=[FormulaCategory.PICS, FormulaCategory.PICM],
+        constraints={"min": 0, "strict_positive": True},
+    ),
 }
 
 CATEGORY_CATALOG: dict[str, CategoryDefinition] = {

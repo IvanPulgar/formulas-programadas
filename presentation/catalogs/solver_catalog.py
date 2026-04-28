@@ -42,13 +42,13 @@ _LATEX: Dict[str, str] = {
     "pics_wn":  r"W_n = \frac{W_q}{\rho}",
 
     # PICS — costs
-    "pics_ct_te":  r"CT_{TE} = \lambda \cdot 8 \cdot W_q \cdot C_{TE}",
-    "pics_ct_ts":  r"CT_{TS} = \lambda \cdot 8 \cdot W \cdot C_{TS}",
-    "pics_ct_tse": r"CT_{TSE} = \lambda \cdot 8 \cdot \frac{1}{\mu} \cdot C_{TSE}",
+    "pics_ct_te":  r"CT_{TE} = \lambda \cdot H \cdot W_q \cdot C_{TE}",
+    "pics_ct_ts":  r"CT_{TS} = \lambda \cdot H \cdot W \cdot C_{TS}",
+    "pics_ct_tse": r"CT_{TSE} = \lambda \cdot H \cdot \frac{1}{\mu} \cdot C_{TSE}",
     "pics_ct_s":   r"CT_S = C_S",
     "pics_ct":     r"CT = CT_{TE} + CT_{TS} + CT_{TSE} + CT_S",
-    "pics_tt":     r"TT = \lambda \cdot 8 \cdot 0.30 \cdot W_q",
-    "pics_tt_alt": r"TT = \lambda \cdot 8 \cdot 0.30 \cdot \rho \cdot W_n",
+    "pics_tt":     r"TT = \lambda \cdot H \cdot 0.30 \cdot W_q",
+    "pics_tt_alt": r"TT = \lambda \cdot H \cdot 0.30 \cdot \rho \cdot W_n",
 
     # PICM — stability / probability
     "picm_stability": r"\rho = \frac{\lambda}{k\,\mu}",
@@ -65,14 +65,14 @@ _LATEX: Dict[str, str] = {
     "picm_wn":  r"W_n = \frac{W_q}{P_k}",
 
     # PICM — costs
-    "picm_ct_te":  r"CT_{TE} = \lambda \cdot 8 \cdot W_q \cdot C_{TE}",
-    "picm_ct_ts":  r"CT_{TS} = \lambda \cdot 8 \cdot W \cdot C_{TS}",
-    "picm_ct_tse": r"CT_{TSE} = \lambda \cdot 8 \cdot \frac{1}{\mu} \cdot C_{TSE}",
+    "picm_ct_te":  r"CT_{TE} = \lambda \cdot H \cdot W_q \cdot C_{TE}",
+    "picm_ct_ts":  r"CT_{TS} = \lambda \cdot H \cdot W \cdot C_{TS}",
+    "picm_ct_tse": r"CT_{TSE} = \lambda \cdot H \cdot \frac{1}{\mu} \cdot C_{TSE}",
     "picm_ct_s":   r"CT_S = k \cdot C_S",
     "picm_ct":     r"CT = CT_{TE} + CT_{TS} + CT_{TSE} + CT_S",
-    "picm_tt":     r"TT = \lambda \cdot 8 \cdot 0.30 \cdot W_q",
-    "picm_ct_simplified": r"CT = \lambda \cdot 8 \cdot W \cdot C_{TS} + k \cdot C_S",
-    "picm_tt_alt": r"TT = \lambda \cdot 8 \cdot 0.30 \cdot P_k \cdot W_n",
+    "picm_tt":     r"TT = \lambda \cdot H \cdot 0.30 \cdot W_q",
+    "picm_ct_simplified": r"CT = \lambda \cdot H \cdot W \cdot C_{TS} + k \cdot C_S",
+    "picm_tt_alt": r"TT = \lambda \cdot H \cdot 0.30 \cdot P_k \cdot W_n",
 
     # PFCS
     "pfcs_p0":  r"P_0 = \left[\sum_{n=0}^{M}\binom{M}{n}\,a^n\right]^{-1}",
@@ -134,6 +134,7 @@ _VAR_SYMBOLS: Dict[str, str] = {
     "q1": "q₁", "q2": "q₂",
     "mu1": "μ₁", "mu2": "μ₂", "mu_bar": "μ̄", "P1": "P₁",
     "lambda_n": "λₙ", "mu_n": "μₙ", "lambda_ef": "λ_ef",
+    "H": "H",
 }
 
 _VAR_NAMES: Dict[str, str] = {
@@ -178,6 +179,7 @@ _VAR_NAMES: Dict[str, str] = {
     "lambda_n": "Tasa de nacimiento",
     "mu_n": "Tasa de muerte",
     "lambda_ef": "Tasa efectiva de llegada",
+    "H": "Horas de operación del período",
 }
 
 _CATEGORY_LABELS: Dict[str, str] = {

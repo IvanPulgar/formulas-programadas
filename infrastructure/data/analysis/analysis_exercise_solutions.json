@@ -57,7 +57,8 @@
       ]
     },
     "total_exercises_included": 30,
-    "last_updated": "2026-04-27"
+    "last_updated": "2026-04-28",
+    "pfcm_coverage_note": "PFCM (M/M/k/M/M) no aparece como modelo principal (model) en ninguno de los 30 ejercicios del .docx. Aparece como model_context en el ejercicio 9 (09_turismo_hotelero_pfcs_pfcm), literales c y d: el ejercicio usa PFCS para 1 taller (literales a, b) y PFCM para k talleres (literales c, d). La fórmula canónica PFCM incluye: r=λ_u/μ → P0_pfcm → Pn_pfcm → Lq_pfcm = Σ(n−k)Pn → optimize_k_pfcm. Las fórmulas clave están en formula_key_convention.PFCM de este metadato."
   },
   "exercises": [
     {
@@ -3588,7 +3589,7 @@
             {
               "order": 1,
               "formula_key": "r_pfcs",
-              "formula_name": "Ratio λ/μ por unidad (PFCS)",
+              "formula_name": "Ratio λ/μ por unidad (común PFCS/PFCM)",
               "expression": "r = λ_unidad / μ",
               "substitution_template": "r = {lambda_per_unit} / {mu}",
               "required_variables": [
@@ -3599,33 +3600,57 @@
             },
             {
               "order": 2,
-              "formula_key": "Lq_pfcm_by_k",
-              "formula_name": "Calcular Lq(k) para k = 1, 2, ... talleres (PFCM)",
-              "expression": "Para cada k: calcular P0(k), Pn(k), L(k), Lq(k) usando fórmulas PFCM",
-              "substitution_template": "Lq(k) = función de ({lambda_per_unit}, {mu}, {M}, k)",
+              "formula_key": "P0_pfcm",
+              "formula_name": "P0 PFCM con k talleres",
+              "expression": "P0(k) = 1 / [Σ_{n=0}^{k} C(M,n)×r^n + Σ_{n=k+1}^{M} C(M,n)×r^n×(n!/k^(n−k))]  (para cada k ≥ 1)",
+              "substitution_template": "P0(k) = 1 / Σ_{n=0}^{M} f({M}, {r_pfcs}, n, k)  para k=1,2,...",
               "required_variables": [
-                "lambda_per_unit",
-                "mu",
-                "M"
+                "M",
+                "r_pfcs"
               ],
-              "produces": "Lq_by_k"
+              "produces": "P0_pfcm"
             },
             {
               "order": 3,
+              "formula_key": "Pn_pfcm",
+              "formula_name": "Pn PFCM con k talleres",
+              "expression": "Pn(k) = C(M,n)×r^n×P0  si n≤k;  C(M,n)×r^n×(n!/k^(n−k))×P0  si n>k",
+              "substitution_template": "Pn(k) = f({M}, {r_pfcs}, {P0_pfcm}, n, k)  para n=0..M",
+              "required_variables": [
+                "M",
+                "r_pfcs",
+                "P0_pfcm"
+              ],
+              "produces": "Pn_pfcm"
+            },
+            {
+              "order": 4,
+              "formula_key": "Lq_pfcm",
+              "formula_name": "Lq PFCM (número medio en cola)",
+              "expression": "Lq(k) = Σ_{n=k+1}^{M} (n−k) × Pn",
+              "substitution_template": "Lq(k) = Σ_{n=k+1}^{{M}} (n−k) × {Pn_pfcm}[n]",
+              "required_variables": [
+                "Pn_pfcm",
+                "M"
+              ],
+              "produces": "Lq_pfcm"
+            },
+            {
+              "order": 5,
               "formula_key": "CT_pfcm_by_k",
               "formula_name": "Costo total para k talleres",
               "expression": "CT(k) = k × cost_taller_day + Lq(k) × cost_defective_day",
-              "substitution_template": "CT(k) = k × {cost_taller_day} + Lq(k) × {cost_defective_day}",
+              "substitution_template": "CT(k) = k × {cost_taller_day} + {Lq_pfcm} × {cost_defective_day}",
               "required_variables": [
-                "Lq_by_k",
+                "Lq_pfcm",
                 "cost_taller_day",
                 "cost_defective_day"
               ],
               "produces": "CT_by_k"
             },
             {
-              "order": 4,
-              "formula_key": "k_optimal",
+              "order": 6,
+              "formula_key": "optimize_k_pfcm",
               "formula_name": "k que minimiza CT",
               "expression": "k* = argmin_{k ≥ 1} CT(k)",
               "substitution_template": "k* = argmin {CT_by_k}  para k = 1, 2, ...",
@@ -3661,7 +3686,7 @@
             {
               "order": 1,
               "formula_key": "r_pfcs",
-              "formula_name": "Ratio λ/μ por unidad (PFCS)",
+              "formula_name": "Ratio λ/μ por unidad (común PFCS/PFCM)",
               "expression": "r = λ_unidad / μ",
               "substitution_template": "r = {lambda_per_unit} / {mu}",
               "required_variables": [
@@ -3672,23 +3697,37 @@
             },
             {
               "order": 2,
-              "formula_key": "Pn_pfcm_d",
-              "formula_name": "Pn PFCM con k talleres óptimo",
-              "expression": "Pn PFCM: Pn = C(M,n) × (λ_u/μ)^n × (n!/k^(n-k)) × P0  para n > k",
-              "substitution_template": "Pn = f({M}, {r_pfcs}, {k_optimal}) para n=0..M",
+              "formula_key": "P0_pfcm",
+              "formula_name": "P0 PFCM con k_optimal talleres",
+              "expression": "P0(k*) = 1 / [Σ_{n=0}^{k*} C(M,n)×r^n + Σ_{n=k*+1}^{M} C(M,n)×r^n×(n!/k*^(n−k*))]",
+              "substitution_template": "P0({k_optimal}) = 1 / Σ_{n=0}^{{M}} f({M}, {r_pfcs}, n, {k_optimal})",
               "required_variables": [
                 "M",
                 "r_pfcs",
                 "k_optimal"
               ],
-              "produces": "Pn_pfcm"
+              "produces": "P0_pfcm"
             },
             {
               "order": 3,
+              "formula_key": "Pn_pfcm",
+              "formula_name": "Pn PFCM con k_optimal talleres",
+              "expression": "Pn = C(M,n)×(λ_u/μ)^n×P0  si n≤k*;  C(M,n)×(λ_u/μ)^n×(n!/k*^(n−k*))×P0  si n>k*",
+              "substitution_template": "Pn = f({M}, {r_pfcs}, {P0_pfcm}, n, {k_optimal})  para n=0..M",
+              "required_variables": [
+                "M",
+                "r_pfcs",
+                "P0_pfcm",
+                "k_optimal"
+              ],
+              "produces": "Pn_pfcm"
+            },
+            {
+              "order": 4,
               "formula_key": "P_Nq_leq_1",
-              "formula_name": "P(máximo 1 esperando) = Σ_{n=0}^{k+1} Pn",
-              "expression": "P(Nq ≤ 1) = Σ_{n=0}^{k_opt+1} Pn",
-              "substitution_template": "P(Nq≤1) = Σ_{n=0}^{{k_optimal}+1} Pn",
+              "formula_name": "P(máximo 1 esperando) = Σ_{n=0}^{k*+1} Pn",
+              "expression": "P(Nq ≤ 1) = Σ_{n=0}^{k*+1} Pn",
+              "substitution_template": "P(Nq≤1) = Σ_{n=0}^{{k_optimal}+1} {Pn_pfcm}[n]",
               "required_variables": [
                 "Pn_pfcm",
                 "k_optimal"

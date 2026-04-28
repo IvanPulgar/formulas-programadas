@@ -137,7 +137,8 @@ def ct_te_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     wq = validate_positive_number("Wq", inputs.get("Wq"))
     cte = validate_positive_number("CTE", inputs.get("CTE"))
-    return lambda_ * 8.0 * wq * cte
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * wq * cte
 
 
 
@@ -145,7 +146,8 @@ def ct_ts_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     w = validate_positive_number("W", inputs.get("W"))
     cts = validate_positive_number("CTS", inputs.get("CTS"))
-    return lambda_ * 8.0 * w * cts
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * w * cts
 
 
 
@@ -153,7 +155,8 @@ def ct_tse_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     mu = validate_positive_number("μ", inputs.get("mu"))
     ctse = validate_positive_number("CTSE", inputs.get("CTSE"))
-    return lambda_ * 8.0 * (1.0 / mu) * ctse
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * (1.0 / mu) * ctse
 
 
 
@@ -176,7 +179,8 @@ def ct_formula(inputs: dict[str, Any]) -> float:
 def tt_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     wq = validate_positive_number("Wq", inputs.get("Wq"))
-    return lambda_ * 8.0 * 0.30 * wq
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * 0.30 * wq
 
 
 def ct_simplified_formula(inputs: dict[str, Any]) -> float:
@@ -185,14 +189,16 @@ def ct_simplified_formula(inputs: dict[str, Any]) -> float:
     cts = validate_positive_number("CTS", inputs.get("CTS"))
     k = validate_positive_integer("k", inputs.get("k"))
     cs = validate_positive_number("CS", inputs.get("CS"))
-    return lambda_ * 8.0 * w * cts + k * cs
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * w * cts + k * cs
 
 
 def tt_alt_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     pk = validate_positive_number("Pk", inputs.get("Pk"))
     wn = validate_positive_number("Wn", inputs.get("Wn"))
-    return lambda_ * 8.0 * 0.30 * pk * wn
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * 0.30 * pk * wn
 
 
 def qualifies_for_pne(inputs: dict[str, Any], threshold: float = 0.85) -> bool:
@@ -460,12 +466,12 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICM,
         description="Costo total asociado al tiempo de espera.",
         result_variable="CT_TE",
-        input_variables=["lambda_", "Wq", "CTE"],
+        input_variables=["lambda_", "Wq", "CTE", "H"],
         formula_type=FormulaType.DIRECT,
         priority=10,
         premium_mode=False,
         manual_calculation=ct_te_formula,
-        symbolic_expression="λ · 8 · Wq · CTE",
+        symbolic_expression="λ · H · Wq · CTE",
         constraints={"lambda_positive": True, "Wq_non_negative": True, "CTE_non_negative": True},
     ),
     FormulaDefinition(
@@ -474,12 +480,12 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICM,
         description="Costo total asociado al tiempo de servicio.",
         result_variable="CT_TS",
-        input_variables=["lambda_", "W", "CTS"],
+        input_variables=["lambda_", "W", "CTS", "H"],
         formula_type=FormulaType.DIRECT,
         priority=10,
         premium_mode=False,
         manual_calculation=ct_ts_formula,
-        symbolic_expression="λ · 8 · W · CTS",
+        symbolic_expression="λ · H · W · CTS",
         constraints={"lambda_positive": True, "W_non_negative": True, "CTS_non_negative": True},
     ),
     FormulaDefinition(
@@ -488,12 +494,12 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICM,
         description="Costo total asociado al tiempo combinado de servicio y espera.",
         result_variable="CT_TSE",
-        input_variables=["lambda_", "mu", "CTSE"],
+        input_variables=["lambda_", "mu", "CTSE", "H"],
         formula_type=FormulaType.DIRECT,
         priority=10,
         premium_mode=False,
         manual_calculation=ct_tse_formula,
-        symbolic_expression="λ · 8 · (1/μ) · CTSE",
+        symbolic_expression="λ · H · (1/μ) · CTSE",
         constraints={"lambda_positive": True, "mu_positive": True, "CTSE_non_negative": True},
     ),
     FormulaDefinition(
@@ -533,14 +539,14 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         id="picm_tt",
         name="Tiempo total de operación",
         category=FormulaCategory.PICM,
-        description="Tiempo total asociado a la operación en función de Wq.",
+        description="Tiempo total asociado a la operación en función de Wq y H horas.",
         result_variable="TT",
-        input_variables=["lambda_", "Wq"],
+        input_variables=["lambda_", "Wq", "H"],
         formula_type=FormulaType.DIRECT,
         priority=6,
         premium_mode=False,
         manual_calculation=tt_formula,
-        symbolic_expression="λ · 8 · 0.30 · Wq",
+        symbolic_expression="λ · H · 0.30 · Wq",
         constraints={"lambda_positive": True, "Wq_non_negative": True},
     ),
     # ── B-group: flexible derived probabilities ─────────────────
@@ -648,26 +654,26 @@ PICM_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICM,
         description="Versión reducida del costo total para comparar alternativas de servidores.",
         result_variable="CT",
-        input_variables=["lambda_", "W", "CTS", "k", "CS"],
+        input_variables=["lambda_", "W", "CTS", "k", "CS", "H"],
         formula_type=FormulaType.DIRECT,
         priority=6,
         premium_mode=False,
         manual_calculation=ct_simplified_formula,
-        symbolic_expression="λ · 8 · W · CTS + k · CS",
+        symbolic_expression="λ · H · W · CTS + k · CS",
         constraints={"lambda_positive": True, "W_non_negative": True, "CTS_non_negative": True, "k_positive_integer": True, "CS_non_negative": True},
     ),
     FormulaDefinition(
         id="picm_tt_alt",
-        name="Tiempo total diario (usando Pk y Wn)",
+        name="Tiempo total del período (usando Pk y Wn)",
         category=FormulaCategory.PICM,
-        description="Expresión alternativa del tiempo total diario usando probabilidad de esperar y espera condicionada.",
+        description="Expresión alternativa del tiempo total del período usando probabilidad de esperar y espera condicionada.",
         result_variable="TT",
-        input_variables=["lambda_", "Pk", "Wn"],
+        input_variables=["lambda_", "Pk", "Wn", "H"],
         formula_type=FormulaType.DIRECT,
         priority=5,
         premium_mode=False,
         manual_calculation=tt_alt_formula,
-        symbolic_expression="λ · 8 · 0.30 · Pk · Wn",
+        symbolic_expression="λ · H · 0.30 · Pk · Wn",
         constraints={"lambda_positive": True, "Pk_probability": True, "Wn_non_negative": True},
     ),
 ]

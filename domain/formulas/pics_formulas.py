@@ -110,21 +110,24 @@ def ct_te_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     wq = validate_positive_number("Wq", inputs.get("Wq"))
     cte = validate_positive_number("CTE", inputs.get("CTE"))
-    return lambda_ * 8.0 * wq * cte
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * wq * cte
 
 
 def ct_ts_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     w = validate_positive_number("W", inputs.get("W"))
     cts = validate_positive_number("CTS", inputs.get("CTS"))
-    return lambda_ * 8.0 * w * cts
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * w * cts
 
 
 def ct_tse_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     mu = validate_positive_number("μ", inputs.get("mu"))
     ctse = validate_positive_number("CTSE", inputs.get("CTSE"))
-    return lambda_ * 8.0 * (1.0 / mu) * ctse
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * (1.0 / mu) * ctse
 
 
 def ct_s_formula(inputs: dict[str, Any]) -> float:
@@ -143,14 +146,16 @@ def ct_formula(inputs: dict[str, Any]) -> float:
 def tt_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     wq = validate_positive_number("Wq", inputs.get("Wq"))
-    return lambda_ * 8.0 * 0.30 * wq
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * 0.30 * wq
 
 
 def tt_alt_formula(inputs: dict[str, Any]) -> float:
     lambda_ = validate_positive_number("λ", inputs.get("lambda_"))
     rho = validate_positive_number("ρ", inputs.get("rho"))
     wn = validate_positive_number("Wn", inputs.get("Wn"))
-    return lambda_ * 8.0 * 0.30 * rho * wn
+    H = validate_positive_number("H", inputs.get("H"))
+    return lambda_ * H * 0.30 * rho * wn
 
 
 PICS_FORMULAS: list[FormulaDefinition] = [
@@ -314,12 +319,12 @@ PICS_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICS,
         description="Costo total asociado al tiempo de espera.",
         result_variable="CT_TE",
-        input_variables=["lambda_", "Wq", "CTE"],
+        input_variables=["lambda_", "Wq", "CTE", "H"],
         formula_type=FormulaType.DIRECT,
         priority=8,
         premium_mode=False,
         manual_calculation=ct_te_formula,
-        symbolic_expression="λ · 8 · Wq · CTE",
+        symbolic_expression="λ · H · Wq · CTE",
         constraints={"lambda_positive": True, "Wq_non_negative": True, "CTE_non_negative": True},
     ),
     FormulaDefinition(
@@ -328,12 +333,12 @@ PICS_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICS,
         description="Costo total asociado al tiempo de servicio.",
         result_variable="CT_TS",
-        input_variables=["lambda_", "W", "CTS"],
+        input_variables=["lambda_", "W", "CTS", "H"],
         formula_type=FormulaType.DIRECT,
         priority=8,
         premium_mode=False,
         manual_calculation=ct_ts_formula,
-        symbolic_expression="λ · 8 · W · CTS",
+        symbolic_expression="λ · H · W · CTS",
         constraints={"lambda_positive": True, "W_non_negative": True, "CTS_non_negative": True},
     ),
     FormulaDefinition(
@@ -342,12 +347,12 @@ PICS_FORMULAS: list[FormulaDefinition] = [
         category=FormulaCategory.PICS,
         description="Costo total asociado al tiempo combinado de servicio y espera.",
         result_variable="CT_TSE",
-        input_variables=["lambda_", "mu", "CTSE"],
+        input_variables=["lambda_", "mu", "CTSE", "H"],
         formula_type=FormulaType.DIRECT,
         priority=8,
         premium_mode=False,
         manual_calculation=ct_tse_formula,
-        symbolic_expression="λ · 8 · (1/μ) · CTSE",
+        symbolic_expression="λ · H · (1/μ) · CTSE",
         constraints={"lambda_positive": True, "mu_positive": True, "CTSE_non_negative": True},
     ),
     FormulaDefinition(
@@ -387,28 +392,28 @@ PICS_FORMULAS: list[FormulaDefinition] = [
         id="pics_tt",
         name="Tiempo total de operación",
         category=FormulaCategory.PICS,
-        description="Tiempo total normalizado al factor de 0.30 horas en función de Wq.",
+        description="Tiempo total normalizado al factor de 0.30 en función de Wq y H horas.",
         result_variable="TT",
-        input_variables=["lambda_", "Wq"],
+        input_variables=["lambda_", "Wq", "H"],
         formula_type=FormulaType.DIRECT,
         priority=5,
         premium_mode=False,
         manual_calculation=tt_formula,
-        symbolic_expression="λ · 8 · 0.30 · Wq",
+        symbolic_expression="λ · H · 0.30 · Wq",
         constraints={"lambda_positive": True, "Wq_non_negative": True},
     ),
     FormulaDefinition(
         id="pics_tt_alt",
-        name="Tiempo total diario (usando ρ y Wn)",
+        name="Tiempo total del período (usando ρ y Wn)",
         category=FormulaCategory.PICS,
-        description="Expresión alternativa del tiempo total diario usando ocupación y espera condicionada.",
+        description="Expresión alternativa del tiempo total del período usando ocupación y espera condicionada.",
         result_variable="TT",
-        input_variables=["lambda_", "rho", "Wn"],
+        input_variables=["lambda_", "rho", "Wn", "H"],
         formula_type=FormulaType.DIRECT,
         priority=5,
         premium_mode=False,
         manual_calculation=tt_alt_formula,
-        symbolic_expression="λ · 8 · 0.30 · ρ · Wn",
+        symbolic_expression="λ · H · 0.30 · ρ · Wn",
         constraints={"lambda_positive": True, "rho_positive": True, "Wn_non_negative": True},
     ),
 ]
