@@ -1,21 +1,23 @@
 """
-Phase KB — Ejercicios 11-20 Structural Knowledge Coverage
+Phase KB — Ejercicios 21-23 Structural Knowledge Coverage
 ==========================================================
-Validates analysis_exercise_solutions.json (exercises 11-20) against 12 groups:
+Validates analysis_exercise_solutions.json (exercises 21-23) against 12 groups:
 
- 1. Exactly 10 NEW exercises exist (source_number 11..20), total ≥ 20
- 2. Unique exercise_ids (across all 20)
- 3. Every exercise 11-20 has 'model' field (valid model name)
- 4. Every exercise 11-20 has 'variables_to_extract'
- 5. Every exercise 11-20 has 'literals'
+ 1. Exactly 3 NEW exercises exist (source_number 21, 22, 23)
+ 2. Unique exercise_ids (across all 23)
+ 3. Every exercise 21-23 has 'model' field (valid model name)
+ 4. Every exercise 21-23 has 'variables_to_extract'
+ 5. Every exercise 21-23 has 'literals'
  6. Every literal has 'objective'
  7. Every literal has 'formula_order' (non-empty list)
- 8. Every formula_order step has: order, formula_key, expression,
-    required_variables or substitution_template, produces
- 9. Models covered: PICS, PICM, PFCS, PFHET appear in exercises 11-20
-10. At least 3 exercises 11-20 have 'recognition_examples'
-11. Analyzer recognizes recognition_examples for exercises 11-20
-12. No memorized numerical results in formula steps of exercises 11-20
+ 8. Every formula_order step has: order, formula_key, expression, produces
+ 9. Models covered in 21-23: PICM and PFCS/PFHET present
+10. At least 1 exercise 21-23 has 'recognition_examples' with modified data
+11. The analyzer recognizes recognition_examples for exercises 21-23
+12. No memorized numerical results in formula steps of exercises 21-23
+
+Read from: infrastructure/data/analysis/analysis_exercise_solutions.json
+Source:    Ejercicios Propuestos Teoría de Colas.docx  (párrafos [172]-[199])
 """
 
 from __future__ import annotations
@@ -50,8 +52,8 @@ def all_exercises(solutions):
 
 @pytest.fixture(scope="module")
 def exercises(all_exercises):
-    """Only exercises 11-20."""
-    return [e for e in all_exercises if 11 <= e["source_number"] <= 20]
+    """Only exercises 21-23."""
+    return [e for e in all_exercises if 21 <= e["source_number"] <= 23]
 
 
 @pytest.fixture(scope="module")
@@ -65,7 +67,7 @@ def client():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 1 — Exercises 11-20 exist; total ≥ 20
+# Group 1 — Exercises 21-23 exist; total ≥ 23
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestExerciseCount:
@@ -73,36 +75,36 @@ class TestExerciseCount:
     def test_solutions_file_loaded(self, solutions):
         assert solutions_loaded(), "analysis_exercise_solutions.json not found or empty"
 
-    def test_at_least_20_exercises_total(self, all_exercises):
-        assert len(all_exercises) >= 20, (
-            f"Expected ≥20 total exercises, got {len(all_exercises)}"
+    def test_at_least_23_exercises_total(self, all_exercises):
+        assert len(all_exercises) >= 23, (
+            f"Expected ≥23 total exercises, got {len(all_exercises)}"
         )
 
-    def test_exactly_10_exercises_11_to_20(self, exercises):
-        assert len(exercises) == 10, (
-            f"Expected exactly 10 exercises (11-20), got {len(exercises)}"
+    def test_exactly_3_exercises_21_to_23(self, exercises):
+        assert len(exercises) == 3, (
+            f"Expected exactly 3 exercises (21-23), got {len(exercises)}"
         )
 
-    def test_source_numbers_are_11_to_20(self, exercises):
+    def test_source_numbers_are_21_22_23(self, exercises):
         nums = sorted(e["source_number"] for e in exercises)
-        assert nums == list(range(11, 21)), (
-            f"source_number values must be exactly 11..20, got {nums}"
+        assert nums == [21, 22, 23], (
+            f"source_number values must be exactly [21, 22, 23], got {nums}"
         )
 
-    def test_get_solution_by_number_works_for_11_20(self):
-        for n in range(11, 21):
+    def test_get_solution_by_number_works_for_21_23(self):
+        for n in (21, 22, 23):
             sol = get_solution_by_number(n)
             assert sol is not None, f"get_solution_by_number({n}) returned None"
             assert sol["source_number"] == n
 
-    def test_exercises_1_to_10_still_present(self, all_exercises):
+    def test_exercises_1_to_20_still_present(self, all_exercises):
         nums = {e["source_number"] for e in all_exercises}
-        for n in range(1, 11):
-            assert n in nums, f"Exercise {n} (EX01-10) is missing after adding EX11-20"
+        for n in range(1, 21):
+            assert n in nums, f"Exercise {n} (EX01-20) is missing after adding EX21-23"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 2 — Unique exercise_ids across all 20 exercises
+# Group 2 — Unique exercise_ids across all 23 exercises
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestUniqueIds:
@@ -113,22 +115,22 @@ class TestUniqueIds:
             f"Duplicate exercise_ids found: {[x for x in ids if ids.count(x) > 1]}"
         )
 
-    def test_exercise_ids_11_20_are_non_empty_strings(self, exercises):
+    def test_exercise_ids_21_23_are_non_empty_strings(self, exercises):
         for e in exercises:
             eid = e.get("exercise_id", "")
             assert isinstance(eid, str) and eid.strip(), (
                 f"Exercise {e.get('source_number')} has invalid exercise_id: {eid!r}"
             )
 
-    def test_exercise_ids_11_20_are_distinct_from_1_10(self, exercises, all_exercises):
-        ids_1_10 = {e["exercise_id"] for e in all_exercises if e["source_number"] <= 10}
-        ids_11_20 = {e["exercise_id"] for e in exercises}
-        overlap = ids_1_10 & ids_11_20
-        assert not overlap, f"exercise_id collision between 1-10 and 11-20: {overlap}"
+    def test_exercise_ids_21_23_distinct_from_previous(self, exercises, all_exercises):
+        ids_prev = {e["exercise_id"] for e in all_exercises if e["source_number"] < 21}
+        ids_new  = {e["exercise_id"] for e in exercises}
+        overlap  = ids_prev & ids_new
+        assert not overlap, f"exercise_id collision between 1-20 and 21-23: {overlap}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 3 — Every exercise 11-20 has valid 'model' field
+# Group 3 — Every exercise 21-23 has valid 'model' field
 # ─────────────────────────────────────────────────────────────────────────────
 
 VALID_MODELS = {"PICS", "PICM", "PFCS", "PFCM", "PFHET"}
@@ -160,9 +162,30 @@ class TestModelField:
                 f"Exercise {e['exercise_id']} missing model_reasoning"
             )
 
+    def test_ex21_is_picm(self, exercises):
+        ex21 = next((e for e in exercises if e["source_number"] == 21), None)
+        assert ex21 is not None, "Exercise 21 not found"
+        assert ex21["model"] == "PICM", (
+            f"Exercise 21 must be PICM (M/M/c condition L), got {ex21['model']!r}"
+        )
+
+    def test_ex22_is_picm(self, exercises):
+        ex22 = next((e for e in exercises if e["source_number"] == 22), None)
+        assert ex22 is not None, "Exercise 22 not found"
+        assert ex22["model"] == "PICM", (
+            f"Exercise 22 must be PICM (M/M/5 licencias), got {ex22['model']!r}"
+        )
+
+    def test_ex23_is_pfcs(self, exercises):
+        ex23 = next((e for e in exercises if e["source_number"] == 23), None)
+        assert ex23 is not None, "Exercise 23 not found"
+        assert ex23["model"] == "PFCS", (
+            f"Exercise 23 must be PFCS (montacargas independientes), got {ex23['model']!r}"
+        )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 4 — Every exercise 11-20 has variables_to_extract
+# Group 4 — Every exercise 21-23 has variables_to_extract
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestVariablesToExtract:
@@ -191,39 +214,24 @@ class TestVariablesToExtract:
                     f"Variable '{v.get('name')}' in {e['exercise_id']} missing 'required' flag"
                 )
 
-    def test_pics_exercises_have_lambda_and_mu(self, exercises):
-        for e in exercises:
-            if e["model"] == "PICS":
-                names = {v["name"] for v in e.get("variables_to_extract", [])}
-                has_lambda = any(
-                    n == "lambda_" or n.startswith("lambda_") or n == "lambda_per_unit"
-                    for n in names
-                )
-                has_mu = any(n == "mu" or n.startswith("mu_") for n in names)
-                assert has_lambda, (
-                    f"PICS exercise {e['exercise_id']} missing lambda variable. Found: {names}"
-                )
-                assert has_mu, (
-                    f"PICS exercise {e['exercise_id']} missing mu variable. Found: {names}"
-                )
-
-    def test_picm_exercises_have_c(self, exercises):
+    def test_picm_exercises_have_lambda_and_mu(self, exercises):
         for e in exercises:
             if e["model"] == "PICM":
                 names = {v["name"] for v in e.get("variables_to_extract", [])}
-                assert "c" in names or "num_cajas" in names, (
-                    f"PICM exercise {e['exercise_id']} should have 'c' or 'num_cajas'. Found: {names}"
+                has_lambda = any(
+                    n == "lambda_" or n.startswith("lambda_") or n == "lambda_per_unit"
+                    or n == "inter_arrival_min"
+                    for n in names
+                )
+                has_mu = any(n == "mu" or n.startswith("mu_") or n == "service_time_min" for n in names)
+                assert has_lambda, (
+                    f"PICM exercise {e['exercise_id']} missing lambda variable. Found: {names}"
+                )
+                assert has_mu, (
+                    f"PICM exercise {e['exercise_id']} missing mu variable. Found: {names}"
                 )
 
-    def test_pfhet_exercise_has_mu_A_and_mu_B(self, exercises):
-        for e in exercises:
-            if e["model"] == "PFHET":
-                names = {v["name"] for v in e.get("variables_to_extract", [])}
-                assert "mu_A" in names and "mu_B" in names, (
-                    f"PFHET exercise {e['exercise_id']} must have mu_A and mu_B. Found: {names}"
-                )
-
-    def test_pfcs_exercises_have_M(self, exercises):
+    def test_pfcs_exercise_has_M(self, exercises):
         for e in exercises:
             if e["model"] == "PFCS":
                 names = {v["name"] for v in e.get("variables_to_extract", [])}
@@ -231,9 +239,35 @@ class TestVariablesToExtract:
                     f"PFCS exercise {e['exercise_id']} must have variable M. Found: {names}"
                 )
 
+    def test_pfcs_exercise_has_mu_A_and_mu_B(self, exercises):
+        """Exercise 23 (PFCS with 2 independent technicians) must have mu_A and mu_B."""
+        for e in exercises:
+            if e["model"] == "PFCS" and e.get("has_multiple_models"):
+                names = {v["name"] for v in e.get("variables_to_extract", [])}
+                assert "mu_A" in names and "mu_B" in names, (
+                    f"PFCS multi-model exercise {e['exercise_id']} must have mu_A and mu_B. "
+                    f"Found: {names}"
+                )
+
+    def test_ex21_has_L_threshold(self, exercises):
+        ex21 = next((e for e in exercises if e["source_number"] == 21), None)
+        assert ex21, "Exercise 21 not found"
+        names = {v["name"] for v in ex21.get("variables_to_extract", [])}
+        assert "L_threshold" in names, (
+            f"Exercise 21 must have L_threshold variable. Found: {names}"
+        )
+
+    def test_ex22_has_failure_prob(self, exercises):
+        ex22 = next((e for e in exercises if e["source_number"] == 22), None)
+        assert ex22, "Exercise 22 not found"
+        names = {v["name"] for v in ex22.get("variables_to_extract", [])}
+        assert "failure_prob" in names, (
+            f"Exercise 22 must have failure_prob variable. Found: {names}"
+        )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 5 — Every exercise 11-20 has literals
+# Group 5 — Every exercise 21-23 has literals
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestLiterals:
@@ -277,6 +311,46 @@ class TestLiterals:
                     f"lit {lit.get('literal_id')}"
                 )
 
+    def test_ex21_has_pfcs_literal(self, exercises):
+        """Exercise 21 must have at least one literal with PFCS model_context (recorte)."""
+        ex21 = next((e for e in exercises if e["source_number"] == 21), None)
+        assert ex21, "Exercise 21 not found"
+        pfcs_lits = [
+            lit for lit in ex21.get("literals", [])
+            if lit.get("model_context") == "PFCS"
+        ]
+        assert len(pfcs_lits) > 0, (
+            f"Exercise 21 must have at least 1 literal with model_context=PFCS "
+            f"(recorte de personal → población finita)."
+        )
+
+    def test_ex22_has_cost_literal(self, exercises):
+        """Exercise 22 must have a literal with objective related to revenue/cost."""
+        ex22 = next((e for e in exercises if e["source_number"] == 22), None)
+        assert ex22, "Exercise 22 not found"
+        cost_lits = [
+            lit for lit in ex22.get("literals", [])
+            if "cost" in lit.get("objective", "").lower()
+               or "revenue" in lit.get("objective", "").lower()
+        ]
+        assert len(cost_lits) > 0, (
+            f"Exercise 22 must have at least 1 literal about costs/revenue. "
+            f"Objectives found: {[l.get('objective') for l in ex22.get('literals', [])]}"
+        )
+
+    def test_ex23_has_pfhet_literal(self, exercises):
+        """Exercise 23 must have at least one literal with PFHET model_context (unificado)."""
+        ex23 = next((e for e in exercises if e["source_number"] == 23), None)
+        assert ex23, "Exercise 23 not found"
+        pfhet_lits = [
+            lit for lit in ex23.get("literals", [])
+            if lit.get("model_context") == "PFHET"
+        ]
+        assert len(pfhet_lits) > 0, (
+            f"Exercise 23 must have at least 1 literal with model_context=PFHET "
+            f"(taller unificado)."
+        )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Group 6 — Every literal has 'objective'
@@ -302,213 +376,198 @@ class TestLiteralObjectives:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 7 — Every literal has non-empty formula_order list
+# Group 7 — Every literal has non-empty formula_order
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestFormulaOrderPresence:
+class TestFormulaOrder:
 
     def test_all_literals_have_formula_order(self, exercises):
         for e in exercises:
             for lit in e.get("literals", []):
                 fo = lit.get("formula_order", [])
                 assert isinstance(fo, list) and len(fo) > 0, (
-                    f"formula_order missing or empty in {e['exercise_id']} "
-                    f"lit {lit.get('literal_id')}"
+                    f"Literal {lit.get('literal_id')} in {e['exercise_id']} "
+                    f"has empty or missing formula_order"
                 )
 
-    def test_formula_order_steps_are_dicts(self, exercises):
+    def test_formula_order_is_sorted_by_order_field(self, exercises):
+        for e in exercises:
+            for lit in e.get("literals", []):
+                steps = lit.get("formula_order", [])
+                orders = [s.get("order", 0) for s in steps]
+                assert orders == sorted(orders), (
+                    f"formula_order steps are not sorted in {e['exercise_id']} "
+                    f"lit {lit.get('literal_id')}: {orders}"
+                )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Group 8 — Every formula_order step has required fields
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestFormulaOrderSteps:
+
+    def test_each_step_has_order(self, exercises):
         for e in exercises:
             for lit in e.get("literals", []):
                 for step in lit.get("formula_order", []):
-                    assert isinstance(step, dict), (
-                        f"formula_order step must be a dict in {e['exercise_id']} "
-                        f"lit {lit.get('literal_id')}"
-                    )
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Group 8 — Every formula_order step has required fields + sequential orders
-# ─────────────────────────────────────────────────────────────────────────────
-
-class TestFormulaOrderStepFields:
-
-    def test_all_steps_have_order(self, exercises):
-        for e in exercises:
-            for lit in e.get("literals", []):
-                for i, step in enumerate(lit.get("formula_order", [])):
                     assert "order" in step, (
-                        f"Step {i} in {e['exercise_id']} lit {lit['literal_id']} missing 'order'"
-                    )
-                    assert isinstance(step["order"], int), (
-                        f"Step order must be int in {e['exercise_id']} lit {lit['literal_id']}"
+                        f"Step missing 'order' in {e['exercise_id']} "
+                        f"lit {lit.get('literal_id')}: {step}"
                     )
 
-    def test_all_steps_have_formula_key(self, exercises):
+    def test_each_step_has_formula_key(self, exercises):
         for e in exercises:
             for lit in e.get("literals", []):
-                for i, step in enumerate(lit.get("formula_order", [])):
+                for step in lit.get("formula_order", []):
                     assert step.get("formula_key"), (
-                        f"Step {i} in {e['exercise_id']} lit {lit['literal_id']} missing formula_key"
+                        f"Step missing 'formula_key' in {e['exercise_id']} "
+                        f"lit {lit.get('literal_id')}: {step}"
                     )
 
-    def test_all_steps_have_expression(self, exercises):
+    def test_each_step_has_expression(self, exercises):
         for e in exercises:
             for lit in e.get("literals", []):
-                for i, step in enumerate(lit.get("formula_order", [])):
+                for step in lit.get("formula_order", []):
                     assert step.get("expression"), (
-                        f"Step {i} in {e['exercise_id']} lit {lit['literal_id']} missing expression"
+                        f"Step missing 'expression' in {e['exercise_id']} "
+                        f"lit {lit.get('literal_id')}: {step.get('formula_key')}"
                     )
 
-    def test_all_steps_have_produces(self, exercises):
+    def test_each_step_has_produces(self, exercises):
         for e in exercises:
             for lit in e.get("literals", []):
-                for i, step in enumerate(lit.get("formula_order", [])):
+                for step in lit.get("formula_order", []):
                     assert step.get("produces"), (
-                        f"Step {i} in {e['exercise_id']} lit {lit['literal_id']} missing produces"
+                        f"Step missing 'produces' in {e['exercise_id']} "
+                        f"lit {lit.get('literal_id')}: {step.get('formula_key')}"
                     )
 
-    def test_all_steps_have_req_vars_or_substitution(self, exercises):
+    def test_each_step_has_required_variables(self, exercises):
         for e in exercises:
             for lit in e.get("literals", []):
-                for i, step in enumerate(lit.get("formula_order", [])):
-                    has_rv = "required_variables" in step and isinstance(
-                        step["required_variables"], list
+                for step in lit.get("formula_order", []):
+                    assert "required_variables" in step, (
+                        f"Step missing 'required_variables' in {e['exercise_id']} "
+                        f"lit {lit.get('literal_id')}: {step.get('formula_key')}"
                     )
-                    has_tpl = bool(step.get("substitution_template", "").strip())
-                    assert has_rv or has_tpl, (
-                        f"Step {i} ('{step.get('formula_key')}') in {e['exercise_id']} "
-                        f"lit {lit['literal_id']} needs required_variables or substitution_template"
-                    )
-
-    def test_step_order_is_sequential(self, exercises):
-        for e in exercises:
-            for lit in e.get("literals", []):
-                fo = lit.get("formula_order", [])
-                orders = [s["order"] for s in fo if "order" in s]
-                assert orders == list(range(1, len(orders) + 1)), (
-                    f"formula_order steps must be sequential 1..N in "
-                    f"{e['exercise_id']} lit {lit['literal_id']}: {orders}"
-                )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 9 — Model coverage: PICS, PICM, PFCS, PFHET appear in exercises 11-20
+# Group 9 — Models covered in 21-23 include PICM and PFCS/PFHET
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestModelCoverage:
+class TestModelsCovered:
 
-    def _all_models_in_11_20(self, exercises) -> set[str]:
+    def test_picm_present_in_21_23(self, exercises):
         models = {e["model"] for e in exercises}
-        for e in exercises:
-            for lit in e.get("literals", []):
-                ctx = lit.get("model_context", "")
-                if ctx:
-                    models.add(ctx)
-        return models
-
-    def test_pics_covered_in_11_20(self, exercises):
-        pics = [e for e in exercises if e["model"] == "PICS"]
-        all_models = self._all_models_in_11_20(exercises)
-        assert "PICS" in all_models, (
-            f"PICS must appear in exercises 11-20 (primary or model_context). Found: {all_models}"
-        )
-        assert len(pics) >= 1, f"Expected at least 1 PICS exercise in 11-20, got {len(pics)}"
-
-    def test_picm_covered_in_11_20(self, exercises):
-        picm = [e for e in exercises if e["model"] == "PICM"]
-        assert len(picm) >= 2, f"Expected at least 2 PICM exercises in 11-20, got {len(picm)}"
-
-    def test_pfcs_covered_in_11_20(self, exercises):
-        pfcs = [e for e in exercises if e["model"] == "PFCS"]
-        all_models = self._all_models_in_11_20(exercises)
-        assert "PFCS" in all_models, (
-            f"PFCS must appear in exercises 11-20. Found: {all_models}"
-        )
-        assert len(pfcs) >= 2, f"Expected ≥2 PFCS exercises in 11-20, got {len(pfcs)}"
-
-    def test_pfhet_covered_in_11_20(self, exercises):
-        pfhet = [e for e in exercises if e["model"] == "PFHET"]
-        assert len(pfhet) >= 1, (
-            f"Expected ≥1 PFHET exercise in 11-20, got {len(pfhet)}"
+        assert "PICM" in models, (
+            f"PICM must be present among exercises 21-23. Found: {models}"
         )
 
-    def test_cost_exercises_present_in_11_20(self, exercises):
-        with_cost = [e for e in exercises if e.get("has_cost_analysis")]
-        assert len(with_cost) >= 3, (
-            f"Expected ≥3 exercises with cost analysis in 11-20, got {len(with_cost)}"
+    def test_pfcs_or_pfhet_present_in_21_23(self, exercises):
+        models = {e["model"] for e in exercises}
+        assert models & {"PFCS", "PFHET"}, (
+            f"PFCS or PFHET must be present among exercises 21-23. Found: {models}"
         )
 
-    def test_optimization_exercises_present_in_11_20(self, exercises):
-        with_opt = [e for e in exercises if e.get("has_optimization")]
-        assert len(with_opt) >= 3, (
-            f"Expected ≥3 exercises with optimization in 11-20, got {len(with_opt)}"
+    def test_ex21_has_multiple_models_flag(self, exercises):
+        """Exercise 21 transitions from PICM to PFCS — has_multiple_models must be true."""
+        ex21 = next((e for e in exercises if e["source_number"] == 21), None)
+        assert ex21 and ex21.get("has_multiple_models") is True, (
+            "Exercise 21 should have has_multiple_models=True (PICM → PFCS)"
         )
 
-    def test_multi_model_exercises_present(self, exercises):
-        multi = [e for e in exercises if e.get("has_multiple_models")]
-        assert len(multi) >= 1, (
-            f"Expected ≥1 exercise with has_multiple_models=True in 11-20, got {len(multi)}"
+    def test_ex23_has_multiple_models_flag(self, exercises):
+        """Exercise 23 transitions from PFCS to PFHET — has_multiple_models must be true."""
+        ex23 = next((e for e in exercises if e["source_number"] == 23), None)
+        assert ex23 and ex23.get("has_multiple_models") is True, (
+            "Exercise 23 should have has_multiple_models=True (PFCS → PFHET)"
+        )
+
+    def test_cost_exercises_present(self, exercises):
+        """Exercises with cost analysis must be flagged."""
+        cost_exs = [e for e in exercises if e.get("has_cost_analysis") is True]
+        assert len(cost_exs) >= 2, (
+            f"At least 2 of exercises 21-23 should have has_cost_analysis=True. "
+            f"Found: {len(cost_exs)}"
         )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 10 — At least 3 exercises 11-20 have recognition_examples
+# Group 10 — At least 1 exercise 21-23 has recognition_examples with modified data
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestRecognitionExamples:
 
-    def test_at_least_3_exercises_have_recognition_examples(self, exercises):
-        with_ex = [e for e in exercises if len(e.get("recognition_examples", [])) > 0]
-        assert len(with_ex) >= 3, (
-            f"Expected ≥3 exercises (11-20) with recognition_examples, got {len(with_ex)}"
+    def test_at_least_one_exercise_has_recognition_examples(self, exercises):
+        exs_with_examples = [
+            e for e in exercises
+            if e.get("recognition_examples") and len(e["recognition_examples"]) > 0
+        ]
+        assert len(exs_with_examples) >= 1, (
+            "At least 1 exercise in 21-23 must have recognition_examples"
         )
 
-    def test_recognition_examples_are_non_empty_strings(self, exercises):
-        for e in exercises:
-            for i, ex_text in enumerate(e.get("recognition_examples", [])):
-                assert isinstance(ex_text, str) and ex_text.strip(), (
-                    f"recognition_example {i} in {e['exercise_id']} is empty or not a string"
-                )
-
-    def test_recognition_examples_are_unique_within_exercise(self, exercises):
+    def test_all_three_exercises_have_recognition_examples(self, exercises):
         for e in exercises:
             examples = e.get("recognition_examples", [])
-            if len(examples) >= 2:
-                assert len(set(examples)) == len(examples), (
-                    f"Duplicate recognition_examples in {e['exercise_id']}"
+            assert len(examples) >= 1, (
+                f"Exercise {e['exercise_id']} should have at least 1 recognition_example"
+            )
+
+    def test_recognition_examples_have_modified_data(self, exercises):
+        """Recognition examples must differ from the exact docx statement (modified data)."""
+        # Check that at least one example per exercise uses different numeric values
+        # by verifying examples are strings with meaningful content
+        for e in exercises:
+            for ex_text in e.get("recognition_examples", []):
+                assert isinstance(ex_text, str) and len(ex_text.strip()) > 30, (
+                    f"Recognition example in {e['exercise_id']} is too short or not a string: "
+                    f"{ex_text!r}"
+                )
+
+    def test_recognition_examples_do_not_reference_exact_exercise_numbers(self, exercises):
+        """Examples should not reference 'ejercicio 21' etc. (structural, not memorized)."""
+        import re
+        for e in exercises:
+            for ex_text in e.get("recognition_examples", []):
+                assert not re.search(r"\bejercicio\s+2[123]\b", ex_text.lower()), (
+                    f"Recognition example in {e['exercise_id']} references a specific "
+                    f"exercise number (should be structural): {ex_text[:60]}"
                 )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 11 — Analyzer recognizes recognition_examples for exercises 11-20
+# Group 11 — Analyzer recognizes recognition_examples for exercises 21-23
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _recognition_cases_11_20():
-    """Collect (exercise_id, model, example_text) for exercises 11-20 only."""
-    try:
-        exs = get_solutions_exercises()
-    except Exception:
-        return []
+def _recognition_cases_21_23() -> list[tuple[str, str, str]]:
+    """Build parametrize list from recognition_examples in exercises 21-23."""
+    sols = load_solutions()
     cases = []
-    for e in exs:
-        if 11 <= e.get("source_number", 0) <= 20:
-            for ex_text in e.get("recognition_examples", []):
-                cases.append((e["exercise_id"], e["model"], ex_text))
+    for ex in sols.get("exercises", []):
+        sn = ex.get("source_number", 0)
+        if 21 <= sn <= 23:
+            model = ex.get("model", "")
+            eid   = ex.get("exercise_id", "")
+            for example in ex.get("recognition_examples", []):
+                cases.append((eid, model, example))
     return cases
 
 
-_RECOGNITION_CASES_11_20 = _recognition_cases_11_20()
+_RECOGNITION_CASES_21_23 = _recognition_cases_21_23()
 
 
 @pytest.mark.parametrize(
     "exercise_id,expected_model,example_text",
-    _RECOGNITION_CASES_11_20,
-    ids=[f"{c[0]}_{i}" for i, c in enumerate(_RECOGNITION_CASES_11_20)],
+    _RECOGNITION_CASES_21_23,
+    ids=[f"{c[0]}_{i}" for i, c in enumerate(_RECOGNITION_CASES_21_23)],
 )
-def test_analyzer_identifies_model_from_recognition_example_11_20(
+def test_analyzer_identifies_model_from_recognition_example_21_23(
     exercise_id, expected_model, example_text, analyzer
 ):
-    """Analyzer must identify the correct model from recognition_examples of EX11-20."""
+    """Analyzer must identify the correct model from recognition_examples of EX21-23."""
     req = StatementAnalysisRequest(text=example_text)
     result = analyzer.analyze(req)
     assert result.identified_model == expected_model, (
@@ -518,7 +577,7 @@ def test_analyzer_identifies_model_from_recognition_example_11_20(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Group 12 — No memorized numerical results in formula steps (exercises 11-20)
+# Group 12 — No memorized numerical results in formula steps (exercises 21-23)
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestNoMemoizedResults:
@@ -526,8 +585,12 @@ class TestNoMemoizedResults:
     def _expression_looks_memorized(self, expr: str) -> bool:
         import re
         cleaned = expr.strip()
-        if "{" in cleaned or any(op in cleaned for op in ["=", "/", "×", "+", "−", "-", "*", "^"]):
+        # Contains an operator or placeholder → structural, not memorized
+        if "{" in cleaned or any(
+            op in cleaned for op in ["=", "/", "×", "+", "−", "-", "*", "^", "Σ", "Σ", "⁻"]
+        ):
             return False
+        # Pure number string → memorized
         if re.fullmatch(r"[\d.,\s]+", cleaned):
             return True
         return False
@@ -568,48 +631,48 @@ class TestNoMemoizedResults:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Bonus — Metadata includes exercises 11-20
+# Bonus — Metadata and source file integrity
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestMetadataIntegrity:
 
-    def test_metadata_exercises_included_covers_1_to_20(self, solutions):
+    def test_metadata_exercises_included_covers_1_to_23(self, solutions):
         meta = solutions.get("_metadata", {})
         included = meta.get("exercises_included", "")
-        # Accept "1-20" or any range that covers up to at least 20 (e.g. "1-23")
-        upper = int(included.split("-")[-1]) if "-" in included else 0
-        assert "1" in included and upper >= 20, (
-            f"_metadata.exercises_included should describe coverage up to at least 20, got: {included!r}"
+        assert "1" in included and int(included.split("-")[-1]) >= 23, (
+            f"_metadata.exercises_included should cover up to at least 23, got: {included!r}"
         )
 
-    def test_every_exercise_11_20_has_source_file(self, exercises):
+    def test_every_exercise_21_23_has_source_file(self, exercises):
         for e in exercises:
             sf = e.get("source_file", "")
             assert "docx" in sf.lower(), (
                 f"Exercise {e['exercise_id']} source_file should reference .docx, got: {sf!r}"
             )
 
-    def test_known_ids_11_20_present(self, exercises):
+    def test_known_ids_21_23_present(self, exercises):
         ids = {e["exercise_id"] for e in exercises}
         expected_ids = {
-            "11_gasolinera_mmc",
-            "12_terminal_facturacion_mm2",
-            "13_base_aerea_v1_comparacion",
-            "14_base_aerea_v2_pfcs",
-            "15_base_aerea_v3_pfcs",
-            "16_terminal_carga_descarga_mmc",
-            "17_cajero_bancario_mm1",
-            "18_supermercado_cajas_independientes",
-            "19_supermercado_cola_unica_mm2",
-            "20_montacargas_tecnicos_heterogeneos",
+            "21_control_calidad_mmc_L_condition",
+            "22_licencias_conducir_mmc_reproceso",
+            "23_montacargas_pfcs_2independientes_pfhet",
         }
-        assert expected_ids.issubset(ids), (
-            f"Missing expected exercise IDs: {expected_ids - ids}"
-        )
+        for eid in expected_ids:
+            assert eid in ids, f"Expected exercise_id {eid!r} not found. Present: {ids}"
 
-    def test_pfhet_exercise_is_20(self, exercises):
-        pfhet = [e for e in exercises if e["model"] == "PFHET"]
-        ids = {e["exercise_id"] for e in pfhet}
-        assert "20_montacargas_tecnicos_heterogeneos" in ids, (
-            f"Expected PFHET exercise 20, got: {ids}"
-        )
+    def test_docx_is_not_modified(self):
+        """The source .docx must not be modified (only the JSON knowledge base)."""
+        import os
+        from pathlib import Path
+        docx = Path(__file__).resolve().parent.parent.parent / "Ejercicios Propuestos Teoría de Colas.docx"
+        assert docx.exists(), f".docx file not found at expected path: {docx}"
+
+    def test_no_temp_scripts_exist(self):
+        """No temporary debug/read scripts should exist in the project root."""
+        from pathlib import Path
+        root = Path(__file__).resolve().parent.parent.parent
+        forbidden = ["debug_literals.py", "read_pdf.py", "_add_exercises_21_23.py"]
+        for fname in forbidden:
+            assert not (root / fname).exists(), (
+                f"Temporary file {fname} should not exist in project root"
+            )

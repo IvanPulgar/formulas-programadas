@@ -1,0 +1,213 @@
+FILE: Ejercicios Propuestos Teoría de Colas.docx
+============================================================
+[   0] ESCUELA SUPERIOR POLITÉCNICA DE CHIMBORAZO FACULTAD DE INFORMÁTICA Y ELECTRÓNICA SOFTWARE
+[   2] TÉCNICAS DE SIMULACIÓN
+[   4] MARZO 2026 – JULIO 2026 EJERCICIOS PROPUESTOS DE TEORÍA DE COLAS
+[   5] Resuelva los siguientes ejercicios de teoría de colas y exponga su solución. Presentar el informe según las indicaciones de la tarea del aula virtual.
+[   6] Una tienda de alimentación es atendida por una persona. Aparentemente el patrón de llegadas de clientes durante los sábados se comporta siguiendo un proceso de Poisson con una tasa de llegadas de 10 personas por hora. A los clientes se les atiende siguiendo un orden tipo FIFO y debido al prestigio de la tienda, una vez que llegan están dispuestos a esperar el servicio. Se estima que el tiempo que se tarda en atender a un cliente se distribuye exponencialmente, con un tiempo medio de 4 minutos. La tienda trabaja 12 horas diarias. Determine:
+[   7] La probabilidad de que haya línea de espera.
+[   8] La longitud media de la línea de espera.
+[   9] El tiempo medio que los clientes permanecen en cola.
+[  10] Total de minutos diarios que permanece desocupada la persona que atiende en la tienda.
+[  11] La estimación del número diario de clientes que esperan para ser atendidos.
+[  12] Número de personas que deben atender en la tienda si se desea que el 50% del tiempo todas estén desocupadas al mismo tiempo.
+[  14] Una compañía de correo urgente tiene 3 personas para recibir las llamadas telefónicas de los encargos. Las llamadas se producen según un proceso de Poisson de intensidad 2 por minuto y la duración de las llamadas es una variable exponencial de media 1 minuto por llamada. Considere que la compañía labora 8 hora diarias. Determine:
+[  15] La probabilidad de que una llamada encuentre exactamente todas las líneas ocupadas y ninguna llamada en espera.
+[  16] ¿Qué cantidad de tiempo al día estarán desocupadas todas las personas, a la vez, que atienden las llamadas?
+[  17] Tiempo medio de espera en la cola.
+[  18] La probabilidad de que haya línea de espera.
+[  19] Si suponemos que cada persona que recibe las llamadas telefónicas cuenta con un salario de USD 4,00 por hora y que por cada hora que los clientes esperan o son atendidos se generan pérdidas de USD 10,00, ¿Cuántas personas para atender las llamadas debe tener la compañía si se desea minimizar los costos?
+[  21] El propietario de una farmacia estima en 60 personas por hora la afluencia de clientes en su establecimiento según un proceso de Poisson. La farmacia es atendida por farmacéuticos quienes tienen la capacidad de atender un promedio de 25 clientes por hora cada uno según una distribución poisson. La farmacia funciona 8 horas diarias. Determine:
+[  22] ¿Cuántos farmacéuticos como mínimo debe contratar el propietario de la farmacia?
+[  24] Según lo resuelto en el literal anterior:
+[  26] Calcular el tiempo medio de permanencia de los clientes en la farmacia.
+[  27] ¿Cuál es el número esperado de clientes en la farmacia?
+[  28] Si se conoce que cada persona deja un beneficio medio de USD 1.5 por compras, cada farmacéutico cobra USD 100 diarios y por cada hora que una persona espera por ser atendido existe una pérdida de USD 10. ¿Cuál sería la rentabilidad diaria de la farmacia?
+[  30] Nota: Rentabilidad = (Ingresos / Gastos)
+[  32] En una fábrica existe una oficina de la Seguridad Social a la que los obreros tienen acceso durante las horas de trabajo. El jefe de personal, que ha observado la afluencia de obreros a la ventanilla, ha solicitado que se haga un estudio relativo al funcionamiento de este servicio. Se designa a un especialista para que determine el tiempo medio de espera de los obreros en la cola y la duración media de la conversación que cada uno mantiene con el empleado de la ventanilla. Este analista llega a la conclusión de que durante la primera y la última media hora de la jornada la afluencia es muy reducida y fluctuante, pero que durante el resto de la jornada el fenómeno se puede considerar estacionario. Del análisis de 100 periodos de 5 minutos, sucesivos o no, pero situados en la fase estacionaria, se dedujo que el número medio de obreros que acudían a la ventanilla era de 1.25 por periodo y que el tiempo entre llegadas seguía una distribución exponencial. Un estudio similar sobre la duración de las conversaciones, llevó a la conclusión de que se distribuían exponencialmente con duración media de 3.33 minutos. Determine:
+[  33] Número medio de obreros en cola.
+[  34] Tiempo medio de espera en la cola.
+[  35] ¿Qué porcentaje del tiempo estará ocioso el oficinista de la ventanilla?
+[  36] El costo para la empresa, si una hora de inactividad del oficinista vale 250 dólares y una hora del obrero 400 dólares. ¿Sería rentable poner otra ventanilla?
+[  37] La probabilidad de que haya línea de espera.
+[  39] El Call Center del IESS tiene 3 operadores para recibir las llamadas telefónicas de sus afiliados con el fin de solicitar alguna consulta médica. Las llamadas se producen según un proceso de Poisson de intensidad 2 por minuto y la duración de las llamadas es una variable exponencial de media 1 minuto. Determine:
+[  40] La probabilidad de que todas las líneas se encuentren ocupadas.
+[  41] ¿Qué fracción de afiliados debe esperar para recibir el servicio?
+[  42] ¿Cuánto tiempo debe esperar un afiliado para ser atendido?
+[  43] Si suponemos que cada operador que recibe las llamadas telefónicas cuenta con un salario de USD 4,00 por hora y que las molestias ocasionadas a los afiliados por esperar para ser atendidos generan pérdidas de USD 5,00 por hora, ¿Cuál es el costo ocasionado en el Call Center?
+[  45] Una empresa está dividida en varios departamentos y en cada uno de ellos trabajan sus empleados. A cada departamento le ha sido asignado una sola copiadora y cada una de ellas puede atender nueve trabajos en una hora, según una distribución Poisson. Los empleados en cada departamento producen ocho trabajos de copiado por hora, según una distribución Poisson. Determine:
+[  46] Para una copiadora asignada a un departamento, calcule la proporción de su tiempo que está desocupada.
+[  47] Calcule el tiempo medio que transcurre desde que llega un empleado a ocupar la copiadora hasta que culmine de ocuparla.
+[  48] Calcule la probabilidad de que haya más de dos empleados esperando por la copiadora en cada departamento.
+[  49] ¿Qué fracción de clientes debe esperar en cola en cada departamento?
+[  51] Suponiendo que la empresa posee 5 departamentos:
+[  53] Para toda la empresa, calcule el número medio de empleados, que han arribado a la copiadora y aún no la han comenzado a utilizar.
+[  55] Una Compañía debe tomar una decisión con respecto a su política de contratar un mecánico para reparar los equipos que se descomponen con una tasa promedio de 4 por hora de acuerdo con una distribución Poisson; el tiempo improductivo de cualquiera de los equipos está costando $5000 por hora a la Empresa. La Compañía puede contratar dos tipos distintos de mecánicos: uno lento, pero poco costoso a $2500 por hora y el otro rápido, pero más costoso a $4500 por hora; el mecánico lento puede reparar los equipos a una tasa promedio de 6 por hora, mientras que el mecánico rápido repara a razón de 8 por hora. La compañía trabaja 24 horas al día. Determine:
+[  56] ¿Cuál mecánico debe contratarse?
+[  58] Según el mecánico a contratarse, determine:
+[  60] Probabilidad de que estén esperando más de un equipo por el mecánico.
+[  61] Tiempo improductivo total diario de los equipos.
+[  62] Número estimado de equipos esperando por el mecánico.
+[  64] Una empresa está dividida en tres departamentos y en cada uno de ellos trabajan sus empleados. A cada departamento le ha sido asignada una mecanógrafa la cual puede escribir diez páginas en una hora. Los empleados en cada departamento elaboran ocho manuscritos por hora. Los manuscritos son de longitud diferentes, pero en promedio cuentan con 0.9 páginas por manuscrito. Los tiempos de llegada y de servicio son exponenciales. La empresa labora 8 horas diarias. Determine:
+[  65] Para una mecanógrafa asignada a un departamento, calcule la proporción de su tiempo que está laborando.
+[  66] Para toda la empresa, calcule el tiempo total diario que esperan los empleados desde que se le entrega un manuscrito a la mecanógrafa, hasta que esta lo devuelva mecanografiado.
+[  67] Calcule la probabilidad de que haya más de tres manuscritos esperando o siendo mecanografiados en cada departamento.
+[  68] Considere que en cada departamento laboran únicamente cinco (5) empleados y cada uno no elabora un nuevo manuscrito hasta que el anterior sea devuelto por la mecanógrafa. Determine:
+[  70] Para toda la empresa, calcule el número esperado de manuscritos que se encuentran en el sistema de las mecanógrafas.
+[  71] Para toda la empresa, calcule el número esperado de empleados elaborando sus manuscritos.
+[  73] El Dpto. de mantenimiento de una empresa de turismo hotelero dispone actualmente de un taller que brinda sus servicios a todos los equipos de refrigeración central pertenecientes a los hoteles, centros recreativos y otras entidades que pertenecen a la empresa. Se sabe que cada entidad perteneciente a la empresa de turismo solamente maneja un equipo de refrigeración central. Se conoce además que un equipo requiere mantenimiento cada 10 días, aleatorio con distribución exponencial. El jefe de mantenimiento ha planteado que debido a la cantidad de equipos disponibles y el tiempo que invierte el taller en brindar el servicio, el funcionamiento de los equipos se ha visto afectado por no poder brindar el mantenimiento en el momento de la solicitud, esto hace que los equipos defectuosos sigan funcionando en espera del momento del mantenimiento, lo que provoca roturas y fallas en cada equipo calculada en $275/día. El tiempo que invierte el taller en dar mantenimiento a dos equipos es exponencial con media de 15 días, y además se sabe que el costo diario de funcionamiento del taller es de $150. Determine:
+[  74] ¿Cuál es la probabilidad de que un equipo de refrigeración solicite al taller recibir mantenimiento y no encuentre a ningún otro equipo esperando?
+[  75] ¿Cuál es la fracción de equipos que deben estar funcionando en espera del mantenimiento?
+[  76] ¿Cuál es el número de talleres que deben trabajar para brindar el servicio de mantenimiento de una forma más económica?
+[  77] Según lo resuelto en el literal anterior, ¿Cuál es la probabilidad de encontrar máximo un equipo esperando para recibir mantenimiento?
+[  79] En un servidor de la universidad se mandan programas de ordenador para ser ejecutados. Los programas llegan al servidor con una tasa de 10 por minuto. El tiempo medio de ejecución de cada programa es de 5 segundos y tanto los tiempos entre llegadas como los tiempos de ejecución se distribuyen exponencialmente. Determine:
+[  80] ¿Qué proporción de tiempo está el servidor desocupado?
+[  81] ¿Qué fracción de programas debe esperar por el servidor?
+[  82] ¿Cuál es la probabilidad de que al menos dos programas estén esperando por el servidor?
+[  83] ¿Cuál es el tiempo esperado total de salida de un programa?
+[  84] ¿Cuál es el número medio de programas esperando en la cola del sistema?
+[  86] Las llegadas de vehículos a una gasolinera siguen una distribución Poisson con media de 6 por minuto y la duración del servicio es exponencial con media 1/3 de minutos. Al llegar, los vehículos se ubican en una cola de espera por el surtidor de gasolina libre. La gasolinera labora 12 horas diarias. Determine:
+[  87] ¿Cuántos surtidores de gasolina se deben colocar para que la probabilidad de que el número de vehículos en la estación iguale o exceda al número de surtidores sea como máximo de 0,2?
+[  89] Según el número de surtidores determinado en el literal anterior:
+[  90] Tiempo total diario que pasan uno o varios surtidores desocupados.
+[  91] Costo total diario ocasionado en la gasolinera si se tiene que el costo de funcionamiento de cada surtidor es de 50 dólares diarios y cada minuto de espera de los vehículos representa una pérdida de 0,5 dólares.
+[  92] Fracción de clientes que deben esperar para ser atendidos.
+[  94] Un terminal de facturación dispone de dos operarios que atienden a los clientes que llegan según una distribución Poisson de media ochenta clientes por hora, los que esperan en una única cola hasta que alguno de los operarios esté libre. El tiempo requerido para atender a un cliente se distribuye exponencialmente con media 1,2 minutos. El terminal de facturación labora ocho horas diarias. Determine:
+[  95] Número esperado de clientes en el terminal de facturación.
+[  96] Tiempo medio que pasan los clientes en el terminal de facturación.
+[  97] Tiempo diario que pasan desocupados uno o ambos operarios.
+[  98] Fracción de clientes que deben esperar.
+[  99] Costo total diario ocasionado en el terminal de facturación si se tiene que el salario de cada operario es de 50 dólares diarios y cada hora de espera de los clientes representa una pérdida de 10 dólares.
+[ 101] Una base aérea dispone de un taller de mantenimiento de aviones y recursos para revisar únicamente un motor de avión a la vez. Por tanto, para devolver los aviones lo antes posible, la política que se sigue consiste en aplazar la revisión de los motores de cada avión. En otras palabras, solamente se revisa un motor del avión cada vez que un avión llega a la base. Con esta política, los aviones llegan según una distribución de Poisson de tasa media uno al día. El tiempo requerido para revisar un motor (una vez que se empieza el trabajo) tiene una distribución exponencial de media 1/2 día. Se ha hecho una propuesta para cambiar la política de revisión de manera que los 4 motores se revisen de forma consecutiva cada vez que un avión llegue a la base. En esta alternativa se supondría cuadruplicar el tiempo esperado de servicio y cada avión necesitaría ser revisado únicamente con una frecuencia 4 veces menor. Considere que la base trabaja todos los días del año. Determine:
+[ 102] ¿Cuál será el tiempo total que pasan en el taller los aviones que arriban a solicitar servicio en una semana de funcionamiento, en cada alternativa?
+[ 104] Escoja una alternativa de funcionamiento y determine:
+[ 106] Tiempo total semanal que estará desocupado el equipo que brinda mantenimiento.
+[ 107] Probabilidad de que exista algún avión esperando para ser atendido.
+[ 108] Si consideramos que la base aérea cuenta con 5 aviones, ¿Cuál será el número medio de aviones que se encuentran operando?
+[ 110] Una base aérea dispone de un taller de mantenimiento de aviones y recursos para revisar únicamente un motor de avión a la vez. Por tanto, para devolver los aviones lo antes posible, la política que se sigue consiste en aplazar la revisión de los motores de cada avión. En otras palabras, solamente se revisa un motor del avión cada vez que un avión llega a la base. Con esta política, los aviones llegan según una distribución exponencial de media cada dos días. El tiempo requerido para revisar un motor (una vez que se empieza el trabajo) tiene una distribución exponencial de media 1 día. Considere que la base trabaja todos los días del año, 8 horas diarias. Determine:
+[ 111] ¿Por cuantos aviones debe responder la base, si se desea que el 20% del tiempo diario de funcionamiento del taller de mantenimiento preste sus servicios a otras aeronaves que no pertenecen a la base aérea?
+[ 113] Según lo resuelto en el literal anterior:
+[ 115] Tiempo total semanal que estará ocupado el equipo que brinda mantenimiento.
+[ 116] Probabilidad de que exista algún avión esperando para ser atendido.
+[ 117] Número medio de aviones que se encuentran en el taller de mantenimiento.
+[ 118] Si el taller de mantenimiento tiene un gasto de funcionamiento de 100 dólares diarios y la espera diaria de un avión para ser atendido equivale a 200 dólares. ¿Cuál es el costo total diario del taller de mantenimiento?
+[ 120] Una base aérea dispone de un taller de mantenimiento de aviones y recursos para revisar únicamente un motor de avión a la vez. Por tanto, para devolver los aviones lo antes posible, la política que se sigue consiste en aplazar la revisión de los motores de cada avión. En otras palabras, solamente se revisa un motor del avión cada vez que un avión llega a la base. Con esta política, los aviones llegan según una distribución exponencial de media cada dos días. El tiempo requerido para revisar un motor (una vez que se empieza el trabajo) tiene una distribución exponencial de media 1 día. Considere que la base trabaja todos los días del año, 8 horas diarias. Determine:
+[ 121] ¿Por cuántos aviones debe responder el taller de mantenimiento, si se desea que al menos el 35% de aviones del total se encuentren en operación y no en mantenimiento?
+[ 123] Según lo resuelto en el literal anterior:
+[ 125] Total de horas a la semana que estará ocupado el equipo que brinda mantenimiento.
+[ 126] Probabilidad de que exista algún avión esperando para ser atendido.
+[ 127] Número medio de aviones que se encuentran en el taller de mantenimiento.
+[ 128] Si el taller de mantenimiento tiene un gasto de funcionamiento de 100 dólares diarios y la espera diaria de un avión para ser atendido equivale a 200 dólares. ¿Cuál es el costo total diario del taller de mantenimiento?
+[ 130] Una empresa multinacional, requiere diseñar su nueva terminal de carga/descarga, en donde deberá construir varias plataformas para la descarga de sus camiones, cada una de estas con un equipo de dos empleados que descargan, entre ambos, un camión en una hora, con tiempos de servicio exponenciales. El costo de cada empleado sería de 20 dólares por hora. Las llegadas de los camiones al terminal serían a razón de tres camiones por hora, siguiendo una distribución Poisson, con un costo estimado de sesenta dólares la hora por camión ocioso. El terminal laboraría 12 horas diarias. Determine:
+[ 131] Según los datos planteados del problema. ¿Cuántas plataformas deberá construir la empresa para garantizar el mejor rendimiento en la terminal de carga/descarga?
+[ 133] Según lo resuelto en el literal anterior:
+[ 135] Tiempo total diario que pasarían una o varias plataformas desocupadas a la vez.
+[ 136] Probabilidad de que exista alguna plataforma desocupada.
+[ 137] Número medio de camiones esperando para ser atendidos por cualquier plataforma.
+[ 138] Tiempo de espera de un camión.
+[ 139] Si se llegara a incrementar la demanda de camiones a descargar en un 50%. ¿Cuántas plataformas adicionales deberían instalarse para garantizar que no más de la mitad de los camiones les corresponda esperar por el servicio?
+[ 141] Un promedio de 10 automóviles por hora llegan a un cajero con un solo servidor qe proporciona servicio sin que uno descienda del automóvil. Suponga que el tiempo de servicio promedio por cada cliente es 4 minutos, y que tanto los tiempos entre llegadas y los tiempos de servicios son exponenciales. El cajero está habilitado 12 horas diarias. Determine:
+[ 142] ¿Cuál es la probabilidad que el cajero esté ocioso?
+[ 143] ¿Cuál es el número promedio de automóviles que están en la cola del cajero?
+[ 144] ¿Cuál es el tiempo promedio que los clientes pasan en el estacionamiento del banco?
+[ 145] Cantidad de autos diarios que deberán esperar para ser atendidos.
+[ 146] Costo total diario ocasionado en el sistema del cajero si el costo de funcionamiento del mismo es aproximado a 100 dólares diarios y por cada hora que los autos deben esperar representa una pérdida de 10 dólares.
+[ 148] Considerando los costos unitarios expuestos en el literal anterior y que sería factible mantener una única cola de automóviles a ser atendidos por varios cajeros. ¿Cuántos servidores deberían estar en funcionamiento para minimizar los costos?
+[ 150] Un supermercado tiene dos cajas. Los clientes llegan a cada caja según una distribución Poisson de intensidad 30 por hora. Los clientes eligen las cajas al azar, creándose una cola para cada caja. El número de productos que cada cliente lleva está exponencial distribuido con una media de 15 productos. Procesar un producto en cualquier caja lleva 4 segundos según una exponencial. El supermercado labora 10 horas diarias. Determine:
+[ 151] La cantidad de minutos de espera de un cliente por su caja.
+[ 152] Probabilidad de encontrar al menos un usuario esperando por su caja.
+[ 153] Número esperado de usuarios esperando por ambas cajas del supermercado.
+[ 154] Total de horas diarias que pasan ambas cajas desocupadas, concurrentemente o no.
+[ 155] Costo total del sistema de ambas cajas si cada empleado que labora en ellas cobra 10 dólares por hora y por cada hora que un cliente deba esperar para ser atendidos se estima una pérdida de 50 dólares.
+[ 157] Un supermercado tiene dos cajas. Los clientes llegan a las cajas según una distribución Poisson de intensidad 50 por hora. Los clientes se ubican en una única cola para ser atendidos por cualquier caja. El número de productos que cada cliente lleva está exponencialmente distribuido con una media de 15 productos. Procesar un producto en cualquier caja lleva 2 segundos según una exponencial. El supermercado labora 10 horas diarias. Determine:
+[ 158] La cantidad de minutos diarios que ambas cajas se encuentren desocupadas al mismo tiempo.
+[ 159] Probabilidad de encontrar al menos un usuario esperando.
+[ 160] Tiempo promedio de espera de un usuario.
+[ 161] Total de horas diarias que pasan ambas cajas desocupadas, concurrentemente o no.
+[ 162] Costo total del sistema de ambas cajas si cada empleado que labora en ellas cobra 10 dólares por hora y por cada hora que un cliente deba esperar o ser atendido se estima una pérdida de 50 dólares.
+[ 163] Un número limitado de montacargas son atendidos por el taller de mantenimiento y reparación de una fábrica local. El taller cuenta con dos técnicos que demoran en promedio 130 y 170 minutos, respectivamente según una distribución exponencial, en atender a cada montacargas. Ambos técnicos atienden a todos los montacargas de la fábrica. Se estima que los montacargas llegan al taller cada medio día, según una exponencial. El taller labora 10 horas diarias, 7 días a la semana. Determine:
+[ 164] ¿Cuántos montacargas se deben asignar al taller, si se desea que al menos un 20% de ellos no les corresponda esperar para ser atendidos?
+[ 166] Según lo resuelto en el literal anterior:
+[ 167] Cantidad de horas diarias que estarán ocupados ambos técnicos al mismo tiempo.
+[ 168] Probabilidad de que algún técnico esté disponible.
+[ 169] Número estimado de montacargas en operación.
+[ 170] Cantidad de montacargas que en una semana de trabajo deben esperar para ser atendidos.
+[ 171] Si el taller de mantenimiento tiene un gasto de funcionamiento de 100 dólares diarios por las labores de ambos técnicos y el tiempo de inactividad de los montacargas equivale a 50 dólares la hora. ¿Cuál es el costo total semanal del taller de mantenimiento?
+[ 172] Los trabajadores de una fábrica tienen que llevar su trabajo al departamento de control de calidad antes de que el producto llegue al final del proceso de producción. Hay un gran número de empleados y las llegadas son aproximadamente de 20 por hora, siguiendo un proceso de Poisson. El tiempo para inspeccionar una pieza sigue una distribución exponencial de media 4 minutos. El director de calidad requiere que en promedio no permanezcan más de 2 empleados dentro del departamento. La fábrica labora 8 horas diarias, 5 días a la semana. Determine:
+[ 173] ¿Número de inspectores que deben atender en el departamento de control de calidad?
+[ 175] Según lo resuelto en el literal anterior:
+[ 177] Probabilidad de que algún inspector esté disponible.
+[ 178] Tiempo (en minutos) estimado de espera de los empleados por el inspector.
+[ 179] Cantidad de horas diarias que estarán ocupados todos los inspectores al mismo tiempo.
+[ 180] Número estimado de empleados que en una semana de funcionamiento del departamento les correspondería esperar para ser atendidos.
+[ 181] Si el departamento de control de calidad tiene un gasto de funcionamiento de 300 dólares diarios por las labores de sus inspectores y el tiempo de inactividad de los empleados equivale a 50 dólares la hora. ¿Cuál es el costo total semanal del departamento de control de calidad?
+[ 182] Considere que en la fábrica se ha realizado un recorte de personal, quedando únicamente 15 empleados, pero manteniendo el mismo número de inspectores. En este escenario los empleados realizarían sus requerimientos al departamento de control de calidad en un 75% menor al valor anterior al recorte. Calcule el número estimado de empleados esperando por la atención del inspector.
+[ 183] En un centro donde se realizan exámenes para licencias de conducir, se desea evaluar su operación para una mejora potencial. Los clientes que llegan entran al edificio y toman un ticket con un número que establece el orden en la línea de espera para el examen escrito, que es autoadministrado por uno de los cinco examinadores electrónicos. Los tiempos de la prueba se encuentran distribuidos como exponencial de media 10 minutos. Trece por ciento de los clientes fallan la prueba y no obtienen su licencia de conducción. Se estima que los clientes llegan al centro cada 3 minutos según un proceso exponencial. El centro obtiene un ingreso estimado de 50 dólares por cada licencia emitida. Considere la atención durante las primeras 6 horas diarias que labora el centro y que todos los clientes que llegan serán completamente atendidos. Determine:
+[ 185] Probabilidad de que haya línea de espera para la prueba escrita.
+[ 186] Número de personas diarias que les corresponderá esperar por la prueba escrita.
+[ 187] Cantidad de minutos que en promedio los clientes permanecen en cola para la prueba escrita.
+[ 188] Número de examinadores electrónicos que deben atender en el centro si se desea que por lo menos el 80% de los clientes sean atendidos en cuanto lleguen.
+[ 189] Se conoce que cada examinador electrónico cobra USD 100 diarios y por cada hora que una persona espera por ser atendido en el subsistema de recepción de la prueba escrita existe una pérdida de USD 10. Calcule los ingresos y costos diarios estimados.
+[ 191] Un número limitado de montacargas son atendidos por el taller de mantenimiento y reparación de una fábrica local. El taller cuenta con dos técnicos, el A y el B, los que demoran en promedio 120 y 150 minutos respectivamente según una distribución exponencial, en atender a cada montacargas. Cada técnico atiende exclusivamente a un grupo de montacargas. Se estima que los montacargas requieren ser atendidos por el taller cada cuatro días, según una exponencial. El taller labora 8 horas diarias, 5 días a la semana. Determine:
+[ 192] ¿Cuántos montacargas se deben asignar a cada técnico si se desea que al menos un 10% de ellos no les corresponda esperar para ser atendidos?
+[ 194] Según lo resuelto en el literal anterior:
+[ 195] Cantidad de minutos diarios que estarán desocupados cada técnico.
+[ 196] Número estimado de montacargas en el taller de mantenimiento.
+[ 197] Cantidad de montacargas que en una semana de trabajo deben esperar para ser atendidos.
+[ 198] Si el taller de mantenimiento tiene un gasto de funcionamiento de 100 dólares diarios por las labores de ambos técnicos y el tiempo de inactividad de los montacargas equivale a 50 dólares la hora. ¿Cuál es el costo total semanal del taller de mantenimiento?
+[ 199] Considere que el taller unifica la atención de ambos técnicos para brindar el mantenimiento a todos los montacargas de la fábrica en un mismo servicio. ¿En cuántas horas diarias el sistema permanecerá con algún técnico desocupado?
+[ 201] La llegada de clientes a un supermercado es Poisson con media de 50 por hora. Los clientes seleccionan una cantidad de artículos diferentes, según una normal de media 15 y desviación de 5. El tiempo de compra depende del número de artículos seleccionados: un minuto por artículo. Al terminar su compra, el cliente se dirige a la caja a pagar. Hay 3 cajas de pago, la caja1 es exclusiva donde son atendidos todos los clientes que compren menos de 12 artículos. La caja 2 y la caja 3 atienden al resto de clientes. Al momento del pago, los clientes pueden pagar en efectivo el 55 %, con cheque el 25% o con tarjeta de crédito el 20%. Las colas frente a cada caja son independientes. Los clientes que compran al menos 12 artículos, al llegar a las cajas, prefieren la cola más corta si alguna caja no está vacía; pero, de haber la misma cantidad de clientes en cola prefieren la caja número 2. El tiempo de pago por cliente es de 8 segundos por artículo, más un tiempo adicional dependiendo de la forma de pago: 30 segundos si paga en efectivo, 60 con cheque y 90 con tarjeta. Luego del pago, un 10% de clientes se dirigen a atención al cliente para renovar su afiliación, donde un empleado les atiende en 5 minutos según una exponencial. Luego de ser atendidos todos los clientes se marchan. El supermercado inicia su atención a las 10 de la mañana y labora 10 horas diarias. Se conoce además que el primer cliente que llega al supermercado lo hace a los dos minutos luego de iniciar su atención.
+[ 203] Considere que el 20% de los clientes que llegan al supermercado pasan directamente al servicio de atención al cliente. Utilizando la teoría de colas en este subsistema (servicio de atención al cliente) y los demás datos expuestos en el planteamiento del problema, determine:
+[ 205] Probabilidad de que haya línea de espera para la atención al cliente.
+[ 206] Número de clientes diarios que les corresponderá esperar para ser atendidos.
+[ 207] Cantidad de minutos que en promedio los clientes permanecen en cola.
+[ 208] Número de empleados que deben atender en la atención al cliente si se desea que al menos la mitad de los usuarios sean atendidos en cuanto lleguen.
+[ 209] Considerando la cantidad de empleados obtenidos en el literal anterior, determine: número de horas diarias que el sistema de atención al cliente pasa con al menos un empleado libre.
+[ 211] En una fábrica arriban ventiladores a un sistema, que posee dos estaciones de trabajo en serie, a la tasa promedio de 6 ventiladores por hora según una distribución Poisson. Los tiempos de proceso en cada estación (incluyendo inspección) son aleatorios exponenciales, con los siguientes valores: Estación de Ensamblaje: media de 8 minutos; y, Estación de Prueba y Empaque: media de 5.5 minutos. En la primera estación, el 9% de los ventiladores resultan defectuosos; y, en la de Prueba y Empaque, solo el 5%. Los ventiladores defectuosos de la primera estación, son enviados directamente a desecho. Los ventiladores defectuosos originados en la segunda estación, son devueltos para que nuevamente inicien su procesamiento en la estación de Ensamblaje, aunque su tiempo de reprocesamiento sería equivalente al 60% del tiempo requerido durante su procesamiento anterior, tanto en la estación de Ensamblaje como en la de Prueba y Empaque; teniendo además prioridad en la atención en ambas estaciones. Considere que un ventilador puede resultar defectuoso nuevamente. Los ventiladores que superan las pruebas son empacados en la misma estación y contabilizados su salida del sistema. Los ventiladores enviados a desecho son atendidos por un técnico que los desarma en 15 minutos según una exponencial y también los almacena. Se considera que por cada ventilador desechado se generan pérdidas equivalentes a 5 dólares. En cada estación labora un técnico especialista. El sistema de la fábrica labora 24 horas diarias.
+[ 213] Considere la atención en la estación de ensamblaje. Utilizando la teoría de colas en este subsistema (estación de ensamblaje) y los demás datos expuestos en el planteamiento del problema, determine:
+[ 215] Probabilidad de que no haya ventiladores en espera de ser atendidos.
+[ 216] Cantidad de ventiladores diarios que serán atendidos en cuanto arriben al subsistema.
+[ 217] Cantidad de minutos que en promedio los ventiladores permanecen en el subsistema.
+[ 218] Número de técnicos especialistas que deben atender en el subsistema si se requiere que en promedio no haya más de uno en espera para ser atendido.
+[ 219] Considerando la cantidad de técnicos obtenido en el literal anterior, determine: número de ventiladores que en una semana laborable de la fábrica deberán esperar para ser atendidos.
+[ 221] Los trabajadores de una fábrica tienen que llevar su trabajo al departamento de control de calidad antes de que el producto llegue al final del proceso de producción. Hay un gran número de empleados y las llegadas son aproximadamente de 18 por hora, siguiendo un proceso de Poisson. El tiempo para inspeccionar una pieza sigue una distribución exponencial de media 6 minutos. El director de calidad requiere que en promedio los empleados no permanezcan más de 10 minutos dentro del departamento. La fábrica labora 8 horas diarias, 5 días a la semana. Determine:
+[ 223] ¿Número de inspectores que deben atender en el departamento de control de calidad?
+[ 225] Según lo resuelto en el literal anterior:
+[ 227] Probabilidad de que algún inspector esté ocupado.
+[ 228] Tiempo (en minutos) estimado de espera por el inspector de un empleado.
+[ 229] Cantidad de minutos diarios que estarán ocupados todos los inspectores al mismo tiempo.
+[ 230] Número estimado de empleados que en una semana de funcionamiento del departamento no les correspondería esperar para ser atendidos.
+[ 231] Si el departamento de control de calidad tiene un gasto de funcionamiento de 300 dólares diarios por las labores de sus inspectores y el tiempo de inactividad de los empleados equivale a 50 dólares la hora. ¿Cuál es el costo total semanal del departamento de control de calidad?
+[ 232] Considere que en la fábrica se ha realizado un recorte de personal, quedando únicamente 15 empleados, pero manteniendo el mismo número de inspectores. En este escenario los empleados realizarían sus requerimientos al departamento de control de calidad en un 50% del valor anterior al recorte. Obtenga el porcentaje estimado de empleados fuera del departamento de control de calidad.
+[ 234] A la oficina del Registro Civil llegan los clientes para solicitar su pasaporte a una tasa de Poisson con media de 18 clientes/hora. Existen ventanillas para atender en orden de llegada a los clientes, demorando cada ventanilla un tiempo exponencial con media de 6 minutos en atender las solicitudes de pasaportes. El Director del Registro Civil plantea como objetivo que no más de la mitad de clientes que llegan estén obligados a esperar para ser atendidos.
+[ 236] ¿Cuántas ventanillas deben ser instaladas en la oficina para cumplir con el objetivo planteado por el Director del Registro Civil? Argumente su respuesta.
+[ 239] Considerando el número de ventanillas que cumple con el objetivo planteado, obtenga:
+[ 241] Porcentaje de tiempo que estarán desocupadas una o varias ventanillas.
+[ 242] Tiempo de espera de un cliente.
+[ 243] Número medio de clientes en la oficina del Registro Civil.
+[ 244] Probabilidad de que se encuentren uno o dos clientes esperando para ser atendidos.
+[ 245] Una empresa de reparación de ordenadores en promedio recibe una solicitud de reparación cada 50 minutos según un proceso aleatorio de distribución exponencial, los que son atendidos por un técnico especialista que tiene una capacidad para atender en promedio a 12 ordenadores en un periodo de 8 horas según un proceso poisson y tiempos de atención exponenciales. Luego de que el ordenador es atendido por el técnico especialista, se chequea su funcionamiento en una estación de control de la calidad, en donde existe un inspector que demora aproximadamente entre 15 y 30 minutos según un proceso uniforme. Culminado el control de calidad, si se detecta que algún ordenador necesita ajuste se envía, el mismo, a un puesto de ajuste donde luego de ajustado retorna a la estación de control para ser chequeado nuevamente, con mayor prioridad que los que recién ingresan. Los ordenadores que pasan satisfactoriamente el control de calidad son empacados por el bodeguero que demora un tiempo exponencial de media 10 minutos y puestos en la bodega a la espera que llegue el cliente para su retiro. Considere que el tiempo que toma el técnico del ajuste es normal de media 30 minutos y desviación 10 minutos. Estadísticamente se tiene que el 75% de los ordenadores necesitan algún ajuste. A la empresa también llegan individualmente un promedio de dos clientes cada hora y media de manera exponencial, que pasan directamente a la bodega para retirar su ordenador, los que también son atendidos por el bodeguero quien demora entre 5 y 10 minutos según un proceso uniforme en realizar esta actividad, priorizando la atención de estos clientes en su atención. La empresa labora 8
+[ 247] horas diarias. Se conoce que la empresa puede contratar a varios técnicos especialistas de iguales condiciones al actual y que cada uno contaría con un salario equivalente a 50 dólares diarios; además, por cada hora que un ordenador pase en el subsistema del técnico especialista (siendo atendido o no) le cuesta a la empresa 5 dólares. Aplicando la teoría de colas en el subsistema del técnico especialista, obtenga:
+[ 249] Desarrollo inicial del problema, identificación del tipo de problema, parámetros y datos del sistema, verificación de condición de estabilidad (si se requiere):
+[ 250] Número de técnicos especialistas que deben trabajar en la empresa para lograr minimizar los costos en el subsistema:
+[ 251] Según el número de técnicos especialistas obtenido en el literal b), determine:
+[ 253] Número estimado de ordenadores diarios que deberán esperar para ser atendidos.
+[ 254] Probabilidad de que no haya ordenadores en espera de ser atendidos.
+[ 255] Número estimado de ordenadores fuera del subsistema del técnico especialista.
+[ 257] En una planta de ensamblaje, los trabajadores envían sus productos (piezas) al departamento de control de calidad, donde inspectores especializados revisan cada una antes de ser empacada. Las llegadas al departamento siguen un proceso de Poisson con una tasa promedio de 24 productos por hora, mientras que el tiempo de inspección sigue una distribución exponencial con una media de 5 minutos. La planta opera durante 9 horas diarias, de lunes a sábado. La gerencia ha determinado que el tiempo promedio de espera en cola para las piezas que sí deban esperar (es decir, que no sean atendidas de inmediato) no debe superar los 4 minutos en promedio. Determine:
+[ 260] El número mínimo de inspectores necesarios para que se cumpla lo determinado por la gerencia.
+[ 261] Considerando el número mínimo de inspectores obtenido en el literal a):
+[ 263] Probabilidad de que haya al menos un inspector desocupado.
+[ 264] Tiempo (en minutos) promedio de espera de las piezas enviadas por los empleados por la atención de algún inspector.
+[ 265] Número de minutos diarios en que todos los inspectores están ocupados simultáneamente.
+[ 266] Número estimado de piezas que en una semana de funcionamiento del departamento les correspondería esperar para ser atendidos.
+[ 267] El costo total semanal del sistema, si el costo diario del departamento es de $360 por la labor de los inspectores, y el tiempo de espera de las piezas se valora en $45 por hora.
+[ 268] Número óptimo de inspectores especializados que deben atender en el departamento, si se requiere que máximo el 50% de las piezas que lleguen tengan que esperar para ser atendidas y no se requeriría la condición de gerencia.
+[ 269] Al servicio de suscriptores de una empresa de telefonía celular llegan usuarios cada 1.2 minutos según un proceso exponencial. Al ingresar un cliente, puede ir a la Sección de Reclamos (SR) o directo a Caja de Pago (CP). El 75 % de los usuarios se dirige a SR y el resto a CP. La SR es atendida por una recepcionista, quien recibe el cliente y oye su planteamiento. Generalmente, el 25 % logra solventar su requerimiento en SR y se va del sistema; sin embargo, el 75% restante requiere atención de una de las 3 asesoras de reclamos, situación por la que reciben un número secuencial para el orden de atención. El tiempo que la recepcionista de reclamos tarda en atender un usuario es normal, con valor medio de 1 minuto y desviación de 0.25 minutos. Las asesoras demoran un tiempo exponencial de media 5 minutos en la atención a los clientes. La CP es atendida por una cajera, quien tarda un tiempo mínimo de 1, máximo de 4 y media de 2 minutos. Así mismo, de los clientes que pasan a reclamo, un 20 %, luego de atendido por la asesora, acude a la caja de pago a efectuar algún pago. En la caja de pago tienen prioridad los atendidos por la asesora de reclamo. Una vez, atendidos, los usuarios abandonan el sistema. El servicio inicia su atención a las 09h00 y labora continuamente 8 horas diarias.
+[ 270] Considere del problema anterior que del total de usuarios que arriban al servicio de la empresa de telefonía, unos 28 clientes por hora son ubicados en la cola del servicio de las asesoras de reclamos. Se prevé que cada asesora cuenta con un salario de 50 dólares diarios y por cada hora de espera de
+[ 272] los usuarios se proyectan pérdidas estimadas en 20 dólares. Utilizando la teoría de colas en este subsistema y los demás datos expuestos en el planteamiento del problema, determine:
+[ 275] Probabilidad de que todas las asesoras de reclamos se encuentren ocupadas.
+[ 276] Cantidad de minutos que en promedio un usuario deberá esperar para ser atendido.
+[ 277] Cantidad de minutos diarios que en el subsistema habrá usuarios esperando para ser atendidos.
+[ 278] Número de asesoras de reclamos que deben laborar si se desea optimizar los costos en el subsistema.
+[ 279] Considerando la cantidad de asesoras de reclamos obtenido en el literal anterior, determine: minutos diarios que pasarán todas las asesoras de reclamos desocupadas de manera concurrente.
